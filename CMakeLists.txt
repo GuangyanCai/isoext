@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.26)
 
-project(diff-voxel LANGUAGES CXX)
+project(diff_voxel LANGUAGES CXX)
 
 if (NOT SKBUILD)
   message(WARNING "\
@@ -52,8 +52,12 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code goes here
-  src/diff_voxel_ext.cpp
+  diff_voxel_ext.cpp
 )
+
+add_subdirectory(src)
+
+target_link_libraries(diff_voxel_ext PUBLIC diff_voxel)
 
 # Install directive for scikit-build-core
 install(TARGETS diff_voxel_ext LIBRARY DESTINATION diff_voxel)
