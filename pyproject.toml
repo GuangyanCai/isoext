@@ -3,7 +3,7 @@ requires = ["scikit-build-core >=0.4.3", "nanobind >=1.3.2"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "diff-voxel"
+name = "diff_voxel"
 version = "0.0.1"
 description = "Differentiable voxel grids with iso-surface, designed for inverse rendering."
 readme = "README.md"
@@ -16,7 +16,7 @@ authors = [
 # ]
 
 [project.urls]
-Homepage = "https://github.com/GuangyanCai/diff-voxel"
+Homepage = "https://github.com/GuangyanCai/diff_voxel"
 
 
 [tool.scikit-build]
