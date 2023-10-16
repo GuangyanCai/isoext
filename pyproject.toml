@@ -3,20 +3,20 @@ requires = ["scikit-build-core >=0.4.3", "nanobind >=1.3.2"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "nanobind-example"
+name = "diff-voxel"
 version = "0.0.1"
-description = "An example minimal project that compiles bindings using nanobind and scikit-build"
+description = "Differentiable voxel grids with iso-surface, designed for inverse rendering."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
-    { name = "Wenzel Jakob", email = "wenzel.jakob@epfl.ch" },
+    { name = "Guangyan Cai", email = "gcai3@uci.edu" },
 ]
-classifiers = [
-    "License :: OSI Approved :: BSD License",
-]
+# classifiers = [
+#     "License :: OSI Approved :: BSD License",
+# ]
 
 [project.urls]
-Homepage = "https://github.com/wjakob/nanobind_example"
+Homepage = "https://github.com/GuangyanCai/diff-voxel"
 
 
 [tool.scikit-build]
