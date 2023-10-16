@@ -1,6 +1,4 @@
 #include <nanobind/nanobind.h>
-#include <nanobind/ndarray.h>
-
 #include <test.hpp>
 
 namespace nb = nanobind;
