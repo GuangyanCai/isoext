@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.26)
 
-project(diff_voxel LANGUAGES CXX)
+project(diff_voxel LANGUAGES CXX CUDA)
 
 if (NOT SKBUILD)
   message(WARNING "\
@@ -33,6 +33,9 @@ find_package(Python 3.8
 # Import nanobind through CMake's find_package mechanism
 find_package(nanobind CONFIG REQUIRED)
 
+# Build lib
+add_subdirectory(src/lib)
+
 # We are now ready to compile the actual extension module
 nanobind_add_module(
   # Name of the extension
@@ -52,12 +55,10 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code goes here
-  diff_voxel_ext.cpp
+  src/diff_voxel_ext.cpp
 )
 
-add_subdirectory(src)
-
-target_link_libraries(diff_voxel_ext PUBLIC diff_voxel)
+target_link_libraries(diff_voxel_ext PRIVATE lib)
 
 # Install directive for scikit-build-core
 install(TARGETS diff_voxel_ext LIBRARY DESTINATION diff_voxel)
