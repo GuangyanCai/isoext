@@ -2,6 +2,7 @@
 
 #include <array>
 #include <tuple>
+#include <cstdint>
 
 namespace mc {
     namespace lorensen {

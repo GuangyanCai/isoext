@@ -5,6 +5,8 @@
 #include <nanobind/stl/array.h>
 #include <nanobind/stl/string.h>
 
+#include <cstdint>
+#include <algorithm>
 
 namespace nb = nanobind;
 using namespace nb::literals;
