@@ -13,7 +13,7 @@ using GridType = nb::ndarray<float, nb::shape<nb::any, nb::any, nb::any>, nb::de
 using AABBType = std::array<float, 6>;
 
 
-NB_MODULE(diff_voxel_ext, m) {
+NB_MODULE(isoext_ext, m) {
 
     m.def("marching_cubes", [](GridType grid, AABBType aabb, float level = 0.f, std::string method = "lorensen"){
         // Convert grid shape to a std::array.

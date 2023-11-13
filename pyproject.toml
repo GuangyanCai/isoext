@@ -3,7 +3,7 @@ requires = ["scikit-build-core >=0.4.3", "nanobind >=1.8.0"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "diff_voxel"
+name = "isoext"
 version = "0.0.1"
 description = "Differentiable voxel grids with iso-surface, designed for inverse rendering."
 readme = "README.md"
@@ -16,7 +16,7 @@ authors = [
 # ]
 
 [project.urls]
-Homepage = "https://github.com/GuangyanCai/diff_voxel"
+Homepage = "https://github.com/GuangyanCai/isoext"
 
 
 [tool.scikit-build]

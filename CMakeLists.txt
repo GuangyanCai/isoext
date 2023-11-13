@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.26)
 
-project(diff_voxel LANGUAGES CXX CUDA)
+project(isoext LANGUAGES CXX CUDA)
 
 if (NOT SKBUILD)
   message(WARNING "\
@@ -39,7 +39,7 @@ add_subdirectory(src/lib)
 # We are now ready to compile the actual extension module
 nanobind_add_module(
   # Name of the extension
-  diff_voxel_ext
+  isoext_ext
 
   # Target the stable ABI for Python 3.12+, which reduces
   # the number of binary wheels that must be built. This
@@ -55,10 +55,10 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code goes here
-  src/diff_voxel_ext.cpp
+  src/isoext_ext.cpp
 )
 
-target_link_libraries(diff_voxel_ext PRIVATE lib)
+target_link_libraries(isoext_ext PRIVATE lib)
 
 # Install directive for scikit-build-core
-install(TARGETS diff_voxel_ext LIBRARY DESTINATION diff_voxel)
+install(TARGETS isoext_ext LIBRARY DESTINATION isoext)

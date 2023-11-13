@@ -1,4 +1,4 @@
-import diff_voxel
+import isoext
 import torch 
 
 def test_basic():
@@ -13,7 +13,7 @@ def test_basic():
     grid = torch.stack(torch.meshgrid([x, y, z], indexing='xy'), dim=-1).cuda()
     sdf = sphere_sdf(grid)
 
-    v, f = diff_voxel.marching_cubes(sdf, [-1, -1, -1, 1, 1, 1], 0)
+    v, f = isoext.marching_cubes(sdf, [-1, -1, -1, 1, 1, 1], 0)
 
     assert v.shape == torch.Size([6, 3])
     assert f.shape == torch.Size([8, 3])
