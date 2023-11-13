@@ -3,7 +3,7 @@
 
 ## Overview
 
-Welcome to `isoext` — a Python library designed for efficient isosurface extraction, leveraging the power of GPU computing. Our library attempts to implement a collection of classic isosurface extraction algorithms. Currently, only the following algorithms are supported, but more will come in the future:
+Welcome to `isoext` — a Python library designed for efficient isosurface extraction, leveraging the power of GPU computing and comes with `pytorch` support. Our library attempts to implement a collection of classic isosurface extraction algorithms. Currently, only the following algorithms are supported, but more will come in the future:
 * Marching cubes
   * `lorensen`: the original marching cubes algorithm from the paper [Marching cubes: A high resolution 3D surface construction algorithm](https://dl.acm.org/doi/10.1145/37402.37422).
 
@@ -52,6 +52,7 @@ v, f = isoext.marching_cubes(sdf, aabb, isolevel)
 ## Task List
 - [ ] Fix docstring.
 - [ ] Implement MC33.
+- [ ] Add `numpy` support.
 
 ## License
 
