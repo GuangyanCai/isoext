@@ -23,7 +23,7 @@ NB_MODULE(diff_voxel_ext, m) {
         // Run marching_cubes to get the vertices and faces.
         float * v_ptr_raw;
         int * f_ptr_raw;
-        size_t v_len, f_len;
+        uint32_t v_len, f_len;
 
         if (method == "lorensen") {
             std::tie(v_ptr_raw, v_len, f_ptr_raw, f_len) = mc::lorensen::marching_cubes(grid.data(), grid_shape, aabb, level);
