@@ -9,7 +9,7 @@ Welcome to `isoext` — a Python library designed for efficient isosurface extra
 
 ## Installation
 
-To install `isoext`, simply run:
+To install `isoext`, make sure [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit) is installed and run:
 
 ```bash
 pip install isoext
@@ -37,6 +37,7 @@ aabb = [-1, -1, -1, 1, 1, 1]
 isolevel = -0.2
 
 v, f = isoext.marching_cubes(sdf, aabb, isolevel)
+isoext.write_obj('sphere.obj', v, f)
 ```
 
 ## Task List
