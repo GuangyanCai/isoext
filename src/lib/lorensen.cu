@@ -269,10 +269,10 @@ std::tuple<float *, uint32_t, int *, uint32_t> mc::lorensen::marching_cubes(
 namespace
 {
 
-    static const int edges_[24] = {0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6,
+    const int edges_[24] = {0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6,
                                    6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7};
 
-    static const int edge_table_[256] = {
+    const int edge_table_[256] = {
         0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f,
         0xb06, 0xc0a, 0xd03, 0xe09, 0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f,
         0x795, 0x69c, 0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230,
@@ -298,7 +298,7 @@ namespace
         0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a,
         0x203, 0x109, 0x0};
 
-    static const int tri_table_[4096] = {
+    const int tri_table_[4096] = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 8, 3,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 9, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 8, 3, 9, 8, 1, -1, -1, -1,
