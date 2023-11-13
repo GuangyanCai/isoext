@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15...3.26)
 
 project(isoext LANGUAGES CXX CUDA)
 
-if (NOT SKBUILD)
+if(NOT SKBUILD)
   message(WARNING "\
   This CMake file is meant to be executed using 'scikit-build'. Running
   it directly will almost certainly not produce the desired result. If
@@ -33,11 +33,21 @@ find_package(Python 3.8
 # Import nanobind through CMake's find_package mechanism
 find_package(nanobind CONFIG REQUIRED)
 
+include(cmake/get_cpm.cmake)
+
+# This will automatically clone CCCL from GitHub and make the exported cmake targets available
+CPMAddPackage(
+  NAME CCCL
+  GITHUB_REPOSITORY nvidia/cccl
+  GIT_TAG main # Fetches the latest commit on the main branch
+)
+
 # Build lib
 add_subdirectory(src/lib)
 
 # We are now ready to compile the actual extension module
 nanobind_add_module(
+
   # Name of the extension
   isoext_ext
 
