@@ -7,16 +7,6 @@ Welcome to `isoext` — a Python library designed for efficient isosurface extra
 * Marching cubes
   * `lorensen`: the original marching cubes algorithm from the paper [Marching cubes: A high resolution 3D surface construction algorithm](https://dl.acm.org/doi/10.1145/37402.37422).
 
-|      CI              | status |
-|----------------------|--------|
-| pip builds           | [![Pip Action Status][actions-pip-badge]][actions-pip-link] |
-| wheels               | [![Wheel Action Status][actions-wheels-badge]][actions-wheels-link] |
-
-[actions-pip-link]:        https://github.com/GuangyanCai/isoext/actions?query=workflow%3APip
-[actions-pip-badge]:       https://github.com/GuangyanCai/isoext/workflows/Pip/badge.svg
-[actions-wheels-link]:     https://github.com/GuangyanCai/isoext/actions?query=workflow%3AWheels
-[actions-wheels-badge]:    https://github.com/GuangyanCai/isoext/workflows/Wheels/badge.svg
-
 ## Installation
 
 To install `isoext`, simply run:
