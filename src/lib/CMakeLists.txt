@@ -1,7 +1,3 @@
-# Import thrust
-find_package(Thrust REQUIRED CONFIG)
-thrust_create_target(Thrust)
-
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/lib/*.cuh")
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/lib/*.cu")
 
@@ -13,4 +9,4 @@ set_target_properties(lib PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
 target_include_directories(lib PUBLIC "${isoext_SOURCE_DIR}/include/lib/")
-target_link_libraries(lib PRIVATE Thrust)
+target_link_libraries(lib PRIVATE CCCL::CCCL)
