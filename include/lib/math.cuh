@@ -35,6 +35,16 @@ inline __host__ __device__ float3 operator/(float3 a, float3 b)
     return make_float3(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
+inline __host__ __device__ bool operator==(float3 a, float3 b)
+{
+    return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+inline __host__ __device__ bool operator!=(float3 a, float3 b)
+{
+    return a.x != b.x || a.y != b.y || a.z != b.z;
+}
+
 __host__ __device__ float3 interpolate(float level, float val_0,
                                        float val_1, float3 pos_0,
                                        float3 pos_1)

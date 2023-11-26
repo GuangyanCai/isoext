@@ -156,9 +156,15 @@ namespace
                 uint32_t v_idx = v0_idx + i;
                 if (tri_table[tri_idx] != -1)
                 {
-                    v[v_idx + 0] = cube_v[tri_table[tri_idx + 0]];
-                    v[v_idx + 1] = cube_v[tri_table[tri_idx + 1]];
-                    v[v_idx + 2] = cube_v[tri_table[tri_idx + 2]];
+                    const float3 &v0 = cube_v[tri_table[tri_idx + 0]];
+                    const float3 &v1 = cube_v[tri_table[tri_idx + 1]];
+                    const float3 &v2 = cube_v[tri_table[tri_idx + 2]];
+
+                    if (v0 != v1 && v0 != v2 && v1 != v2) {
+                        v[v_idx + 0] = v0;
+                        v[v_idx + 1] = v1;
+                        v[v_idx + 2] = v2;
+                    }
                 }
             }
         }
