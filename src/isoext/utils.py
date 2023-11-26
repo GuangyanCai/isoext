@@ -1,3 +1,4 @@
+import torch 
 
 def write_obj(obj_path, v, f):
     with open(obj_path, 'w') as obj_file:
@@ -12,3 +13,12 @@ def write_obj(obj_path, v, f):
             lines.append(f'f {f0} {f1} {f2}\n')
 
         obj_file.writelines(lines)
+
+def make_grid(aabb, res, device='cuda'):
+    if isinstance(res, int):
+        res = [res] * 3
+
+    s = [torch.linspace(aabb[i], aabb[i + 3], res[i], device=device) for i in range(3)]
+    grid = torch.stack(torch.meshgrid(s, indexing='ij'), dim=-1)
+
+    return grid

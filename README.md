@@ -21,23 +21,31 @@ Here's a simple example to get you started:
 
 ```python
 import isoext
-import torch 
-
-def sphere_sdf(x):
-    return x.norm(dim=-1) - 0.5
-
-res = 128
-x = torch.linspace(-1, 1, res)
-y = torch.linspace(-1, 1, res)
-z = torch.linspace(-1, 1, res)
-grid = torch.stack(torch.meshgrid([x, y, z], indexing='ij'), dim=-1) # Use "ij" mode to keep the orientation 
-sdf = sphere_sdf(grid).cuda() # Only accept a gpu tensor from pytorch for now
+from isoext.sdf import *
 
 aabb = [-1, -1, -1, 1, 1, 1]
-isolevel = -0.2
+res = 128
+grid = isoext.make_grid(aabb, res)
 
-v, f = isoext.marching_cubes(sdf, aabb, isolevel)
-isoext.write_obj('sphere.obj', v, f)
+torus_a = TorusSDF(R=0.75, r=0.15)
+torus_b = RotationOp(sdf=torus_a, axis=[1, 0, 0], angle=90)
+torus_c = RotationOp(sdf=torus_a, axis=[0, 1, 0], angle=90)
+
+sphere_a = SphereSDF(radius=0.75)
+
+sdf = IntersectionOp([
+    sphere_a, 
+    NegationOp(UnionOp([
+        torus_a, torus_b, torus_c
+    ]))
+])
+sdf_v = sdf(grid) # Only accept a gpu tensor from pytorch for now
+
+isolevel = 0
+
+v, f = isoext.marching_cubes(sdf_v, aabb, isolevel)
+
+isoext.write_obj('test.obj', v, f)
 ```
 
 ## Task List
