@@ -49,9 +49,9 @@ isoext.write_obj('test.obj', v, f)
 ```
 
 ## Task List
-- [ ] Fix docstring.
+- [x] Fix docstring.
 - [ ] Implement MC33.
-- [ ] Add `numpy` support.
+- [x] Add `numpy` support.
 
 ## License
 
