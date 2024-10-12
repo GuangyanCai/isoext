@@ -1,4 +1,5 @@
 #include "mc.cuh"
+#include "utils.cuh"
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
@@ -40,13 +41,8 @@ NB_MODULE(isoext_ext, m) {
             throw std::invalid_argument("Invalid method.");
         }
 
-        nb::capsule v_owner(v_ptr_raw, [](void *p) noexcept {
-             cudaFree(p);
-        });
-
-        nb::capsule f_owner(f_ptr_raw, [](void *p) noexcept {
-             cudaFree(p);
-        });
+        auto v_owner = create_device_capsule(v_ptr_raw);
+        auto f_owner = create_device_capsule(f_ptr_raw);
 
         // Convert the pointers into nb::ndarray.
         auto v_ndarray = Vertices(v_ptr_raw, {v_len, 3}, v_owner);

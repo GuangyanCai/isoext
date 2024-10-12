@@ -42,8 +42,8 @@ CPMAddPackage(
   GIT_TAG v2.6.1 # Fixing the version to avoid breaking changes
 )
 
-# Build lib
-add_subdirectory(src/lib)
+file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/*.cuh")
+file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
 
 # We are now ready to compile the actual extension module
 nanobind_add_module(
@@ -65,10 +65,12 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code goes here
-  src/isoext_ext.cu
+  ${HEADER_LIST}
+  ${SOURCE_LIST}
 )
 
-target_link_libraries(isoext_ext PRIVATE lib)
+target_link_libraries(isoext_ext PRIVATE CCCL::CCCL)
+target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
 
 # Install directive for scikit-build-core
 install(TARGETS isoext_ext LIBRARY DESTINATION isoext)
