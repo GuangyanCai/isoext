@@ -39,7 +39,7 @@ sdf = IntersectionOp([
         torus_a, torus_b, torus_c
     ]))
 ])
-sdf_v = sdf(grid) # Only accept a gpu tensor from pytorch for now
+sdf_v = sdf(grid) # can be a pytorch tensor or an numpy array
 
 isolevel = 0
 
