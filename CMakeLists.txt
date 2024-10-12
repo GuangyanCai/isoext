@@ -39,7 +39,7 @@ include(cmake/get_cpm.cmake)
 CPMAddPackage(
   NAME CCCL
   GITHUB_REPOSITORY nvidia/cccl
-  GIT_TAG main # Fetches the latest commit on the main branch
+  GIT_TAG v2.6.1 # Fixing the version to avoid breaking changes
 )
 
 # Build lib
@@ -65,7 +65,7 @@ nanobind_add_module(
   NB_STATIC
 
   # Source code goes here
-  src/isoext_ext.cpp
+  src/isoext_ext.cu
 )
 
 target_link_libraries(isoext_ext PRIVATE lib)

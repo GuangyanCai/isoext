@@ -5,15 +5,21 @@
 #include <nanobind/stl/array.h>
 #include <nanobind/stl/string.h>
 
+#include <thrust/device_malloc.h>
+
 #include <cstdint>
 #include <algorithm>
 
 namespace nb = nanobind;
 using namespace nb::literals;
 
-using GridType = nb::ndarray<float, nb::shape<nb::any, nb::any, nb::any>, nb::device::cuda, nb::c_contig>;
+// Input types
+using GridType = nb::ndarray<float, nb::ndim<3>, nb::device::cuda, nb::c_contig>;
 using AABBType = std::array<float, 6>;
 
+// Output types
+using Vertices = nb::ndarray<nb::pytorch, float, nb::shape<-1, 3>, nb::device::cuda, nb::c_contig>;
+using Faces = nb::ndarray<nb::pytorch, int, nb::shape<-1, 3>, nb::device::cuda, nb::c_contig>;
 
 NB_MODULE(isoext_ext, m) {
 
@@ -34,17 +40,22 @@ NB_MODULE(isoext_ext, m) {
             throw std::invalid_argument("Invalid method.");
         }
 
+        nb::capsule v_owner(v_ptr_raw, [](void *p) noexcept {
+             cudaFree(p);
+        });
+
+        nb::capsule f_owner(f_ptr_raw, [](void *p) noexcept {
+             cudaFree(p);
+        });
+
         // Convert the pointers into nb::ndarray.
-        auto v_ndarray = nb::ndarray<nb::pytorch, float, nb::shape<nb::any, 3>>(
-            v_ptr_raw, {v_len, 3}, nb::handle(), {3, 1}, nb::dtype<float>(), nb::device::cuda::value, 0
-        );
-        auto f_ndarray = nb::ndarray<nb::pytorch, int, nb::shape<nb::any, 3>>(
-            f_ptr_raw, {f_len, 3}, nb::handle(), {3, 1}, nb::dtype<int>(), nb::device::cuda::value, 0
-        );
+        auto v_ndarray = Vertices(v_ptr_raw, {v_len, 3}, v_owner);
+        auto f_ndarray = Faces(f_ptr_raw, {f_len, 3}, f_owner);
 
         // Return a tuple of (v, f).
-        return nb::make_tuple<nb::rv_policy::take_ownership>(v_ndarray, f_ndarray);
+        return nb::make_tuple(v_ndarray, f_ndarray);
     }, "grid"_a, "aabb"_a, "level"_a = 0.f, "method"_a = "lorensen", "Marching Cubes");
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";
+    
 }
