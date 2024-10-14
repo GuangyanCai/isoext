@@ -7,14 +7,20 @@
 #include <thrust/unique.h>
 
 void
-vertex_welding(thrust::device_vector<float3> &v,
-               thrust::device_vector<int> &f) {
-    // Scatter v to sorted_v based on f
-    thrust::device_vector<float3> sorted_v(v.size());
-    thrust::scatter(v.begin(), v.end(), f.begin(), sorted_v.begin());
-    f.clear();
-    f.resize(v.size());
-    thrust::sequence(f.begin(), f.end());
+vertex_welding(thrust::device_vector<float3> &v, thrust::device_vector<int> &f,
+               bool skip_scatter) {
+
+    thrust::device_vector<float3> sorted_v;
+
+    if (skip_scatter) {
+        sorted_v = v;
+    } else {
+        // Scatter v to sorted_v based on f
+        thrust::scatter(v.begin(), v.end(), f.begin(), sorted_v.begin());
+        f.clear();
+        f.resize(v.size());
+        thrust::sequence(f.begin(), f.end());
+    }
 
     // Remove duplicated vertices
     thrust::sort(sorted_v.begin(), sorted_v.end(), float3_less_pred());

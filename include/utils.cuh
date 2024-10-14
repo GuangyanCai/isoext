@@ -116,4 +116,4 @@ struct get_case_idx_op {
 };
 
 void vertex_welding(thrust::device_vector<float3> &v,
-                    thrust::device_vector<int> &f);
+                    thrust::device_vector<int> &f, bool skip_scatter = true);
