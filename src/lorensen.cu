@@ -87,9 +87,8 @@ struct process_cube_op {
 };
 
 std::tuple<float *, uint32_t, int *, uint32_t>
-marching_cubes(float *const grid_ptr, const std::array<int64_t, 3> &grid_shape,
-               const std::array<float, 6> &aabb, float level, bool tight) {
-    uint3 res = make_uint3(grid_shape[0], grid_shape[1], grid_shape[2]);
+marching_cubes(float *const grid_ptr, uint3 res, float3 aabb_min,
+               float3 aabb_max, float level, bool tight) {
     uint32_t num_cubes = (res.x - 1) * (res.y - 1) * (res.z - 1);
 
     // Move the grid to the device.
@@ -152,8 +151,6 @@ marching_cubes(float *const grid_ptr, const std::array<int64_t, 3> &grid_shape,
     vertex_welding(v_dv, f_dv);
 
     // Fit the vertices inside the aabb.
-    float3 aabb_min = make_float3(aabb[0], aabb[1], aabb[2]);
-    float3 aabb_max = make_float3(aabb[3], aabb[4], aabb[5]);
     float3 old_scale = make_float3(res.x - 1, res.y - 1, res.z - 1);
     thrust::transform(v_dv.begin(), v_dv.end(), v_dv.begin(),
                       transform_aabb_functor(aabb_min, aabb_max, old_scale));
