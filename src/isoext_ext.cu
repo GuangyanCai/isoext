@@ -27,9 +27,8 @@ NB_MODULE(isoext_ext, m) {
             float3 aabb_min = make_float3(aabb[0], aabb[1], aabb[2]);
             float3 aabb_max = make_float3(aabb[3], aabb[4], aabb[5]);
 
-            auto [v_ptr_raw, v_len, f_ptr_raw, f_len] =
-                mc::lorensen::marching_cubes(grid.data(), res, aabb_min,
-                                             aabb_max, level, tight);
+            auto [v_ptr_raw, v_len, f_ptr_raw, f_len] = mc::marching_cubes(
+                grid.data(), res, aabb_min, aabb_max, level, tight, method);
 
             VerticesType v(v_ptr_raw, {v_len, 3},
                            create_device_capsule(v_ptr_raw));

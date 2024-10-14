@@ -1,13 +1,15 @@
 #pragma once
 
-#include <array>
-#include <cstdint>
-#include <tuple>
+#include "lut.cuh"
+#include "math.cuh"
+#include "utils.cuh"
 
 namespace mc {
 namespace lorensen {
-std::tuple<float *, uint32_t, int *, uint32_t>
-marching_cubes(float *const grid_ptr, uint3 res, float3 aabb_min,
-               float3 aabb_max, float level, bool tight);
-}
+
+void run(const thrust::device_vector<uint8_t> &case_idx_dv,
+         const thrust::device_vector<uint32_t> &grid_idx_dv, float3 *v,
+         const float *grid, const uint3 res, float level, bool tight);
+
+}   // namespace lorensen
 }   // namespace mc
