@@ -2,6 +2,7 @@
 
 #include <cuda_runtime.h>
 #include <nanobind/nanobind.h>
+#include <thrust/device_vector.h>
 
 // Function to copy data from device to host
 template <typename T>
@@ -113,3 +114,6 @@ struct get_case_idx_op {
         cases[cube_idx] = table_idx;
     }
 };
+
+void vertex_welding(thrust::device_vector<float3> &v,
+                    thrust::device_vector<int> &f);

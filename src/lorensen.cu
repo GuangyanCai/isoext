@@ -146,33 +146,22 @@ marching_cubes(float *const grid_ptr, const std::array<int64_t, 3> &grid_shape,
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
                v_dv.end());
 
-    // Remove duplicated vertices.
-    thrust::device_vector<float3> sorted_v_dv(v_dv);
-    thrust::sort(sorted_v_dv.begin(), sorted_v_dv.end(), float3_less_pred());
-    sorted_v_dv.erase(thrust::unique(sorted_v_dv.begin(), sorted_v_dv.end(),
-                                     float3_elem_eq_pred()),
-                      sorted_v_dv.end());
-
-    // Compute the triangle faces.
+    // Weld/merge vertices.
     thrust::device_vector<int> f_dv(v_dv.size());
-    thrust::lower_bound(sorted_v_dv.begin(), sorted_v_dv.end(), v_dv.begin(),
-                        v_dv.end(), f_dv.begin(), float3_less_pred());
-
-    // Clear v_dv to make more space.
-    v_dv.clear();
+    thrust::sequence(f_dv.begin(), f_dv.end());
+    vertex_welding(v_dv, f_dv);
 
     // Fit the vertices inside the aabb.
     float3 aabb_min = make_float3(aabb[0], aabb[1], aabb[2]);
     float3 aabb_max = make_float3(aabb[3], aabb[4], aabb[5]);
     float3 old_scale = make_float3(res.x - 1, res.y - 1, res.z - 1);
-    thrust::transform(sorted_v_dv.begin(), sorted_v_dv.end(),
-                      sorted_v_dv.begin(),
+    thrust::transform(v_dv.begin(), v_dv.end(), v_dv.begin(),
                       transform_aabb_functor(aabb_min, aabb_max, old_scale));
 
     // Allocate memory for the vertex pointer and copy the data.
-    uint32_t v_len = sorted_v_dv.size();
+    uint32_t v_len = v_dv.size();
     thrust::device_ptr<float3> v_dp = thrust::device_malloc<float3>(v_len);
-    thrust::copy(sorted_v_dv.begin(), sorted_v_dv.end(), v_dp);
+    thrust::copy(v_dv.begin(), v_dv.end(), v_dp);
     float *v_ptr = reinterpret_cast<float *>(thrust::raw_pointer_cast(v_dp));
 
     // Allocate memory for the face pointer and copy the data.
