@@ -20,7 +20,7 @@ template <typename Framework, typename Device> struct MarchingCubes {
         nb::ndarray<Framework, int, nb::shape<-1, 3>, Device, nb::c_contig>;
 
     static nb::tuple run(GridType grid, AABBType aabb, float level = 0.f,
-                         std::string method = "lorensen") {
+                         bool tight = true, std::string method = "lorensen") {
         bool from_cpu = grid.device_type() == nb::device::cpu::value;
 
         // Convert grid shape to a std::array.
@@ -39,8 +39,8 @@ template <typename Framework, typename Device> struct MarchingCubes {
 
         if (method == "lorensen") {
             std::tie(v_ptr_raw, v_len, f_ptr_raw, f_len) =
-                mc::lorensen::marching_cubes(grid_data, grid_shape, aabb,
-                                             level);
+                mc::lorensen::marching_cubes(grid_data, grid_shape, aabb, level,
+                                             tight);
         } else {
             throw std::invalid_argument("Invalid method.");
         }

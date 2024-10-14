@@ -13,51 +13,10 @@
 #include "lorensen.cuh"
 #include "lut.cuh"
 #include "math.cuh"
+#include "utils.cuh"
 
 // Hide helper structures using an anonymous namespace
 namespace mc::lorensen {
-struct get_case_idx_op {
-    uint8_t *cases;
-    const float *grid;
-    const uint3 res;
-    const float level;
-
-    get_case_idx_op(uint8_t *cases, const float *grid, const uint3 res,
-                    const float level)
-        : cases(cases), grid(grid), res(res), level(level) {}
-
-    __host__ __device__ void operator()(uint32_t cube_idx) {
-        // Compute the 3D index of the first cube vertex.
-        uint32_t tmp, p0_i, p0_j, p0_k;
-        tmp = cube_idx;
-        p0_k = tmp % (res.z - 1);
-        tmp /= (res.z - 1);
-        p0_j = tmp % (res.y - 1);
-        p0_i = tmp / (res.y - 1);
-
-        // For each cube vertex, compute the index to the grid array.
-        uint32_t res_yz = res.y * res.z;
-        uint32_t p_idx[8];
-        p_idx[0] = p0_i * res.y * res.z + p0_j * res.z + p0_k;
-        p_idx[1] = p_idx[0] + 1;
-        p_idx[2] = p_idx[1] + res.z;
-        p_idx[3] = p_idx[0] + res.z;
-        p_idx[4] = p_idx[0] + res_yz;
-        p_idx[5] = p_idx[1] + res_yz;
-        p_idx[6] = p_idx[2] + res_yz;
-        p_idx[7] = p_idx[3] + res_yz;
-
-        // Compute the sign of each cube vertex and derive the case number
-        // (table_idx).
-        uint8_t table_idx = 0;
-        float p_val[8];
-        for (uint32_t i = 0; i < 8; i++) {
-            p_val[i] = grid[p_idx[i]];
-            table_idx |= (p_val[i] - level < 0) << i;
-        }
-        cases[cube_idx] = table_idx;
-    }
-};
 
 struct process_cube_op {
     float3 *v;
@@ -67,58 +26,34 @@ struct process_cube_op {
     const int *tri_table;
     const uint3 res;
     const float level;
+    const bool tight;
 
     process_cube_op(float3 *v, const float *grid, const int *edges,
                     const int *edge_table, const int *tri_table,
-                    const uint3 res, const float level)
+                    const uint3 res, const float level, const bool tight)
         : v(v), grid(grid), edges(edges), edge_table(edge_table),
-          tri_table(tri_table), res(res), level(level) {}
+          tri_table(tri_table), res(res), level(level), tight(tight) {}
 
     __host__ __device__ void
     operator()(thrust::tuple<uint8_t, uint32_t, uint32_t> args) {
-        uint32_t case_idx = thrust::get<0>(args);
-        uint32_t cube_idx = thrust::get<1>(args);
-        uint32_t result_idx = thrust::get<2>(args);
-
-        // Compute the 3D index of the first cube vertex.
-        uint32_t tmp, p0_i, p0_j, p0_k;
-        tmp = cube_idx;
-        p0_k = tmp % (res.z - 1);
-        tmp /= (res.z - 1);
-        p0_j = tmp % (res.y - 1);
-        p0_i = tmp / (res.y - 1);
+        uint32_t case_idx, cube_idx, result_idx;
+        thrust::tie(case_idx, cube_idx, result_idx) = args;
 
         // For each cube vertex, compute the index to the grid array.
-        uint32_t res_yz = res.y * res.z;
-        uint32_t p_idx[8];
-        p_idx[0] = p0_i * res.y * res.z + p0_j * res.z + p0_k;
-        p_idx[1] = p_idx[0] + 1;
-        p_idx[2] = p_idx[1] + res.z;
-        p_idx[3] = p_idx[0] + res.z;
-        p_idx[4] = p_idx[0] + res_yz;
-        p_idx[5] = p_idx[1] + res_yz;
-        p_idx[6] = p_idx[2] + res_yz;
-        p_idx[7] = p_idx[3] + res_yz;
+        Cube c(cube_idx, res, tight);
 
-        // Compute the location of each cube vertex. Assume each cube is a unit
-        // cube for now.
+        // Compute the location of each cube vertex. Assume each cube is a
+        // unit cube for now.
         float3 p_pos[8];
-        p_pos[0] = make_float3(p0_i, p0_j, p0_k);
-        p_pos[1] = make_float3(p0_i, p0_j, p0_k + 1);
-        p_pos[2] = make_float3(p0_i, p0_j + 1, p0_k + 1);
-        p_pos[3] = make_float3(p0_i, p0_j + 1, p0_k);
-        p_pos[4] = make_float3(p0_i + 1, p0_j, p0_k);
-        p_pos[5] = make_float3(p0_i + 1, p0_j, p0_k + 1);
-        p_pos[6] = make_float3(p0_i + 1, p0_j + 1, p0_k + 1);
-        p_pos[7] = make_float3(p0_i + 1, p0_j + 1, p0_k);
+        c.get_vtx_pos(p_pos);
 
         float p_val[8];
         for (uint32_t i = 0; i < 8; i++) {
-            p_val[i] = grid[p_idx[i]];
+            p_val[i] = grid[c.vi[i]];
         }
 
-        // Compute the intersection between the isosurface and each edge of the
-        // cube.
+        // Compute the intersection between the isosurface and each edge of
+        // the cube.
         int edge_status = edge_table[case_idx];
         float3 cube_v[12];
         for (uint32_t i = 0; i < 12; i++) {
@@ -153,7 +88,7 @@ struct process_cube_op {
 
 std::tuple<float *, uint32_t, int *, uint32_t>
 marching_cubes(float *const grid_ptr, const std::array<int64_t, 3> &grid_shape,
-               const std::array<float, 6> &aabb, float level) {
+               const std::array<float, 6> &aabb, float level, bool tight) {
     uint3 res = make_uint3(grid_shape[0], grid_shape[1], grid_shape[2]);
     uint32_t num_cubes = (res.x - 1) * (res.y - 1) * (res.z - 1);
 
@@ -173,7 +108,7 @@ marching_cubes(float *const grid_ptr, const std::array<int64_t, 3> &grid_shape,
         thrust::counting_iterator<uint32_t>(0),
         thrust::counting_iterator<uint32_t>(num_cubes),
         get_case_idx_op(thrust::raw_pointer_cast(case_idx_dv.data()),
-                        thrust::raw_pointer_cast(grid_dp), res, level));
+                        thrust::raw_pointer_cast(grid_dp), res, level, tight));
 
     // Remove empty cubes.
     thrust::device_vector<uint32_t> grid_idx_dv(num_cubes);
@@ -205,7 +140,7 @@ marching_cubes(float *const grid_ptr, const std::array<int64_t, 3> &grid_shape,
                         thrust::raw_pointer_cast(edges_dv.data()),
                         thrust::raw_pointer_cast(edge_table_dv.data()),
                         thrust::raw_pointer_cast(tri_table_dv.data()), res,
-                        level));
+                        level, tight));
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
