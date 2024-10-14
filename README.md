@@ -1,6 +1,6 @@
 
 # isoext: Isosurface Extraction on GPU
-[![PyPI version](https://badge.fury.io/py/isoext.svg?kill_cache=1)](https://badge.fury.io/py/isoext)
+[![PyPI version](https://badge.fury.io/py/isoext.svg?)](https://badge.fury.io/py/isoext)
 ## Overview
 
 Welcome to `isoext` — a Python library designed for efficient isosurface extraction, leveraging the power of GPU computing and comes with `pytorch` support. Our library attempts to implement a collection of classic isosurface extraction algorithms. Currently, only the following algorithms are supported, but more will come in the future:
@@ -39,7 +39,7 @@ sdf = IntersectionOp([
         torus_a, torus_b, torus_c
     ]))
 ])
-sdf_v = sdf(grid) # Only accept a gpu tensor from pytorch for now
+sdf_v = sdf(grid) # can be a pytorch tensor or an numpy array
 
 isolevel = 0
 
