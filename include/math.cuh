@@ -3,8 +3,6 @@
 #include <cuda_runtime.h>
 #include <thrust/functional.h>
 
-#include <cstdint>
-
 inline __host__ __device__ float3
 operator+(float3 a, float3 b) {
     return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -45,7 +43,7 @@ operator!=(float3 a, float3 b) {
     return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
-__host__ __device__ float3
+inline __host__ __device__ float3
 interpolate(float level, float val_0, float val_1, float3 pos_0, float3 pos_1) {
     if (abs(level - val_0) < 0.00001)
         return (pos_0);
