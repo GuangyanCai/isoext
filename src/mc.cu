@@ -17,43 +17,85 @@
 namespace mc {
 
 static std::unordered_map<
-    std::string,
-    std::function<void(const thrust::device_vector<uint8_t> &,
-                       const thrust::device_vector<uint32_t> &, float3 *,
-                       const float *, const uint3, float, bool)>>
+    std::string, std::function<void(const thrust::device_vector<uint8_t> &,
+                                    const thrust::device_vector<uint32_t> &,
+                                    float3 *, const float *, const float3 *,
+                                    const uint3, float, bool)>>
     method_map = {{"lorensen", lorensen::run}};
 
 std::tuple<float *, uint32_t, int *, uint32_t>
-marching_cubes(float *const grid_ptr, uint3 res, float3 aabb_min,
-               float3 aabb_max, float level, bool tight, std::string method) {
-    uint32_t num_cubes;
-    if (tight) {
-        num_cubes = (res.x - 1) * (res.y - 1) * (res.z - 1);
-    } else {
-        if (res.x % 2 != 0 || res.y != 2 || res.z != 2) {
-            throw std::runtime_error(
-                "When tight is false, res must be (2n, 2, 2).");
-        }
-        num_cubes = res.x / 2;
-    }
+marching_cubes(const float *grid_ptr, uint3 res,
+               std::optional<std::array<float, 6>> o_aabb,
+               std::optional<const float3 *> o_cells_ptr, float level,
+               std::string method) {
 
     auto it = method_map.find(method);
     if (it == method_map.end()) {
         throw std::runtime_error("Unknown method: " + method);
     }
-
     auto mc_method = it->second;
 
-    // Move the grid to the device.
-    thrust::device_ptr<float> grid_dp(grid_ptr);
+    // Variables to store cube and cell information
+    uint32_t num_cubes;
+    const float3 *cells_ptr;
+    thrust::device_vector<float3> cells_dv;
+    bool tight;
+
+    // Check if AABB (Axis-Aligned Bounding Box) is provided
+    if (o_aabb.has_value()) {
+        // Ensure that cell positions are not provided when AABB is given
+        if (o_cells_ptr.has_value()) {
+            throw std::runtime_error(
+                "Only one of AABB and cell positions is required.");
+        }
+
+        // Check if resolution is at least (2, 2, 2) for AABB
+        if (res.x < 2 || res.y < 2 || res.z < 2) {
+            throw std::runtime_error(
+                "When given AABB, res must be at least (2, 2, 2).");
+        }
+
+        // Extract AABB values and create min/max vectors
+        auto aabb = o_aabb.value();
+        float3 aabb_min = make_float3(aabb[0], aabb[1], aabb[2]);
+        float3 aabb_max = make_float3(aabb[3], aabb[4], aabb[5]);
+
+        // Calculate number of cubes and points
+        num_cubes = (res.x - 1) * (res.y - 1) * (res.z - 1);
+        uint32_t num_points = res.x * res.y * res.z;
+
+        // Resize cells vector and populate it with vertex positions
+        cells_dv.resize(num_points);
+        thrust::transform(thrust::counting_iterator<uint32_t>(0),
+                          thrust::counting_iterator<uint32_t>(num_points),
+                          cells_dv.begin(),
+                          get_vtx_pos_op(res, aabb_min, aabb_max));
+        cells_ptr = thrust::raw_pointer_cast(cells_dv.data());
+        tight = true;
+    }
+    // Check if cell positions are provided
+    else if (o_cells_ptr.has_value()) {
+        // Ensure resolution is (2n, 2, 2) when cell positions are given
+        if (res.x % 2 != 0 || res.y != 2 || res.z != 2) {
+            throw std::runtime_error(
+                "When given cell positions, res must be (2n, 2, 2).");
+        }
+        cells_ptr = o_cells_ptr.value();
+        num_cubes = res.x / 2;
+        tight = false;
+    }
+    // Throw error if neither AABB nor cell positions are provided
+    else {
+        throw std::runtime_error("Either AABB or cell positions are required.");
+    }
 
     // Get the case index of each cube based on the sign of cube vertices.
     thrust::device_vector<uint8_t> case_idx_dv(num_cubes);
     thrust::for_each(
         thrust::counting_iterator<uint32_t>(0),
         thrust::counting_iterator<uint32_t>(num_cubes),
-        get_case_idx_op(thrust::raw_pointer_cast(case_idx_dv.data()),
-                        thrust::raw_pointer_cast(grid_dp), res, level, tight));
+        get_case_idx_op(thrust::raw_pointer_cast(case_idx_dv.data()), grid_ptr,
+                        res, level, tight));
 
     // Remove empty cubes.
     thrust::device_vector<uint32_t> grid_idx_dv(num_cubes);
@@ -72,7 +114,7 @@ marching_cubes(float *const grid_ptr, uint3 res, float3 aabb_min,
 
     // Run Marching Cubes on each cube.
     mc_method(case_idx_dv, grid_idx_dv, thrust::raw_pointer_cast(v_dv.data()),
-              thrust::raw_pointer_cast(grid_dp), res, level, tight);
+              grid_ptr, cells_ptr, res, level, tight);
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
@@ -82,11 +124,6 @@ marching_cubes(float *const grid_ptr, uint3 res, float3 aabb_min,
     thrust::device_vector<int> f_dv(v_dv.size());
     thrust::sequence(f_dv.begin(), f_dv.end());
     vertex_welding(v_dv, f_dv);
-
-    // Fit the vertices inside the aabb.
-    float3 old_scale = make_float3(res.x - 1, res.y - 1, res.z - 1);
-    thrust::transform(v_dv.begin(), v_dv.end(), v_dv.begin(),
-                      transform_aabb_functor(aabb_min, aabb_max, old_scale));
 
     // Allocate memory for the vertex pointer and copy the data.
     uint32_t v_len = v_dv.size();

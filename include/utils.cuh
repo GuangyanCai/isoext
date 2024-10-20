@@ -4,6 +4,8 @@
 #include <nanobind/nanobind.h>
 #include <thrust/device_vector.h>
 
+#include "math.cuh"
+
 // Function to copy data from device to host
 template <typename T>
 T *
@@ -58,7 +60,7 @@ struct Cube {
         // Otherwise, each cube is separate from others. In this case, res must
         // be (2n, 2, 2), where n is the number of cubes.
         else {
-            ci.x = 2 * (cube_idx - 1);
+            ci.x = 2 * cube_idx;
             ci.y = 0;
             ci.z = 0;
         }
@@ -74,17 +76,25 @@ struct Cube {
         vi[6] = vi[2] + res_yz;                               // (x+1, y+1, z+1)
         vi[7] = vi[3] + res_yz;                               // (x+1, y+1, z)
     }
+};
 
-    // Compute the vertex positions of the cube as if it is a unit cube.
-    __host__ __device__ void get_vtx_pos(float3 *v) {
-        v[0] = make_float3(ci.x, ci.y, ci.z);
-        v[1] = make_float3(ci.x, ci.y, ci.z + 1);
-        v[2] = make_float3(ci.x, ci.y + 1, ci.z + 1);
-        v[3] = make_float3(ci.x, ci.y + 1, ci.z);
-        v[4] = make_float3(ci.x + 1, ci.y, ci.z);
-        v[5] = make_float3(ci.x + 1, ci.y, ci.z + 1);
-        v[6] = make_float3(ci.x + 1, ci.y + 1, ci.z + 1);
-        v[7] = make_float3(ci.x + 1, ci.y + 1, ci.z);
+struct get_vtx_pos_op {
+    const uint3 res;
+    const float3 aabb_min;
+    const float3 aabb_size;
+
+    get_vtx_pos_op(const uint3 res, const float3 aabb_min,
+                   const float3 aabb_max)
+        : res(res), aabb_min(aabb_min), aabb_size(aabb_max - aabb_min) {}
+
+    __host__ __device__ float3 operator()(uint32_t idx) {
+        float3 pos;
+        pos.z = (idx % res.z) / (float) (res.z - 1);
+        idx /= res.z;
+        pos.y = (idx % res.y) / (float) (res.y - 1);
+        pos.x = (idx / res.y) / (float) (res.x - 1);
+        pos = aabb_min + pos * aabb_size;
+        return pos;
     }
 };
 
