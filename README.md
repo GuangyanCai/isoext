@@ -39,18 +39,40 @@ sdf = IntersectionOp([
         torus_a, torus_b, torus_c
     ]))
 ])
-sdf_v = sdf(grid) # can be a pytorch tensor or an numpy array
+sdf_v = sdf(grid) # must be a cuda pytorchtensor
 
 isolevel = 0
 
-v, f = isoext.marching_cubes(sdf_v, aabb, isolevel)
+v, f = isoext.marching_cubes(sdf_v, aabb=aabb, level=isolevel, method="lorensen")
 
 isoext.write_obj('test.obj', v, f)
 ```
 
+## Marching Cubes
+
+### Arguments
+
+`isoext.marching_cubes` accepts the following arguments:
+
+- `grid`: A CUDA PyTorch tensor representing the scalar field. It should be a 3D tensor. If `cells` is provided, `grid` must be of shape (2N, 2, 2), where N is the number of cells.
+- `aabb`: (Optional) A list or tuple of 6 floats representing the axis-aligned bounding box [xmin, ymin, zmin, xmax, ymax, zmax]. If provided, `cells` must not be given.
+- `cells`: (Optional) A CUDA PyTorch tensor of shape (2N, 2, 2, 3) representing the cell positions. If provided, `aabb` must not be given.
+- `level`: The isovalue at which to extract the isosurface. Default is 0.0.
+- `method`: The marching cubes algorithm to use. Currently, only "lorensen" is supported.
+
+### Return Value
+
+The function returns a tuple `(vertices, faces)`:
+
+- `vertices`: A CUDA PyTorch tensor of shape (V, 3) representing the vertex positions. 
+- `faces`: A CUDA PyTorch tensor of shape (F, 3) representing the triangular faces.
+- If no faces are found, both `vertices` and `faces` will be `None`.
+
 ## Task List
 - [x] Fix docstring.
-- [ ] Implement MC33.
+- [ ] Add more Marching Cubes variants.
+- [ ] Add Dual Contouring.
+- [ ] Add Dual Marching Cubes.
 
 ## License
 
