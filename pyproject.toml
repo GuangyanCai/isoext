@@ -4,17 +4,15 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "isoext"
-version = "0.2.1"
+version = "0.3.0"
 description = "A collection of algorithms for iso-sufrace extraction on GPU. Supports pytorch."
 readme = "README.md"
 requires-python = ">=3.8"
-authors = [
-    { name = "Guangyan Cai", email = "gcai3@uci.edu" },
-]
+authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Environment :: GPU :: NVIDIA CUDA",
-    "Topic :: Multimedia :: Graphics :: 3D Modeling"
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]
 
 [project.urls]
