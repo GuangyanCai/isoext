@@ -1,6 +1,9 @@
 import torch 
 
 def write_obj(obj_path, v, f):
+    if v.numel() == 0 or f.numel() == 0:
+        return
+
     with open(obj_path, 'w') as obj_file:
         v = v.tolist()
         f = (f + 1).tolist()
