@@ -60,7 +60,7 @@ struct is_nan_pred {
     }
 };
 
-struct float3_less_pred : public thrust::binary_function<float3, float3, bool> {
+struct float3_less_pred {
     __host__ __device__ bool operator()(const float3 &lhs,
                                         const float3 &rhs) const {
         return thrust::make_tuple(lhs.x, lhs.y, lhs.z) <
@@ -68,8 +68,7 @@ struct float3_less_pred : public thrust::binary_function<float3, float3, bool> {
     }
 };
 
-struct float3_elem_eq_pred
-    : public thrust::binary_function<float3, float3, bool> {
+struct float3_elem_eq_pred {
     __host__ __device__ bool operator()(const float3 &lhs,
                                         const float3 &rhs) const {
         return thrust::make_tuple(lhs.x, lhs.y, lhs.z) ==
