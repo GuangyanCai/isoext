@@ -1,4 +1,5 @@
 #include "lorensen.cuh"
+#include "nagae.cuh"
 #include "math.cuh"
 #include "mc.cuh"
 #include "utils.cuh"
@@ -21,7 +22,7 @@ static std::unordered_map<
                                     const thrust::device_vector<uint32_t> &,
                                     float3 *, const float *, const float3 *,
                                     const uint3, float, bool)>>
-    method_map = {{"lorensen", lorensen::run}};
+    method_map = {{"lorensen", lorensen::run}, {"nagae", nagae::run}};
 
 std::tuple<float *, uint32_t, int *, uint32_t>
 marching_cubes(const float *grid_ptr, uint3 res,

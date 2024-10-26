@@ -1,4 +1,4 @@
-#include "lorensen.cuh"
+#include "nagae.cuh"
 #include "lut.cuh"
 #include "math.cuh"
 #include "utils.cuh"
@@ -7,7 +7,7 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 
-namespace mc::lorensen {
+namespace mc::nagae {
 
 struct process_cube_op {
     float3 *v;
@@ -59,9 +59,9 @@ struct process_cube_op {
         }
 
         // Assemble the triangles.
-        case_idx *= lorensen::max_length;
-        uint32_t v0_idx = result_idx * lorensen::max_length;
-        for (uint32_t i = 0; i < lorensen::max_length; i += 3) {
+        case_idx *= nagae::max_length;
+        uint32_t v0_idx = result_idx * nagae::max_length;
+        for (uint32_t i = 0; i < nagae::max_length; i += 3) {
             uint32_t tri_idx = case_idx + i;
             uint32_t v_idx = v0_idx + i;
             if (tri_table[tri_idx] != -1) {
@@ -89,12 +89,12 @@ run(const thrust::device_vector<uint8_t> &case_idx_dv,
     bool tight) {
 
     // Move the LUTs to the device.
-    thrust::device_vector<int> edges_dv(lorensen::edges,
-                                        lorensen::edges + lorensen::edges_size);
+    thrust::device_vector<int> edges_dv(nagae::edges,
+                                        nagae::edges + nagae::edges_size);
     thrust::device_vector<int> edge_table_dv(
-        lorensen::edge_table, lorensen::edge_table + lorensen::edge_table_size);
+        nagae::edge_table, nagae::edge_table + nagae::edge_table_size);
     thrust::device_vector<int> tri_table_dv(
-        lorensen::tri_table, lorensen::tri_table + lorensen::tri_table_size);
+        nagae::tri_table, nagae::tri_table + nagae::tri_table_size);
 
     size_t num_cubes = grid_idx_dv.size();
 
@@ -112,4 +112,4 @@ run(const thrust::device_vector<uint8_t> &case_idx_dv,
             thrust::raw_pointer_cast(edge_table_dv.data()),
             thrust::raw_pointer_cast(tri_table_dv.data()), res, level, tight));
 }
-}   // namespace mc::lorensen
+}   // namespace mc::nagae

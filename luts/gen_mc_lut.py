@@ -115,17 +115,18 @@ def gen(case_file: Path, output_path: Path):
         return [[edge_rotation[e] for e in tri] for tri in tris]
 
     # Flip the vertices of a case
-    def flip_verts(case):
+    def reflect_verts(case):
         return ''.join(str(1 - int(s)) for s in case)
 
     # Flip the triangles of a case
-    def flip_tris(tris):
+    def reflect_tris(tris):
         return [tri[::-1] for tri in tris]
 
     # Read the base cases from the case file
     with open(case_file, "r") as f:
         case_file = json.load(f)
     base_cases = case_file["base_cases"]
+    use_reflection = case_file.get("use_reflection", True)
     output_path = output_path / case_file["method"]
 
     # Generate all cases based on the base cases via rotation and reflection
@@ -136,10 +137,11 @@ def gen(case_file: Path, output_path: Path):
             if rotated_case not in cases:
                 rotated_tris = rotate_tris(tris, edge_rotations[i])
                 cases[rotated_case] = rotated_tris
-            flipped_case = flip_verts(rotated_case)
-            if flipped_case not in cases:
-                flipped_tris = flip_tris(rotated_tris)
-                cases[flipped_case] = flipped_tris
+            if use_reflection:
+                reflected_case = reflect_verts(rotated_case)
+                if reflected_case not in cases:
+                    reflected_tris = reflect_tris(rotated_tris)
+                    cases[reflected_case] = reflected_tris
     num_cases = len(cases)
 
     # Check that we have found all 256 cases

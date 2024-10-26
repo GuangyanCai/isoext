@@ -34,19 +34,27 @@ struct Cube {
     __host__ __device__ Cube(uint32_t cube_idx, uint3 res, bool tight) {
         // Cube layout:
         //
-        //    v7 ---- v6
-        //   /|      /|
-        //  v4 ---- v5|
-        //  | |     | |
-        //  | v3 ---|-v2
-        //  |/      |/
-        //  v0 ---- v1
+        //        v3------e10-----v7
+        //       /|               /|
+        //      / |              / |
+        //    e1  |            e5  |
+        //    /  e2            /   e6
+        //   /    |           /    |
+        //  v1------e9------v5     |
+        //  |     |          |     |
+        //  |    v2------e11-|----v6
+        //  |    /           |    /
+        // e0  e3           e4  e7
+        //  |  /             |  /
+        //  | /              | /
+        //  |/               |/
+        //  v0------e8------v4
         //
-        // x
-        // |  y
-        // | /
-        // |/
-        // +----z
+        //  z
+        //  |  y
+        //  | /
+        //  |/
+        //  +----x   
 
         // When the grid is tight, neighbor cubes share faces. In this case,
         // there are (res.x - 1) * (res.y - 1) * (res.z - 1) cubes.
@@ -55,7 +63,6 @@ struct Cube {
             cube_idx /= (res.z - 1);
             ci.y = cube_idx % (res.y - 1);
             ci.x = cube_idx / (res.y - 1);
-
         }
         // Otherwise, each cube is separate from others. In this case, res must
         // be (2n, 2, 2), where n is the number of cubes.
@@ -69,12 +76,12 @@ struct Cube {
         uint32_t res_yz = res.y * res.z;
         vi[0] = ci.x * res.y * res.z + ci.y * res.z + ci.z;   // (x, y, z)
         vi[1] = vi[0] + 1;                                    // (x, y, z+1)
-        vi[2] = vi[1] + res.z;                                // (x, y+1, z+1)
-        vi[3] = vi[0] + res.z;                                // (x, y+1, z)
+        vi[2] = vi[0] + res.z;                                // (x, y+1, z)
+        vi[3] = vi[1] + res.z;                                // (x, y+1, z+1)
         vi[4] = vi[0] + res_yz;                               // (x+1, y, z)
         vi[5] = vi[1] + res_yz;                               // (x+1, y, z+1)
-        vi[6] = vi[2] + res_yz;                               // (x+1, y+1, z+1)
-        vi[7] = vi[3] + res_yz;                               // (x+1, y+1, z)
+        vi[6] = vi[2] + res_yz;                               // (x+1, y+1, z)
+        vi[7] = vi[3] + res_yz;                               // (x+1, y+1, z+1)
     }
 };
 
