@@ -23,7 +23,7 @@ NB_MODULE(isoext_ext, m) {
         "marching_cubes",
         [](GridType grid, std::optional<AABBType> aabb,
            std::optional<CellType> cells, float level = 0.f,
-           std::string method = "lorensen") {
+           std::string method = "nagae") {
             float *grid_ptr = grid.data();
             std::optional<float3 *> cells_ptr;
             if (cells.has_value()) {
@@ -56,7 +56,7 @@ NB_MODULE(isoext_ext, m) {
             return nb::make_tuple(v, f);
         },
         "grid"_a, "aabb"_a = nb::none(), "cells"_a = nb::none(),
-        "level"_a = 0.f, "method"_a = "lorensen", "Marching Cubes");
+        "level"_a = 0.f, "method"_a = "nagae", "Marching Cubes");
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";
 }
