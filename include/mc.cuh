@@ -1,5 +1,9 @@
 #pragma once
 
+#include "mc_base.cuh"
+#include "mc_lorensen.cuh"
+#include "mc_nagae.cuh"
+
 #include <array>
 #include <optional>
 #include <string>

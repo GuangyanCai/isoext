@@ -45,6 +45,9 @@ CPMAddPackage(
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/*.cuh")
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
 
+# Enable CUDA lambda expressions
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+
 # We are now ready to compile the actual extension module
 nanobind_add_module(
 

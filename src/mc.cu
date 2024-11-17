@@ -1,28 +1,17 @@
-#include "lorensen.cuh"
-#include "nagae.cuh"
-#include "math.cuh"
 #include "mc.cuh"
-#include "utils.cuh"
+#include <memory>
+#include <stdexcept>
 
 #include <thrust/copy.h>
 #include <thrust/device_malloc.h>
 #include <thrust/device_vector.h>
 #include <thrust/fill.h>
 #include <thrust/host_vector.h>
-#include <thrust/iterator/constant_iterator.h>
 #include <thrust/remove.h>
 #include <thrust/sequence.h>
-
-#include <unordered_map>
+#include <thrust/transform.h>
 
 namespace mc {
-
-static std::unordered_map<
-    std::string, std::function<void(const thrust::device_vector<uint8_t> &,
-                                    const thrust::device_vector<uint32_t> &,
-                                    float3 *, const float *, const float3 *,
-                                    const uint3, float, bool)>>
-    method_map = {{"lorensen", lorensen::run}, {"nagae", nagae::run}};
 
 std::tuple<float *, uint32_t, int *, uint32_t>
 marching_cubes(const float *grid_ptr, uint3 res,
@@ -30,11 +19,7 @@ marching_cubes(const float *grid_ptr, uint3 res,
                std::optional<const float3 *> o_cells_ptr, float level,
                std::string method) {
 
-    auto it = method_map.find(method);
-    if (it == method_map.end()) {
-        throw std::runtime_error("Unknown method: " + method);
-    }
-    auto mc_method = it->second;
+    auto mc_variant = MCBase::create(method);
 
     // Variables to store cube and cell information
     uint32_t num_cubes;
@@ -110,12 +95,14 @@ marching_cubes(const float *grid_ptr, uint3 res,
     num_cubes = grid_idx_dv.size();
 
     // Allocate memory for the vertex array
-    thrust::device_vector<float3> v_dv(num_cubes * 18);
+    thrust::device_vector<float3> v_dv(num_cubes *
+                                       mc_variant->get_max_triangles() * 3);
     thrust::fill(v_dv.begin(), v_dv.end(), make_float3(NAN, NAN, NAN));
 
     // Run Marching Cubes on each cube.
-    mc_method(case_idx_dv, grid_idx_dv, thrust::raw_pointer_cast(v_dv.data()),
-              grid_ptr, cells_ptr, res, level, tight);
+    mc_variant->run(case_idx_dv, grid_idx_dv,
+                    thrust::raw_pointer_cast(v_dv.data()), grid_ptr, cells_ptr,
+                    res, level, tight);
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
@@ -128,17 +115,18 @@ marching_cubes(const float *grid_ptr, uint3 res,
 
     // Allocate memory for the vertex pointer and copy the data.
     uint32_t v_len = v_dv.size();
-    thrust::device_ptr<float3> v_dp = thrust::device_malloc<float3>(v_len);
-    thrust::copy(v_dv.begin(), v_dv.end(), v_dp);
-    float *v_ptr = reinterpret_cast<float *>(thrust::raw_pointer_cast(v_dp));
+    thrust::device_ptr<float3> v_ptr = thrust::device_malloc<float3>(v_len);
+    thrust::copy(v_dv.begin(), v_dv.end(), v_ptr);
+    float *v_ptr_raw =
+        reinterpret_cast<float *>(thrust::raw_pointer_cast(v_ptr));
 
     // Allocate memory for the face pointer and copy the data.
     uint32_t f_len = f_dv.size() / 3;
-    thrust::device_ptr<int> f_dp = thrust::device_malloc<int>(f_dv.size());
-    thrust::copy(f_dv.begin(), f_dv.end(), f_dp);
-    int *f_ptr = thrust::raw_pointer_cast(f_dp);
+    thrust::device_ptr<int> f_ptr = thrust::device_malloc<int>(f_dv.size());
+    thrust::copy(f_dv.begin(), f_dv.end(), f_ptr);
+    int *f_ptr_raw = thrust::raw_pointer_cast(f_ptr);
 
-    return {v_ptr, v_len, f_ptr, f_len};
+    return {v_ptr_raw, v_len, f_ptr_raw, f_len};
 }
 
 }   // namespace mc
