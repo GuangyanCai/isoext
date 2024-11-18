@@ -1,13 +1,15 @@
-#include "lorensen.cuh"
-#include "lut.cuh"
 #include "math.cuh"
+#include "mc_lorensen.cuh"
 #include "utils.cuh"
 
 #include <thrust/device_vector.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/zip_iterator.h>
 
-namespace mc::lorensen {
+namespace mc {
+
+namespace {
+static MCRegistrar<Lorensen> registrar("lorensen");
 
 struct process_cube_op {
     float3 *v;
@@ -22,8 +24,8 @@ struct process_cube_op {
 
     process_cube_op(float3 *v, const float *grid, const float3 *cells,
                     const int *edges, const int *edge_table,
-                    const int *tri_table, const uint3 res, const float level,
-                    const bool tight)
+                    const int *tri_table, const uint3 res, float level,
+                    bool tight)
         : v(v), grid(grid), cells(cells), edges(edges), edge_table(edge_table),
           tri_table(tri_table), res(res), level(level), tight(tight) {}
 
@@ -35,8 +37,7 @@ struct process_cube_op {
         // For each cube vertex, compute the index to the grid array.
         Cube c(cube_idx, res, tight);
 
-        // Compute the location of each cube vertex. Assume each cube is a
-        // unit cube for now.
+        // Compute the location of each cube vertex.
         float3 p_pos[8];
         float p_val[8];
         for (uint32_t i = 0; i < 8; i++) {
@@ -44,8 +45,7 @@ struct process_cube_op {
             p_val[i] = grid[c.vi[i]];
         }
 
-        // Compute the intersection between the isosurface and each edge of
-        // the cube.
+        // Compute the intersection between the isosurface and each edge.
         int edge_status = edge_table[case_idx];
         float3 cube_v[12];
         for (uint32_t i = 0; i < 12; i++) {
@@ -59,9 +59,9 @@ struct process_cube_op {
         }
 
         // Assemble the triangles.
-        case_idx *= lorensen::max_length;
-        uint32_t v0_idx = result_idx * lorensen::max_length;
-        for (uint32_t i = 0; i < lorensen::max_length; i += 3) {
+        case_idx *= Lorensen::max_len;   // max_length = 3 * 5
+        uint32_t v0_idx = result_idx * Lorensen::max_len;
+        for (uint32_t i = 0; i < Lorensen::max_len; i += 3) {
             uint32_t tri_idx = case_idx + i;
             uint32_t v_idx = v0_idx + i;
             if (tri_table[tri_idx] != -1) {
@@ -74,36 +74,34 @@ struct process_cube_op {
                     v[v_idx + 1] = v1;
                     v[v_idx + 2] = v2;
                 }
-            }
-            else {
+            } else {
                 break;
             }
         }
     }
 };
 
+}   // anonymous namespace
+
 void
-run(const thrust::device_vector<uint8_t> &case_idx_dv,
-    const thrust::device_vector<uint32_t> &grid_idx_dv, float3 *v,
-    const float *grid, const float3 *cells, const uint3 res, float level,
-    bool tight) {
-
+Lorensen::run(const thrust::device_vector<uint8_t> &case_idx_dv,
+              const thrust::device_vector<uint32_t> &grid_idx_dv, float3 *v,
+              const float *grid, const float3 *cells, const uint3 res,
+              float level, bool tight) {
     // Move the LUTs to the device.
-    thrust::device_vector<int> edges_dv(lorensen::edges,
-                                        lorensen::edges + lorensen::edges_size);
-    thrust::device_vector<int> edge_table_dv(
-        lorensen::edge_table, lorensen::edge_table + lorensen::edge_table_size);
-    thrust::device_vector<int> tri_table_dv(
-        lorensen::tri_table, lorensen::tri_table + lorensen::tri_table_size);
-
-    size_t num_cubes = grid_idx_dv.size();
+    static const thrust::device_vector<int> edges_dv(
+        Lorensen::edges, Lorensen::edges + Lorensen::edges_size);
+    static const thrust::device_vector<int> edge_table_dv(
+        Lorensen::edge_table, Lorensen::edge_table + Lorensen::edge_table_size);
+    static const thrust::device_vector<int> tri_table_dv(
+        tri_table, tri_table + sizeof(tri_table) / sizeof(tri_table[0]));
 
     auto begin = thrust::make_zip_iterator(
         thrust::make_tuple(case_idx_dv.begin(), grid_idx_dv.begin(),
                            thrust::counting_iterator<uint32_t>(0)));
-    auto end = thrust::make_zip_iterator(
-        thrust::make_tuple(case_idx_dv.end(), grid_idx_dv.end(),
-                           thrust::counting_iterator<uint32_t>(num_cubes)));
+    auto end = thrust::make_zip_iterator(thrust::make_tuple(
+        case_idx_dv.end(), grid_idx_dv.end(),
+        thrust::counting_iterator<uint32_t>(case_idx_dv.size())));
 
     thrust::for_each(
         begin, end,
@@ -112,4 +110,5 @@ run(const thrust::device_vector<uint8_t> &case_idx_dv,
             thrust::raw_pointer_cast(edge_table_dv.data()),
             thrust::raw_pointer_cast(tri_table_dv.data()), res, level, tight));
 }
-}   // namespace mc::lorensen
+
+}   // namespace mc
