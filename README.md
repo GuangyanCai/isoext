@@ -81,6 +81,8 @@ python gen_mc_lut.py mc_methods/lorensen.json output
 ```
 This will generate the luts and as well as the meshes of all the cases inside the `output/lorensen` folder.
 
+For the cube annotation, refer to the script documentation in `luts/gen_mc_lut.py`. The cases are indexed in binary format, where the ith bit indicates the ith vertex is below the isosurface if it is 1 and vice versa.
+
 ## Task List
 - [x] Fix docstring.
 - [ ] Add more Marching Cubes variants.
