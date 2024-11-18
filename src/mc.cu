@@ -14,65 +14,28 @@
 namespace mc {
 
 std::tuple<float *, uint32_t, int *, uint32_t>
-marching_cubes(const float *grid_ptr, uint3 res,
-               std::optional<std::array<float, 6>> o_aabb,
-               std::optional<const float3 *> o_cells_ptr, float level,
-               std::string method) {
+marching_cubes(const float *grid_ptr, const float3 *cells_ptr, uint3 res,
+               float level, bool tight, std::string method) {
 
     auto mc_variant = MCBase::create(method);
 
     // Variables to store cube and cell information
     uint32_t num_cubes;
-    const float3 *cells_ptr;
-    thrust::device_vector<float3> cells_dv;
-    bool tight;
 
-    // Check if AABB (Axis-Aligned Bounding Box) is provided
-    if (o_aabb.has_value()) {
-        // Ensure that cell positions are not provided when AABB is given
-        if (o_cells_ptr.has_value()) {
-            throw std::runtime_error(
-                "Only one of AABB and cell positions is required.");
-        }
-
-        // Check if resolution is at least (2, 2, 2) for AABB
+    if (tight) {
+        // Check if resolution is at least (2, 2, 2)
         if (res.x < 2 || res.y < 2 || res.z < 2) {
-            throw std::runtime_error(
-                "When given AABB, res must be at least (2, 2, 2).");
+            throw std::runtime_error("When the grid layout is tight, res must "
+                                     "be at least (2, 2, 2).");
         }
-
-        // Extract AABB values and create min/max vectors
-        auto aabb = o_aabb.value();
-        float3 aabb_min = make_float3(aabb[0], aabb[1], aabb[2]);
-        float3 aabb_max = make_float3(aabb[3], aabb[4], aabb[5]);
-
-        // Calculate number of cubes and points
         num_cubes = (res.x - 1) * (res.y - 1) * (res.z - 1);
-        uint32_t num_points = res.x * res.y * res.z;
-
-        // Resize cells vector and populate it with vertex positions
-        cells_dv.resize(num_points);
-        thrust::transform(thrust::counting_iterator<uint32_t>(0),
-                          thrust::counting_iterator<uint32_t>(num_points),
-                          cells_dv.begin(),
-                          get_vtx_pos_op(res, aabb_min, aabb_max));
-        cells_ptr = thrust::raw_pointer_cast(cells_dv.data());
-        tight = true;
-    }
-    // Check if cell positions are provided
-    else if (o_cells_ptr.has_value()) {
+    } else {
         // Ensure resolution is (2n, 2, 2) when cell positions are given
         if (res.x % 2 != 0 || res.y != 2 || res.z != 2) {
             throw std::runtime_error(
-                "When given cell positions, res must be (2n, 2, 2).");
+                "When the grid layout is not tight, res must be (2n, 2, 2).");
         }
-        cells_ptr = o_cells_ptr.value();
         num_cubes = res.x / 2;
-        tight = false;
-    }
-    // Throw error if neither AABB nor cell positions are provided
-    else {
-        throw std::runtime_error("Either AABB or cell positions are required.");
     }
 
     // Get the case index of each cube based on the sign of cube vertices.

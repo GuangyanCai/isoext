@@ -57,10 +57,11 @@ isoext.write_obj('test.obj', v, f)
 
 `isoext.marching_cubes` accepts the following arguments:
 
-- `grid`: A CUDA PyTorch tensor representing the scalar field. It should be a 3D tensor. If `cells` is provided, `grid` must be of shape (2N, 2, 2), where N is the number of cells.
-- `aabb`: (Optional) A list or tuple of 6 floats representing the axis-aligned bounding box [xmin, ymin, zmin, xmax, ymax, zmax]. If provided, `cells` must not be given.
-- `cells`: (Optional) A CUDA PyTorch tensor of shape (2N, 2, 2, 3) representing the cell positions. If provided, `aabb` must not be given.
+- `grid`: A CUDA PyTorch tensor representing the scalar field. It should be a 3D tensor.
+- `aabb`: (Optional) A list or tuple of 6 floats representing the axis-aligned bounding box [xmin, ymin, zmin, xmax, ymax, zmax]. Only one of `aabb` or `cells` should be given.
+- `cells`: (Optional) A CUDA PyTorch tensor representing the cell positions. It a 4D tensor and the first three dimensions must be the same as `grid`. Only one of `aabb` or `cells` should be given.
 - `level`: (Optional) The isovalue at which to extract the isosurface. Default is 0.0.
+- `tight`: (Optional) Whether to use tight grid layout. Default is `True`. When `tight` is `False`, the resolution of `grid` must be (2n, 2, 2). This is useful when cells are not organized in a regular grid.
 - `method`: (Optional) The marching cubes algorithm to use. Currently, `lorensen` and `nagae` are supported. Default is `nagae`.
 
 ### Return Value
