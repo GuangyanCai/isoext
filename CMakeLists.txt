@@ -48,6 +48,12 @@ file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
 # Enable CUDA lambda expressions
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
 
+# Set C++17 as the default
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
 # We are now ready to compile the actual extension module
 nanobind_add_module(
 
