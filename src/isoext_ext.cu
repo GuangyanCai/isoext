@@ -1,5 +1,4 @@
 #include "mc/mc.cuh"
-#include "ndarray_types.cuh"
 #include "utils.cuh"
 
 #include <nanobind/nanobind.h>
@@ -16,6 +15,25 @@ nanobind::capsule
 create_device_capsule(void *ptr) {
     return nanobind::capsule(ptr, [](void *p) noexcept { cudaFree(p); });
 }
+
+#include <array>
+#include <nanobind/ndarray.h>
+
+// Input types
+using GridType = nanobind::ndarray<nanobind::pytorch, float, nanobind::ndim<3>,
+                                   nanobind::device::cuda, nanobind::c_contig>;
+using CellType =
+    nanobind::ndarray<nanobind::pytorch, float, nanobind::shape<-1, -1, -1, 3>,
+                      nanobind::device::cuda, nanobind::c_contig>;
+using AABBType = std::array<float, 6>;
+
+// Output types
+using VerticesType =
+    nanobind::ndarray<nanobind::pytorch, float, nanobind::shape<-1, 3>,
+                      nanobind::device::cuda, nanobind::c_contig>;
+using FacesType =
+    nanobind::ndarray<nanobind::pytorch, int, nanobind::shape<-1, 3>,
+                      nanobind::device::cuda, nanobind::c_contig>;
 
 NB_MODULE(isoext_ext, m) {
 
