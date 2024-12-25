@@ -1,5 +1,5 @@
 #include "math.cuh"
-#include "mc_lorensen.cuh"
+#include "mc/lorensen.cuh"
 #include "utils.cuh"
 
 #include <thrust/device_vector.h>

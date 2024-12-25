@@ -1,5 +1,5 @@
 #include "math.cuh"
-#include "mc_nagae.cuh"
+#include "mc/nagae.cuh"
 #include "utils.cuh"
 
 #include <thrust/device_vector.h>

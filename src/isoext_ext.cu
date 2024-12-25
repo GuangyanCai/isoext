@@ -1,4 +1,4 @@
-#include "mc.cuh"
+#include "mc/mc.cuh"
 #include "ndarray_types.cuh"
 #include "utils.cuh"
 

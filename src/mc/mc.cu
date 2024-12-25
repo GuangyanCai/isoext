@@ -1,4 +1,5 @@
-#include "mc.cuh"
+#include "mc/mc.cuh"
+#include "utils.cuh"
 #include <memory>
 #include <stdexcept>
 

@@ -42,8 +42,8 @@ CPMAddPackage(
   GIT_TAG v2.6.1 # Fixing the version to avoid breaking changes
 )
 
-file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/*.cuh")
-file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
+file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/*.cuh")
+file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
 
 # Enable CUDA lambda expressions
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
