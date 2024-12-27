@@ -11,29 +11,23 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 // Function to create a nanobind capsule for device memory
-nanobind::capsule
+nb::capsule
 create_device_capsule(void *ptr) {
-    return nanobind::capsule(ptr, [](void *p) noexcept { cudaFree(p); });
+    return nb::capsule(ptr, [](void *p) noexcept { cudaFree(p); });
 }
 
-#include <array>
-#include <nanobind/ndarray.h>
-
 // Input types
-using GridType = nanobind::ndarray<nanobind::pytorch, float, nanobind::ndim<3>,
-                                   nanobind::device::cuda, nanobind::c_contig>;
-using CellType =
-    nanobind::ndarray<nanobind::pytorch, float, nanobind::shape<-1, -1, -1, 3>,
-                      nanobind::device::cuda, nanobind::c_contig>;
+using GridType = nb::ndarray<nb::pytorch, float, nb::ndim<3>, nb::device::cuda,
+                             nb::c_contig>;
+using CellType = nb::ndarray<nb::pytorch, float, nb::shape<-1, -1, -1, 3>,
+                             nb::device::cuda, nb::c_contig>;
 using AABBType = std::array<float, 6>;
 
 // Output types
-using VerticesType =
-    nanobind::ndarray<nanobind::pytorch, float, nanobind::shape<-1, 3>,
-                      nanobind::device::cuda, nanobind::c_contig>;
-using FacesType =
-    nanobind::ndarray<nanobind::pytorch, int, nanobind::shape<-1, 3>,
-                      nanobind::device::cuda, nanobind::c_contig>;
+using VerticesType = nb::ndarray<nb::pytorch, float, nb::shape<-1, 3>,
+                                 nb::device::cuda, nb::c_contig>;
+using FacesType = nb::ndarray<nb::pytorch, int, nb::shape<-1, 3>,
+                              nb::device::cuda, nb::c_contig>;
 
 NB_MODULE(isoext_ext, m) {
 
