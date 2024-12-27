@@ -7,4 +7,6 @@ build
 *.egg-info
 .vscode
 .vs
-luts/output
+luts/*
+!luts/gen_mc_lut.py
+!luts/mc_methods/*

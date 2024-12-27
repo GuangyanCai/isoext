@@ -1,7 +1,6 @@
 #pragma once
 
 #include "math.cuh"
-#include "utils.cuh"
 #include <memory>
 #include <string>
 #include <thrust/device_vector.h>

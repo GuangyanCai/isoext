@@ -1,5 +1,5 @@
 #include "math.cuh"
-#include "mc_lorensen.cuh"
+#include "mc/nagae.cuh"
 #include "utils.cuh"
 
 #include <thrust/device_vector.h>
@@ -9,7 +9,7 @@
 namespace mc {
 
 namespace {
-static MCRegistrar<Lorensen> registrar("lorensen");
+static MCRegistrar<Nagae> registrar("nagae");
 
 struct process_cube_op {
     float3 *v;
@@ -59,9 +59,9 @@ struct process_cube_op {
         }
 
         // Assemble the triangles.
-        case_idx *= Lorensen::max_len;   // max_length = 3 * 5
-        uint32_t v0_idx = result_idx * Lorensen::max_len;
-        for (uint32_t i = 0; i < Lorensen::max_len; i += 3) {
+        case_idx *= Nagae::max_len;   // max_length = 3 * 5 for Nagae
+        uint32_t v0_idx = result_idx * Nagae::max_len;
+        for (uint32_t i = 0; i < Nagae::max_len; i += 3) {
             uint32_t tri_idx = case_idx + i;
             uint32_t v_idx = v0_idx + i;
             if (tri_table[tri_idx] != -1) {
@@ -80,21 +80,20 @@ struct process_cube_op {
         }
     }
 };
-
 }   // anonymous namespace
 
 void
-Lorensen::run(const thrust::device_vector<uint8_t> &case_idx_dv,
-              const thrust::device_vector<uint32_t> &grid_idx_dv, float3 *v,
-              const float *grid, const float3 *cells, const uint3 res,
-              float level, bool tight) {
+Nagae::run(const thrust::device_vector<uint8_t> &case_idx_dv,
+           const thrust::device_vector<uint32_t> &grid_idx_dv, float3 *v,
+           const float *grid, const float3 *cells, const uint3 res, float level,
+           bool tight) {
     // Move the LUTs to the device.
-    static const thrust::device_vector<int> edges_dv(
-        Lorensen::edges, Lorensen::edges + Lorensen::edges_size);
-    static const thrust::device_vector<int> edge_table_dv(
-        Lorensen::edge_table, Lorensen::edge_table + Lorensen::edge_table_size);
-    static const thrust::device_vector<int> tri_table_dv(
-        tri_table, tri_table + sizeof(tri_table) / sizeof(tri_table[0]));
+    thrust::device_vector<int> edges_dv(Nagae::edges,
+                                        Nagae::edges + Nagae::edges_size);
+    thrust::device_vector<int> edge_table_dv(
+        Nagae::edge_table, Nagae::edge_table + Nagae::edge_table_size);
+    thrust::device_vector<int> tri_table_dv(
+        Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
 
     auto begin = thrust::make_zip_iterator(
         thrust::make_tuple(case_idx_dv.begin(), grid_idx_dv.begin(),

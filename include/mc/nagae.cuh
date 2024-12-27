@@ -1,5 +1,5 @@
 #pragma once
-#include "mc_base.cuh"
+#include "mc/base.cuh"
 
 namespace mc {
 

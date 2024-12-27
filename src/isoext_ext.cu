@@ -1,5 +1,4 @@
-#include "mc.cuh"
-#include "ndarray_types.cuh"
+#include "mc/mc.cuh"
 #include "utils.cuh"
 
 #include <nanobind/nanobind.h>
@@ -17,15 +16,54 @@ create_device_capsule(void *ptr) {
     return nanobind::capsule(ptr, [](void *p) noexcept { cudaFree(p); });
 }
 
+#include <array>
+#include <nanobind/ndarray.h>
+
+// Input types
+using GridType = nanobind::ndarray<nanobind::pytorch, float, nanobind::ndim<3>,
+                                   nanobind::device::cuda, nanobind::c_contig>;
+using CellType =
+    nanobind::ndarray<nanobind::pytorch, float, nanobind::shape<-1, -1, -1, 3>,
+                      nanobind::device::cuda, nanobind::c_contig>;
+using AABBType = std::array<float, 6>;
+
+// Output types
+using VerticesType =
+    nanobind::ndarray<nanobind::pytorch, float, nanobind::shape<-1, 3>,
+                      nanobind::device::cuda, nanobind::c_contig>;
+using FacesType =
+    nanobind::ndarray<nanobind::pytorch, int, nanobind::shape<-1, 3>,
+                      nanobind::device::cuda, nanobind::c_contig>;
+
 NB_MODULE(isoext_ext, m) {
 
     m.def(
         "marching_cubes",
         [](GridType grid, std::optional<AABBType> aabb,
-           std::optional<CellType> cells, float level = 0.f,
+           std::optional<CellType> cells, float level = 0.f, bool tight = true,
            std::string method = "nagae") {
             float *grid_ptr = grid.data();
-            std::optional<float3 *> cells_ptr;
+            uint3 res = make_uint3(grid.shape(0), grid.shape(1), grid.shape(2));
+
+            if (!aabb.has_value() && !cells.has_value()) {
+                throw std::runtime_error(
+                    "Either AABB or cell positions must be provided.");
+            }
+            if (aabb.has_value() && cells.has_value()) {
+                throw std::runtime_error("Either AABB or cell positions must "
+                                         "be provided, not both.");
+            }
+
+            thrust::device_vector<float3> cells_dv;
+            float3 *cells_ptr = nullptr;
+
+            if (aabb.has_value()) {
+                auto a = aabb.value();
+                cells_dv = get_cells_from_aabb(a, res);
+                cells_ptr = thrust::raw_pointer_cast(cells_dv.data());
+                tight = true;
+            }
+
             if (cells.has_value()) {
                 auto c = cells.value();
                 cells_ptr = reinterpret_cast<float3 *>(c.data());
@@ -38,9 +76,8 @@ NB_MODULE(isoext_ext, m) {
                 }
             }
 
-            uint3 res = make_uint3(grid.shape(0), grid.shape(1), grid.shape(2));
             auto [v_ptr_raw, v_len, f_ptr_raw, f_len] = mc::marching_cubes(
-                grid.data(), res, aabb, cells_ptr, level, method);
+                grid.data(), cells_ptr, res, level, tight, method);
 
             if (v_len == 0 || f_len == 0) {
                 cudaFree(v_ptr_raw);
@@ -56,7 +93,8 @@ NB_MODULE(isoext_ext, m) {
             return nb::make_tuple(v, f);
         },
         "grid"_a, "aabb"_a = nb::none(), "cells"_a = nb::none(),
-        "level"_a = 0.f, "method"_a = "nagae", "Marching Cubes");
+        "level"_a = 0.f, "tight"_a = true, "method"_a = "nagae",
+        "Marching Cubes");
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";
 }

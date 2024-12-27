@@ -54,7 +54,7 @@ struct Cube {
         //  |  y
         //  | /
         //  |/
-        //  +----x   
+        //  +----x
 
         // When the grid is tight, neighbor cubes share faces. In this case,
         // there are (res.x - 1) * (res.y - 1) * (res.z - 1) cubes.
@@ -134,3 +134,6 @@ struct get_case_idx_op {
 
 void vertex_welding(thrust::device_vector<float3> &v,
                     thrust::device_vector<int> &f, bool skip_scatter = true);
+
+thrust::device_vector<float3> get_cells_from_aabb(std::array<float, 6> aabb,
+                                                  uint3 res);
