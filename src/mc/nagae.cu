@@ -88,11 +88,11 @@ Nagae::run(const thrust::device_vector<uint8_t> &case_idx_dv,
            const float *grid, const float3 *cells, const uint3 res, float level,
            bool tight) {
     // Move the LUTs to the device.
-    static const thrust::device_vector<int> edges_dv(
-        Nagae::edges, Nagae::edges + Nagae::edges_size);
-    static const thrust::device_vector<int> edge_table_dv(
+    thrust::device_vector<int> edges_dv(Nagae::edges,
+                                        Nagae::edges + Nagae::edges_size);
+    thrust::device_vector<int> edge_table_dv(
         Nagae::edge_table, Nagae::edge_table + Nagae::edge_table_size);
-    static const thrust::device_vector<int> tri_table_dv(
+    thrust::device_vector<int> tri_table_dv(
         Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
 
     auto begin = thrust::make_zip_iterator(
