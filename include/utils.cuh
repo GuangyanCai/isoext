@@ -94,7 +94,7 @@ struct get_vtx_pos_op {
                    const float3 aabb_max)
         : res(res), aabb_min(aabb_min), aabb_size(aabb_max - aabb_min) {}
 
-    __host__ __device__ float3 operator()(uint32_t idx) {
+    __host__ __device__ float3 operator()(uint idx) {
         float3 pos;
         pos.z = (idx % res.z) / (float) (res.z - 1);
         idx /= res.z;

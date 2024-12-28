@@ -3,6 +3,20 @@
 #include <cuda_runtime.h>
 #include <thrust/functional.h>
 
+#include <array>
+
+using uint = unsigned int;
+
+inline float3
+make_float3(std::array<float, 3> xyz) {
+    return make_float3(xyz[0], xyz[1], xyz[2]);
+}
+
+inline uint3
+make_uint3(std::array<uint, 3> xyz) {
+    return make_uint3(xyz[0], xyz[1], xyz[2]);
+}
+
 inline __host__ __device__ float3
 operator+(float3 a, float3 b) {
     return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
