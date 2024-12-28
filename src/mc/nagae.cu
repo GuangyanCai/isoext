@@ -13,56 +13,52 @@ static MCRegistrar<Nagae> registrar("nagae");
 
 struct process_cube_op {
     float3 *v;
-    const float *grid;
-    const float3 *cells;
+    const float *values;
+    const float3 *points;
+    const uint *cells;
     const int *edges;
     const int *edge_table;
     const int *tri_table;
-    const uint3 res;
     const float level;
-    const bool tight;
 
-    process_cube_op(float3 *v, const float *grid, const float3 *cells,
-                    const int *edges, const int *edge_table,
-                    const int *tri_table, const uint3 res, float level,
-                    bool tight)
-        : v(v), grid(grid), cells(cells), edges(edges), edge_table(edge_table),
-          tri_table(tri_table), res(res), level(level), tight(tight) {}
+    process_cube_op(float3 *v, const float *values, const float3 *points,
+                    const uint *cells, const int *edges, const int *edge_table,
+                    const int *tri_table, float level)
+        : v(v), values(values), points(points), cells(cells), edges(edges),
+          edge_table(edge_table), tri_table(tri_table), level(level) {}
 
     __host__ __device__ void
     operator()(thrust::tuple<uint8_t, uint32_t, uint32_t> args) {
-        uint32_t case_idx, cube_idx, result_idx;
-        thrust::tie(case_idx, cube_idx, result_idx) = args;
-
-        // For each cube vertex, compute the index to the grid array.
-        Cube c(cube_idx, res, tight);
+        uint32_t case_num, cell_idx, result_idx;
+        thrust::tie(case_num, cell_idx, result_idx) = args;
 
         // Compute the location of each cube vertex.
-        float3 p_pos[8];
-        float p_val[8];
+        float3 c_p[8];
+        float c_v[8];
+        uint offset = cell_idx * 8;
         for (uint32_t i = 0; i < 8; i++) {
-            p_pos[i] = cells[c.vi[i]];
-            p_val[i] = grid[c.vi[i]];
+            c_p[i] = points[cells[offset + i]];
+            c_v[i] = values[cells[offset + i]];
         }
 
         // Compute the intersection between the isosurface and each edge.
-        int edge_status = edge_table[case_idx];
+        int edge_status = edge_table[case_num];
         float3 cube_v[12];
         for (uint32_t i = 0; i < 12; i++) {
             if (edge_status & (1 << i)) {
                 int p_0 = edges[i * 2];
                 int p_1 = edges[i * 2 + 1];
-                float denom = p_val[p_1] - p_val[p_0];
-                float t = (denom != 0.0f) ? (level - p_val[p_0]) / denom : 0.0f;
-                cube_v[i] = lerp(t, p_pos[p_0], p_pos[p_1]);
+                float denom = c_v[p_1] - c_v[p_0];
+                float t = (denom != 0.0f) ? (level - c_v[p_0]) / denom : 0.0f;
+                cube_v[i] = lerp(t, c_p[p_0], c_p[p_1]);
             }
         }
 
         // Assemble the triangles.
-        case_idx *= Nagae::max_len;   // max_length = 3 * 5 for Nagae
+        case_num *= Nagae::max_len;   // max_length = 3 * 5 for Nagae
         uint32_t v0_idx = result_idx * Nagae::max_len;
         for (uint32_t i = 0; i < Nagae::max_len; i += 3) {
-            uint32_t tri_idx = case_idx + i;
+            uint32_t tri_idx = case_num + i;
             uint32_t v_idx = v0_idx + i;
             if (tri_table[tri_idx] != -1) {
                 const float3 &v0 = cube_v[tri_table[tri_idx + 0]];
@@ -83,10 +79,10 @@ struct process_cube_op {
 }   // anonymous namespace
 
 void
-Nagae::run(const thrust::device_vector<uint8_t> &case_idx_dv,
-           const thrust::device_vector<uint32_t> &grid_idx_dv, float3 *v,
-           const float *grid, const float3 *cells, const uint3 res, float level,
-           bool tight) {
+Nagae::run(const thrust::device_vector<uint8_t> &case_num_dv,
+           const thrust::device_vector<uint> &cell_idx_dv, float3 *v,
+           const float *values, const float3 *points, const uint *cells,
+           float level) {
     // Move the LUTs to the device.
     thrust::device_vector<int> edges_dv(Nagae::edges,
                                         Nagae::edges + Nagae::edges_size);
@@ -96,18 +92,17 @@ Nagae::run(const thrust::device_vector<uint8_t> &case_idx_dv,
         Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
 
     auto begin = thrust::make_zip_iterator(
-        thrust::make_tuple(case_idx_dv.begin(), grid_idx_dv.begin(),
+        thrust::make_tuple(case_num_dv.begin(), cell_idx_dv.begin(),
                            thrust::counting_iterator<uint32_t>(0)));
     auto end = thrust::make_zip_iterator(thrust::make_tuple(
-        case_idx_dv.end(), grid_idx_dv.end(),
-        thrust::counting_iterator<uint32_t>(case_idx_dv.size())));
+        case_num_dv.end(), cell_idx_dv.end(),
+        thrust::counting_iterator<uint32_t>(case_num_dv.size())));
 
-    thrust::for_each(
-        begin, end,
-        process_cube_op(
-            v, grid, cells, thrust::raw_pointer_cast(edges_dv.data()),
-            thrust::raw_pointer_cast(edge_table_dv.data()),
-            thrust::raw_pointer_cast(tri_table_dv.data()), res, level, tight));
+    thrust::for_each(begin, end,
+                     process_cube_op(v, values, points, cells,
+                                     edges_dv.data().get(),
+                                     edge_table_dv.data().get(),
+                                     tri_table_dv.data().get(), level));
 }
 
 }   // namespace mc

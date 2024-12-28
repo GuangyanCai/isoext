@@ -107,28 +107,23 @@ struct get_vtx_pos_op {
 
 struct get_case_idx_op {
     uint8_t *cases;
-    const float *grid;
-    const uint3 res;
+    const float *values;
+    const uint *cells;
     const float level;
-    const bool tight;
 
-    get_case_idx_op(uint8_t *cases, const float *grid, const uint3 res,
-                    const float level, const bool tight)
-        : cases(cases), grid(grid), res(res), level(level), tight(tight) {}
+    get_case_idx_op(uint8_t *cases, const float *values, const uint *cells,
+                    const float level)
+        : cases(cases), values(values), cells(cells), level(level) {}
 
-    __host__ __device__ void operator()(uint32_t cube_idx) {
-        // For each cube vertex, compute the index to the grid array.
-        Cube c(cube_idx, res, tight);
-
+    __host__ __device__ void operator()(uint32_t cell_idx) {
         // Compute the sign of each cube vertex and derive the case number
-        // (table_idx).
-        uint8_t table_idx = 0;
-        float p_val[8];
-        for (uint32_t i = 0; i < 8; i++) {
-            p_val[i] = grid[c.vi[i]];
-            table_idx |= (p_val[i] - level < 0) << i;
+        uint8_t case_num = 0;
+        uint offset = cell_idx * 8;
+        for (uint i = 0; i < 8; i++) {
+            float p_val = values[cells[offset + i]];
+            case_num |= (p_val - level < 0) << i;
         }
-        cases[cube_idx] = table_idx;
+        cases[cell_idx] = case_num;
     }
 };
 

@@ -64,8 +64,10 @@ ours_to_nb(NDArray<float3> &arr) {
 }
 
 struct PyGrid : Grid {
-    NB_TRAMPOLINE(Grid, 3);
+    NB_TRAMPOLINE(Grid, 6);
 
+    uint get_num_cells() const override { NB_OVERRIDE_PURE(get_num_cells); }
+    uint get_num_points() const override { NB_OVERRIDE_PURE(get_num_points); }
     NDArray<float3> get_points() const override {
         NB_OVERRIDE_PURE(get_points);
     }
@@ -73,73 +75,26 @@ struct PyGrid : Grid {
     void set_values(const NDArray<float> &new_values) override {
         NB_OVERRIDE_PURE(set_values, new_values);
     }
+    NDArray<uint> get_cells() const override { NB_OVERRIDE_PURE(get_cells); }
 };
 
 NB_MODULE(isoext_ext, m) {
 
-    m.def(
-        "marching_cubes",
-        [](GridType grid, std::optional<AABBType> aabb,
-           std::optional<CellType> cells, float level = 0.f, bool tight = true,
-           std::string method = "nagae") {
-            float *grid_ptr = grid.data();
-            uint3 res = make_uint3(grid.shape(0), grid.shape(1), grid.shape(2));
-
-            if (!aabb.has_value() && !cells.has_value()) {
-                throw std::runtime_error(
-                    "Either AABB or cell positions must be provided.");
-            }
-            if (aabb.has_value() && cells.has_value()) {
-                throw std::runtime_error("Either AABB or cell positions must "
-                                         "be provided, not both.");
-            }
-
-            thrust::device_vector<float3> cells_dv;
-            float3 *cells_ptr = nullptr;
-
-            if (aabb.has_value()) {
-                auto a = aabb.value();
-                cells_dv = get_cells_from_aabb(a, res);
-                cells_ptr = thrust::raw_pointer_cast(cells_dv.data());
-                tight = true;
-            }
-
-            if (cells.has_value()) {
-                auto c = cells.value();
-                cells_ptr = reinterpret_cast<float3 *>(c.data());
-                for (int i = 0; i < 3; i++) {
-                    if (grid.shape(i) != c.shape(i)) {
-                        throw std::runtime_error(
-                            "Resolutions of grid and cells must match except "
-                            "for the last dimension of cells.");
-                    }
-                }
-            }
-
-            auto [v_ptr_raw, v_len, f_ptr_raw, f_len] = mc::marching_cubes(
-                grid.data(), cells_ptr, res, level, tight, method);
-
-            if (v_len == 0 || f_len == 0) {
-                cudaFree(v_ptr_raw);
-                cudaFree(f_ptr_raw);
-                return nb::make_tuple(nb::none(), nb::none());
-            }
-
-            VerticesType v(v_ptr_raw, {v_len, 3},
-                           create_device_capsule(v_ptr_raw));
-            FacesType f(f_ptr_raw, {f_len, 3},
-                        create_device_capsule(f_ptr_raw));
-
-            return nb::make_tuple(v, f);
-        },
-        "grid"_a, "aabb"_a = nb::none(), "cells"_a = nb::none(),
-        "level"_a = 0.f, "tight"_a = true, "method"_a = "nagae",
-        "Marching Cubes");
+    m.def("marching_cubes", [](Grid *grid, float level, std::string method) {
+        auto [v, f] = mc::marching_cubes(grid, level, method);
+        if (v.size() == 0 || f.size() == 0) {
+            return nb::make_tuple(nb::none(), nb::none());
+        }
+        return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+    });
 
     nb::class_<Grid, PyGrid>(m, "Grid")
+        .def("get_num_cells", &Grid::get_num_cells)
+        .def("get_num_points", &Grid::get_num_points)
         .def("get_points", &Grid::get_points)
         .def("get_values", &Grid::get_values)
-        .def("set_values", &Grid::set_values);
+        .def("set_values", &Grid::set_values)
+        .def("get_cells", &Grid::get_cells);
 
     nb::class_<UniformGrid, Grid>(m, "UniformGrid")
         .def(

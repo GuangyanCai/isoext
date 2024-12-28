@@ -25,6 +25,9 @@ template <typename DTYPE> struct NDArray {
         data_ptr = thrust::device_malloc<DTYPE>(size());
     }
 
+    NDArray(uint3 shape)
+        : NDArray(std::vector<size_t>{shape.x, shape.y, shape.z}) {}
+
     NDArray(const NDArray<DTYPE> &other)
         : shape(other.shape), read_only(false) {
         data_ptr = thrust::device_malloc<DTYPE>(other.size());
@@ -51,10 +54,18 @@ template <typename DTYPE> struct NDArray {
 
     inline size_t ndim() const { return shape.size(); }
 
+    DTYPE *data() const { return data_ptr.get(); }
+
     void set(const NDArray<DTYPE> &other) {
         if (shape != other.shape) {
             throw std::runtime_error("Cannot set values with different shapes");
         }
         thrust::copy(other.data_ptr, other.data_ptr + size(), data_ptr);
+    }
+
+    static NDArray<DTYPE> copy(DTYPE *data, std::vector<size_t> shape) {
+        NDArray<DTYPE> arr(shape);
+        thrust::copy(data, data + arr.size(), arr.data_ptr);
+        return arr;
     }
 };
