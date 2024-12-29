@@ -1,8 +1,10 @@
 #include "common.cuh"
-#include "grid/uniform.cuh"
 #include "math.cuh"
 #include "mc/mc.cuh"
 #include "utils.cuh"
+
+#include "grid/sparse.cuh"
+#include "grid/uniform.cuh"
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
@@ -11,21 +13,19 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/trampoline.h>
 
+#include <limits>
+
 namespace nb = nanobind;
 using namespace nb::literals;
 
 template <typename DTYPE, typename... Ts>
-using PyTorchCudaType =
+using PyTorchCuda =
     nb::ndarray<nb::pytorch, DTYPE, nb::device::cuda, nb::c_contig, Ts...>;
 
 // Input types
-using GridType = PyTorchCudaType<float, nb::ndim<3>>;
-using CellType = PyTorchCudaType<float, nb::shape<-1, -1, -1, 3>>;
-using AABBType = std::array<float, 6>;
-
-// Output types
-using VerticesType = PyTorchCudaType<float, nb::shape<-1, 3>>;
-using FacesType = PyTorchCudaType<int, nb::shape<-1, 3>>;
+using UniformGridData = PyTorchCuda<float, nb::ndim<3>>;
+using SparseGridData = PyTorchCuda<float, nb::shape<-1, 8>>;
+using SparseGridCellIdx = PyTorchCuda<int, nb::ndim<1>>;
 
 // Function to create a nanobind capsule for device memory
 nb::capsule
@@ -35,25 +35,28 @@ create_device_capsule(void *ptr) {
 
 template <typename DTYPE, typename... Ts>
 NDArray<DTYPE>
-nb_to_ours(const PyTorchCudaType<DTYPE, Ts...> &arr) {
+nb_to_ours(const PyTorchCuda<DTYPE, Ts...> &arr) {
     return NDArray<DTYPE>(arr.data(),
                           {arr.shape_ptr(), arr.shape_ptr() + arr.ndim()});
 }
 
 template <typename DTYPE, typename... Ts>
-PyTorchCudaType<DTYPE, Ts...>
+PyTorchCuda<DTYPE, Ts...>
 ours_to_nb(NDArray<DTYPE> &arr) {
+    if (arr.size() == 0) {
+        return PyTorchCuda<DTYPE, Ts...>();
+    }
     NDArray<DTYPE> new_arr =
         arr.read_only ? arr : std::move(arr);   // Ensure new_arr owns the data
     new_arr.read_only = true;   // Transfer ownership to the capsule
     DTYPE *data_ptr = new_arr.data_ptr.get();
-    return PyTorchCudaType<DTYPE, Ts...>(data_ptr, new_arr.ndim(),
-                                         new_arr.shape.data(),
-                                         create_device_capsule(data_ptr));
+    return PyTorchCuda<DTYPE, Ts...>(data_ptr, new_arr.ndim(),
+                                     new_arr.shape.data(),
+                                     create_device_capsule(data_ptr));
 }
 
 template <typename... Ts>
-PyTorchCudaType<float, Ts...>
+PyTorchCuda<float, Ts...>
 ours_to_nb(NDArray<float3> &arr) {
     float *data_ptr = reinterpret_cast<float *>(arr.data_ptr.get());
     std::vector<size_t> shape = arr.shape;
@@ -80,13 +83,13 @@ struct PyGrid : Grid {
 
 NB_MODULE(isoext_ext, m) {
 
-    m.def("marching_cubes", [](Grid *grid, float level, std::string method) {
-        auto [v, f] = mc::marching_cubes(grid, level, method);
-        if (v.size() == 0 || f.size() == 0) {
-            return nb::make_tuple(nb::none(), nb::none());
-        }
-        return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
-    });
+    m.def(
+        "marching_cubes",
+        [](Grid *grid, float level, std::string method) {
+            auto [v, f] = mc::marching_cubes(grid, level, method);
+            return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+        },
+        "grid"_a, "level"_a = 0.f, "method"_a = "nagae");
 
     nb::class_<Grid, PyGrid>(m, "Grid")
         .def("get_num_cells", &Grid::get_num_cells)
@@ -100,12 +103,14 @@ NB_MODULE(isoext_ext, m) {
         .def(
             "__init__",
             [](UniformGrid *self, std::array<uint, 3> shape,
-               std::array<float, 3> aabb_min, std::array<float, 3> aabb_max) {
+               std::array<float, 3> aabb_min, std::array<float, 3> aabb_max,
+               float default_value) {
                 new (self) UniformGrid(make_uint3(shape), make_float3(aabb_min),
-                                       make_float3(aabb_max));
+                                       make_float3(aabb_max), default_value);
             },
             "shape"_a, "aabb_min"_a = std::array<float, 3>{-1, -1, -1},
-            "aabb_max"_a = std::array<float, 3>{1, 1, 1})
+            "aabb_max"_a = std::array<float, 3>{1, 1, 1},
+            "default_value"_a = FMAX)
         .def("get_points",
              [](UniformGrid &self) {
                  NDArray<float3> points = self.get_points();
@@ -116,9 +121,60 @@ NB_MODULE(isoext_ext, m) {
                  NDArray<float> values = self.get_values();
                  return ours_to_nb(values);
              })
-        .def("set_values", [](UniformGrid &self, GridType new_values) {
+        .def("set_values", [](UniformGrid &self, UniformGridData new_values) {
             NDArray<float> values = nb_to_ours(new_values);
             self.set_values(values);
+        });
+
+    nb::class_<SparseGrid, Grid>(m, "SparseGrid")
+        .def(
+            "__init__",
+            [](SparseGrid *self, std::array<uint, 3> shape,
+               std::array<float, 3> aabb_min, std::array<float, 3> aabb_max,
+               float default_value) {
+                new (self) SparseGrid(make_uint3(shape), make_float3(aabb_min),
+                                      make_float3(aabb_max), default_value);
+            },
+            "shape"_a, "aabb_min"_a = std::array<float, 3>{-1, -1, -1},
+            "aabb_max"_a = std::array<float, 3>{1, 1, 1},
+            "default_value"_a = std::numeric_limits<float>::max())
+        .def("get_num_cells", &SparseGrid::get_num_cells)
+        .def("get_num_points", &SparseGrid::get_num_points)
+        .def("get_points",
+             [](SparseGrid &self) {
+                 NDArray<float3> points = self.get_points();
+                 return ours_to_nb(points);
+             })
+        .def("get_values",
+             [](SparseGrid &self) {
+                 NDArray<float> values = self.get_values();
+                 return ours_to_nb(values);
+             })
+        .def("set_values",
+             [](SparseGrid &self, SparseGridData new_values) {
+                 NDArray<float> values = nb_to_ours(new_values);
+                 self.set_values(values);
+             })
+        .def("get_cells",
+             [](SparseGrid &self) {
+                 NDArray<uint> cells = self.get_cells();
+                 return ours_to_nb(cells);
+             })
+        .def("add_cells",
+             [](SparseGrid &self, SparseGridCellIdx new_cell_idx) {
+                 NDArray<uint> new_cell_idx_ =
+                     nb_to_ours(new_cell_idx).cast<uint>();
+                 self.add_cells(new_cell_idx_);
+             })
+        .def("remove_cells",
+             [](SparseGrid &self, SparseGridCellIdx new_cell_idx) {
+                 NDArray<uint> new_cell_idx_ =
+                     nb_to_ours(new_cell_idx).cast<uint>();
+                 self.remove_cells(new_cell_idx_);
+             })
+        .def("get_cell_indices", [](SparseGrid &self) {
+            NDArray<int> cell_idx = self.get_cell_indices().cast<int>();
+            return ours_to_nb(cell_idx);
         });
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";

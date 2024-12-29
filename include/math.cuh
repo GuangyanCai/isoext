@@ -4,8 +4,10 @@
 #include <thrust/functional.h>
 
 #include <array>
+#include <limits>
 
 using uint = unsigned int;
+constexpr float FMAX = std::numeric_limits<float>::max();
 
 inline float3
 make_float3(std::array<float, 3> xyz) {

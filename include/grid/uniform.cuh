@@ -14,7 +14,8 @@ class UniformGrid : public Grid {
     uint num_cells, num_points;
 
   public:
-    UniformGrid(uint3 shape, float3 aabb_min, float3 aabb_max);
+    UniformGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
+                float default_value = FMAX);
 
     ~UniformGrid() = default;
 

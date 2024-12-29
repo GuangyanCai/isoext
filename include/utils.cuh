@@ -85,6 +85,33 @@ struct Cube {
     }
 };
 
+struct idx_to_cell_op {
+    uint *cells;
+    uint3 shape;
+
+    __host__ __device__ idx_to_cell_op(uint *cells, uint3 shape)
+        : cells(cells), shape(shape) {}
+
+    __host__ __device__ void operator()(uint idx) {
+        uint x, y, z, yz, i;
+        i = idx;
+        z = i % (shape.z - 1);
+        i /= (shape.z - 1);
+        y = i % (shape.y - 1);
+        x = i / (shape.y - 1);
+        idx *= 8;
+        yz = shape.y * shape.z;
+        cells[idx + 0] = x * yz + y * shape.z + z;
+        cells[idx + 1] = cells[idx + 0] + 1;
+        cells[idx + 2] = cells[idx + 0] + shape.z;
+        cells[idx + 3] = cells[idx + 1] + shape.z;
+        cells[idx + 4] = cells[idx + 0] + yz;
+        cells[idx + 5] = cells[idx + 1] + yz;
+        cells[idx + 6] = cells[idx + 2] + yz;
+        cells[idx + 7] = cells[idx + 3] + yz;
+    }
+};
+
 struct get_vtx_pos_op {
     const uint3 res;
     const float3 aabb_min;

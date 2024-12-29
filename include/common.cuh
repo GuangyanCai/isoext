@@ -25,9 +25,6 @@ template <typename DTYPE> struct NDArray {
         data_ptr = thrust::device_malloc<DTYPE>(size());
     }
 
-    NDArray(uint3 shape)
-        : NDArray(std::vector<size_t>{shape.x, shape.y, shape.z}) {}
-
     NDArray(const NDArray<DTYPE> &other)
         : shape(other.shape), read_only(false) {
         data_ptr = thrust::device_malloc<DTYPE>(other.size());
@@ -63,9 +60,19 @@ template <typename DTYPE> struct NDArray {
         thrust::copy(other.data_ptr, other.data_ptr + size(), data_ptr);
     }
 
-    static NDArray<DTYPE> copy(DTYPE *data, std::vector<size_t> shape) {
+    static NDArray<DTYPE> copy(const DTYPE *data, std::vector<size_t> shape) {
         NDArray<DTYPE> arr(shape);
         thrust::copy(data, data + arr.size(), arr.data_ptr);
+        return arr;
+    }
+
+    void fill(DTYPE value) { thrust::fill(data_ptr, data_ptr + size(), value); }
+
+    template <typename NEW_DTYPE> NDArray<NEW_DTYPE> cast() {
+        NDArray<NEW_DTYPE> arr(shape);
+        thrust::transform(
+            data_ptr, data_ptr + size(), arr.data_ptr,
+            [] __device__(DTYPE x) { return static_cast<NEW_DTYPE>(x); });
         return arr;
     }
 };
