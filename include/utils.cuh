@@ -1,10 +1,12 @@
 #pragma once
 
+#include "common.cuh"
+#include "grid/grid.cuh"
+#include "math.cuh"
+
 #include <cuda_runtime.h>
 #include <nanobind/nanobind.h>
 #include <thrust/device_vector.h>
-
-#include "math.cuh"
 
 // Function to copy data from device to host
 template <typename T>
@@ -94,5 +96,92 @@ struct get_case_idx_op {
     }
 };
 
+struct get_edge_status_op {
+    int *edge_status;
+    const float *values;
+    const uint *cells;
+    const int *edge_table;
+    const float level;
+
+    get_edge_status_op(int *edge_status, const float *values, const uint *cells,
+                       const int *edge_table, const float level)
+        : edge_status(edge_status), values(values), cells(cells),
+          edge_table(edge_table), level(level) {}
+
+    __host__ __device__ void operator()(uint cell_idx) {
+        // Compute the sign of each cube vertex and derive the case number
+        uint8_t case_num = 0;
+        uint offset = cell_idx * 8;
+        for (uint i = 0; i < 8; i++) {
+            float p_val = values[cells[offset + i]];
+            case_num |= (p_val - level < 0) << i;
+        }
+        edge_status[cell_idx] = edge_table[case_num];
+    }
+};
+
+struct get_its_points_op {
+    float3 *its_points;
+    const uint *cell_idx;
+    const uint *cell_offsets;
+    const int *edge_status;
+    const float *values;
+    const float3 *points;
+    const uint *cells;
+    const int *edges;
+    const float level;
+
+    get_its_points_op(float3 *its_points, const uint *cell_idx,
+                      const uint *cell_offsets, const int *edge_status,
+                      const float *values, const float3 *points,
+                      const uint *cells, const int *edges, const float level)
+        : its_points(its_points), cell_idx(cell_idx),
+          cell_offsets(cell_offsets), edge_status(edge_status), values(values),
+          points(points), cells(cells), edges(edges), level(level) {}
+
+    __host__ __device__ void operator()(uint idx) {
+        int status = edge_status[idx];
+        int offset = cell_offsets[idx];
+
+        // Compute the location of each cube vertex.
+        float3 c_p[8];
+        float c_v[8];
+        uint c_offset = cell_idx[idx] * 8;
+        for (uint32_t i = 0; i < 8; i++) {
+            c_p[i] = points[cells[c_offset + i]];
+            c_v[i] = values[cells[c_offset + i]];
+        }
+
+        for (int i = 0; i < 12; i++) {
+            if (status & (1 << i)) {
+                int p_0 = edges[i * 2];
+                int p_1 = edges[i * 2 + 1];
+                float denom = c_v[p_1] - c_v[p_0];
+                float t = (denom != 0.0f) ? (level - c_v[p_0]) / denom : 0.0f;
+                its_points[offset] = lerp(t, c_p[p_0], c_p[p_1]);
+                offset++;
+            }
+        }
+    }
+};
+
+struct Intersection {
+    NDArray<float3> points;
+    NDArray<float3> normals;
+    NDArray<uint> cell_offsets;
+
+    Intersection(uint num_points, NDArray<uint> &&cell_offsets)
+        : points({num_points}), normals({num_points}),
+          cell_offsets(std::move(cell_offsets)) {}
+
+    inline NDArray<float3> get_points() { return points; }
+    inline NDArray<float3> get_normals() { return normals; }
+    inline void set_normals(const NDArray<float3> &normals_) {
+        normals.set(normals_);
+    }
+};
+
 void vertex_welding(thrust::device_vector<float3> &v,
                     thrust::device_vector<int> &f, bool skip_scatter = true);
+
+Intersection get_intersection(Grid *grid, float level);

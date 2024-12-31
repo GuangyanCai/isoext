@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common.cuh"
 #include "math.cuh"
 
 class Grid {

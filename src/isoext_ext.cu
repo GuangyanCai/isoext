@@ -26,6 +26,7 @@ using PyTorchCuda =
 using UniformGridData = PyTorchCuda<float, nb::ndim<3>>;
 using SparseGridData = PyTorchCuda<float, nb::shape<-1, 8>>;
 using SparseGridCellIdx = PyTorchCuda<int, nb::ndim<1>>;
+using Vector3 = PyTorchCuda<float, nb::shape<-1, 3>>;
 
 // Function to create a nanobind capsule for device memory
 nb::capsule
@@ -55,6 +56,14 @@ ours_to_nb(NDArray<DTYPE> &arr) {
                                      create_device_capsule(data_ptr));
 }
 
+// special case for Vector3
+NDArray<float3>
+nb_to_ours(const Vector3 &arr) {
+    float3 *data_ptr = reinterpret_cast<float3 *>(arr.data());
+    return NDArray<float3>(data_ptr, {arr.shape(0)});
+}
+
+// special case for float3
 template <typename... Ts>
 PyTorchCuda<float, Ts...>
 ours_to_nb(NDArray<float3> &arr) {
@@ -176,6 +185,18 @@ NB_MODULE(isoext_ext, m) {
             NDArray<int> cell_idx = self.get_cell_indices().cast<int>();
             return ours_to_nb(cell_idx);
         });
+
+    nb::class_<Intersection>(m, "Intersection")
+        .def("get_points",
+             [](Intersection &self) { return ours_to_nb(self.points); })
+        .def("get_normals",
+             [](Intersection &self) { return ours_to_nb(self.normals); })
+        .def("set_normals", [](Intersection &self, Vector3 new_normals) {
+            NDArray<float3> normals = nb_to_ours(new_normals);
+            self.set_normals(normals);
+        });
+
+    m.def("get_intersection", &get_intersection, "grid"_a, "level"_a = 0.f);
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";
 }

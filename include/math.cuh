@@ -97,3 +97,7 @@ struct is_empty_pred {
         return v == 0 || v == 255;
     }
 };
+
+struct is_zero_pred {
+    __host__ __device__ bool operator()(const int &v) { return v == 0; }
+};

@@ -4,6 +4,7 @@
 #include <thrust/device_free.h>
 #include <thrust/device_malloc.h>
 #include <thrust/device_ptr.h>
+#include <thrust/device_vector.h>
 
 #include <array>
 #include <numeric>
@@ -58,6 +59,13 @@ template <typename DTYPE> struct NDArray {
             throw std::runtime_error("Cannot set values with different shapes");
         }
         thrust::copy(other.data_ptr, other.data_ptr + size(), data_ptr);
+    }
+
+    void set(const thrust::device_vector<DTYPE> dv) {
+        if (size() != dv.size()) {
+            throw std::runtime_error("Cannot set values with different sizes");
+        }
+        thrust::copy(dv.begin(), dv.end(), data_ptr);
     }
 
     static NDArray<DTYPE> copy(const DTYPE *data, std::vector<size_t> shape) {
