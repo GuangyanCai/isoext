@@ -34,19 +34,3 @@ vertex_welding(thrust::device_vector<float3> &v, thrust::device_vector<int> &f,
     // Update vertex array
     v = std::move(sorted_v);
 }
-
-thrust::device_vector<float3>
-get_cells_from_aabb(std::array<float, 6> aabb, uint3 res) {
-    thrust::device_vector<float3> cells_dv;
-    float3 aabb_min = make_float3(aabb[0], aabb[1], aabb[2]);
-    float3 aabb_max = make_float3(aabb[3], aabb[4], aabb[5]);
-    uint32_t num_points = res.x * res.y * res.z;
-
-    // Resize cells vector and populate it with vertex positions
-    cells_dv.resize(num_points);
-    thrust::transform(thrust::counting_iterator<uint32_t>(0),
-                      thrust::counting_iterator<uint32_t>(num_points),
-                      cells_dv.begin(),
-                      get_vtx_pos_op(res, aabb_min, aabb_max));
-    return cells_dv;
-}

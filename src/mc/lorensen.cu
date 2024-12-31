@@ -1,3 +1,4 @@
+#include "common.cuh"
 #include "math.cuh"
 #include "mc/lorensen.cuh"
 #include "utils.cuh"
@@ -85,10 +86,9 @@ Lorensen::run(const thrust::device_vector<uint8_t> &cases_dv,
               const float *values, const float3 *points, const uint *cells,
               float level) {
     // Move the LUTs to the device.
-    thrust::device_vector<int> edges_dv(Lorensen::edges,
-                                        Lorensen::edges + Lorensen::edges_size);
-    thrust::device_vector<int> edge_table_dv(
-        Lorensen::edge_table, Lorensen::edge_table + Lorensen::edge_table_size);
+    thrust::device_vector<int> edges_dv(edges, edges + edges_size);
+    thrust::device_vector<int> edge_table_dv(edge_table,
+                                             edge_table + edge_table_size);
     thrust::device_vector<int> tri_table_dv(
         Lorensen::tri_table, Lorensen::tri_table + Lorensen::tri_table_size);
 

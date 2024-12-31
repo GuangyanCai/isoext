@@ -1,3 +1,4 @@
+#include "common.cuh"
 #include "math.cuh"
 #include "mc/nagae.cuh"
 #include "utils.cuh"
@@ -84,10 +85,9 @@ Nagae::run(const thrust::device_vector<uint8_t> &case_num_dv,
            const float *values, const float3 *points, const uint *cells,
            float level) {
     // Move the LUTs to the device.
-    thrust::device_vector<int> edges_dv(Nagae::edges,
-                                        Nagae::edges + Nagae::edges_size);
-    thrust::device_vector<int> edge_table_dv(
-        Nagae::edge_table, Nagae::edge_table + Nagae::edge_table_size);
+    thrust::device_vector<int> edges_dv(edges, edges + edges_size);
+    thrust::device_vector<int> edge_table_dv(edge_table,
+                                             edge_table + edge_table_size);
     thrust::device_vector<int> tri_table_dv(
         Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
 

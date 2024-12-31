@@ -25,66 +25,6 @@ host_to_device(const T *h_ptr, size_t size) {
     return d_ptr;
 }
 
-// Structure representing a cube in a 3D grid
-struct Cube {
-    uint32_t vi[8];   // indices of the cube vertices in the grid
-    uint3 ci;         // 3D cube index
-
-    // Constructor to initialize the cube based on its index and grid resolution
-    __host__ __device__ Cube(uint32_t cube_idx, uint3 res, bool tight) {
-        // Cube layout:
-        //
-        //        v3------e10-----v7
-        //       /|               /|
-        //      / |              / |
-        //    e1  |            e5  |
-        //    /  e2            /   e6
-        //   /    |           /    |
-        //  v1------e9------v5     |
-        //  |     |          |     |
-        //  |    v2------e11-|----v6
-        //  |    /           |    /
-        // e0  e3           e4  e7
-        //  |  /             |  /
-        //  | /              | /
-        //  |/               |/
-        //  v0------e8------v4
-        //
-        //  z
-        //  |  y
-        //  | /
-        //  |/
-        //  +----x
-
-        // When the grid is tight, neighbor cubes share faces. In this case,
-        // there are (res.x - 1) * (res.y - 1) * (res.z - 1) cubes.
-        if (tight) {
-            ci.z = cube_idx % (res.z - 1);
-            cube_idx /= (res.z - 1);
-            ci.y = cube_idx % (res.y - 1);
-            ci.x = cube_idx / (res.y - 1);
-        }
-        // Otherwise, each cube is separate from others. In this case, res must
-        // be (2n, 2, 2), where n is the number of cubes.
-        else {
-            ci.x = 2 * cube_idx;
-            ci.y = 0;
-            ci.z = 0;
-        }
-
-        // Compute the indices of the cube's vertices in the array.
-        uint32_t res_yz = res.y * res.z;
-        vi[0] = ci.x * res.y * res.z + ci.y * res.z + ci.z;   // (x, y, z)
-        vi[1] = vi[0] + 1;                                    // (x, y, z+1)
-        vi[2] = vi[0] + res.z;                                // (x, y+1, z)
-        vi[3] = vi[1] + res.z;                                // (x, y+1, z+1)
-        vi[4] = vi[0] + res_yz;                               // (x+1, y, z)
-        vi[5] = vi[1] + res_yz;                               // (x+1, y, z+1)
-        vi[6] = vi[2] + res_yz;                               // (x+1, y+1, z)
-        vi[7] = vi[3] + res_yz;                               // (x+1, y+1, z+1)
-    }
-};
-
 struct idx_to_cell_op {
     uint *cells;
     uint3 shape;
@@ -156,6 +96,3 @@ struct get_case_idx_op {
 
 void vertex_welding(thrust::device_vector<float3> &v,
                     thrust::device_vector<int> &f, bool skip_scatter = true);
-
-thrust::device_vector<float3> get_cells_from_aabb(std::array<float, 6> aabb,
-                                                  uint3 res);
