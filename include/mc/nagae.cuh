@@ -8,10 +8,10 @@ class Nagae : public MCBase {
     static constexpr size_t max_triangles = 5;
     static constexpr size_t max_len = max_triangles * 3;
 
-    void run(const thrust::device_vector<uint8_t> &case_num_dv,
-             const thrust::device_vector<uint> &cell_indices_dv, float3 *v,
-             const float *values, const float3 *points, const uint *cells,
-             float level) override;
+    void run(float3 *v, const uint num_cells, const uint8_t *cases,
+             const uint *cell_indices, const float *values,
+             const float3 *points, const uint *cells,
+             const float level) override;
 
     size_t get_max_triangles() const override { return max_triangles; }
 

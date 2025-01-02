@@ -1,8 +1,8 @@
 #include "mc/nagae.cuh"
 #include "shared_luts.cuh"
+
 #include <thrust/device_vector.h>
 #include <thrust/iterator/counting_iterator.h>
-#include <thrust/iterator/zip_iterator.h>
 
 namespace mc {
 
@@ -11,6 +11,8 @@ static MCRegistrar<Nagae> registrar("nagae");
 
 struct process_cube_op {
     float3 *v;
+    const uint8_t *cases;
+    const uint *cell_indices;
     const float *values;
     const float3 *points;
     const uint *cells;
@@ -19,16 +21,17 @@ struct process_cube_op {
     const int *tri_table;
     const float level;
 
-    process_cube_op(float3 *v, const float *values, const float3 *points,
+    process_cube_op(float3 *v, const uint8_t *cases, const uint *cell_indices,
+                    const float *values, const float3 *points,
                     const uint *cells, const int *edges, const int *edge_table,
-                    const int *tri_table, float level)
-        : v(v), values(values), points(points), cells(cells), edges(edges),
-          edge_table(edge_table), tri_table(tri_table), level(level) {}
+                    const int *tri_table, const float level)
+        : v(v), cases(cases), cell_indices(cell_indices), values(values),
+          points(points), cells(cells), edges(edges), edge_table(edge_table),
+          tri_table(tri_table), level(level) {}
 
-    __host__ __device__ void
-    operator()(thrust::tuple<uint8_t, uint32_t, uint32_t> args) {
-        uint32_t case_num, cell_idx, result_idx;
-        thrust::tie(case_num, cell_idx, result_idx) = args;
+    __host__ __device__ void operator()(uint idx) {
+        uint32_t case_num = cases[idx];
+        uint32_t cell_idx = cell_indices[idx];
 
         // Compute the location of each cube vertex.
         float3 c_p[8];
@@ -54,7 +57,7 @@ struct process_cube_op {
 
         // Assemble the triangles.
         case_num *= Nagae::max_len;   // max_length = 3 * 5 for Nagae
-        uint32_t v0_idx = result_idx * Nagae::max_len;
+        uint32_t v0_idx = idx * Nagae::max_len;
         for (uint32_t i = 0; i < Nagae::max_len; i += 3) {
             uint32_t tri_idx = case_num + i;
             uint32_t v_idx = v0_idx + i;
@@ -77,10 +80,9 @@ struct process_cube_op {
 }   // anonymous namespace
 
 void
-Nagae::run(const thrust::device_vector<uint8_t> &case_num_dv,
-           const thrust::device_vector<uint> &cell_indices_dv, float3 *v,
-           const float *values, const float3 *points, const uint *cells,
-           float level) {
+Nagae::run(float3 *v, const uint num_cells, const uint8_t *cases,
+           const uint *cell_indices, const float *values, const float3 *points,
+           const uint *cells, const float level) {
     // Move the LUTs to the device.
     thrust::device_vector<int> edges_dv(edges, edges + edges_size);
     thrust::device_vector<int> edge_table_dv(edge_table,
@@ -88,16 +90,10 @@ Nagae::run(const thrust::device_vector<uint8_t> &case_num_dv,
     thrust::device_vector<int> tri_table_dv(
         Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
 
-    auto begin = thrust::make_zip_iterator(
-        thrust::make_tuple(case_num_dv.begin(), cell_indices_dv.begin(),
-                           thrust::counting_iterator<uint32_t>(0)));
-    auto end = thrust::make_zip_iterator(thrust::make_tuple(
-        case_num_dv.end(), cell_indices_dv.end(),
-        thrust::counting_iterator<uint32_t>(case_num_dv.size())));
-
-    thrust::for_each(begin, end,
-                     process_cube_op(v, values, points, cells,
-                                     edges_dv.data().get(),
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     process_cube_op(v, cases, cell_indices, values, points,
+                                     cells, edges_dv.data().get(),
                                      edge_table_dv.data().get(),
                                      tri_table_dv.data().get(), level));
 }

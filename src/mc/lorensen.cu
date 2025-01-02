@@ -3,7 +3,6 @@
 
 #include <thrust/device_vector.h>
 #include <thrust/iterator/counting_iterator.h>
-#include <thrust/iterator/zip_iterator.h>
 
 namespace mc {
 
@@ -12,6 +11,8 @@ static MCRegistrar<Lorensen> registrar("lorensen");
 
 struct process_cube_op {
     float3 *v;
+    const uint8_t *cases;
+    const uint *cell_indices;
     const float *values;
     const float3 *points;
     const uint *cells;
@@ -20,22 +21,23 @@ struct process_cube_op {
     const int *tri_table;
     const float level;
 
-    process_cube_op(float3 *v, const float *values, const float3 *points,
+    process_cube_op(float3 *v, const uint8_t *cases, const uint *cell_indices,
+                    const float *values, const float3 *points,
                     const uint *cells, const int *edges, const int *edge_table,
-                    const int *tri_table, float level)
-        : v(v), values(values), points(points), cells(cells), edges(edges),
-          edge_table(edge_table), tri_table(tri_table), level(level) {}
+                    const int *tri_table, const float level)
+        : v(v), cases(cases), cell_indices(cell_indices), values(values),
+          points(points), cells(cells), edges(edges), edge_table(edge_table),
+          tri_table(tri_table), level(level) {}
 
-    __host__ __device__ void
-    operator()(thrust::tuple<uint8_t, uint32_t, uint32_t> args) {
-        uint32_t case_num, cell_idx, result_idx;
-        thrust::tie(case_num, cell_idx, result_idx) = args;
+    __host__ __device__ void operator()(uint idx) {
+        uint case_num = cases[idx];
+        uint cell_idx = cell_indices[idx];
 
         // Compute the location of each cube vertex.
         float3 c_p[8];
         float c_v[8];
         uint offset = cell_idx * 8;
-        for (uint32_t i = 0; i < 8; i++) {
+        for (uint i = 0; i < 8; i++) {
             c_p[i] = points[cells[offset + i]];
             c_v[i] = values[cells[offset + i]];
         }
@@ -43,7 +45,7 @@ struct process_cube_op {
         // Compute the intersection between the isosurface and each edge.
         int edge_status = edge_table[case_num];
         float3 cube_v[12];
-        for (uint32_t i = 0; i < 12; i++) {
+        for (uint i = 0; i < 12; i++) {
             if (edge_status & (1 << i)) {
                 int p_0 = edges[i * 2];
                 int p_1 = edges[i * 2 + 1];
@@ -55,10 +57,10 @@ struct process_cube_op {
 
         // Assemble the triangles.
         case_num *= Lorensen::max_len;   // max_length = 3 * 5
-        uint32_t v0_idx = result_idx * Lorensen::max_len;
-        for (uint32_t i = 0; i < Lorensen::max_len; i += 3) {
-            uint32_t tri_idx = case_num + i;
-            uint32_t v_idx = v0_idx + i;
+        uint v0_idx = idx * Lorensen::max_len;
+        for (uint i = 0; i < Lorensen::max_len; i += 3) {
+            uint tri_idx = case_num + i;
+            uint v_idx = v0_idx + i;
             if (tri_table[tri_idx] != -1) {
                 const float3 &v0 = cube_v[tri_table[tri_idx + 0]];
                 const float3 &v1 = cube_v[tri_table[tri_idx + 1]];
@@ -79,10 +81,9 @@ struct process_cube_op {
 }   // anonymous namespace
 
 void
-Lorensen::run(const thrust::device_vector<uint8_t> &cases_dv,
-              const thrust::device_vector<uint> &cell_idx_dv, float3 *v,
-              const float *values, const float3 *points, const uint *cells,
-              float level) {
+Lorensen::run(float3 *v, const uint num_cells, const uint8_t *cases,
+              const uint *cell_indices, const float *values,
+              const float3 *points, const uint *cells, const float level) {
     // Move the LUTs to the device.
     thrust::device_vector<int> edges_dv(edges, edges + edges_size);
     thrust::device_vector<int> edge_table_dv(edge_table,
@@ -90,16 +91,10 @@ Lorensen::run(const thrust::device_vector<uint8_t> &cases_dv,
     thrust::device_vector<int> tri_table_dv(
         Lorensen::tri_table, Lorensen::tri_table + Lorensen::tri_table_size);
 
-    auto begin = thrust::make_zip_iterator(
-        thrust::make_tuple(cases_dv.begin(), cell_idx_dv.begin(),
-                           thrust::counting_iterator<uint32_t>(0)));
-    auto end = thrust::make_zip_iterator(thrust::make_tuple(
-        cases_dv.end(), cell_idx_dv.end(),
-        thrust::counting_iterator<uint32_t>(cases_dv.size())));
-
-    thrust::for_each(begin, end,
-                     process_cube_op(v, values, points, cells,
-                                     edges_dv.data().get(),
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     process_cube_op(v, cases, cell_indices, values, points,
+                                     cells, edges_dv.data().get(),
                                      edge_table_dv.data().get(),
                                      tri_table_dv.data().get(), level));
 }

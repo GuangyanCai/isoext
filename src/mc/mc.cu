@@ -47,9 +47,9 @@ marching_cubes(Grid *grid, float level, std::string method) {
     thrust::fill(v_dv.begin(), v_dv.end(), make_float3(NAN, NAN, NAN));
 
     // Run Marching Cubes on each cube.
-    mc_variant->run(cases_dv, cell_indices_dv,
-                    thrust::raw_pointer_cast(v_dv.data()), values.data(),
-                    points.data(), cells.data(), level);
+    mc_variant->run(v_dv.data().get(), num_cells, cases_dv.data().get(),
+                    cell_indices_dv.data().get(), values.data(), points.data(),
+                    cells.data(), level);
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
