@@ -1,7 +1,5 @@
-#include "common.cuh"
-#include "math.cuh"
 #include "mc/lorensen.cuh"
-#include "utils.cuh"
+#include "shared_luts.cuh"
 
 #include <thrust/device_vector.h>
 #include <thrust/iterator/counting_iterator.h>

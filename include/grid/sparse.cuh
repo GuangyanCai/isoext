@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common.cuh"
 #include "grid/grid.cuh"
 #include "math.cuh"
+#include "ndarray.cuh"
 
 #include <thrust/device_vector.h>
 

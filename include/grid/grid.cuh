@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common.cuh"
 #include "math.cuh"
+#include "ndarray.cuh"
 
 class Grid {
   public:

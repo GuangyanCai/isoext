@@ -1,10 +1,8 @@
-#include "common.cuh"
-#include "math.cuh"
-#include "mc/mc.cuh"
-#include "utils.cuh"
-
 #include "grid/sparse.cuh"
 #include "grid/uniform.cuh"
+#include "its.cuh"
+#include "mc/mc.cuh"
+#include "ndarray.cuh"
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>

@@ -1,8 +1,5 @@
-#include "common.cuh"
-#include "math.cuh"
 #include "mc/nagae.cuh"
-#include "utils.cuh"
-
+#include "shared_luts.cuh"
 #include <thrust/device_vector.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/zip_iterator.h>

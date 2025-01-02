@@ -1,4 +1,4 @@
-#include "common.cuh"
+#include "shared_luts.cuh"
 
 const int edges[edges_size] = {0, 1, 1, 3, 2, 3, 0, 2, 4, 5, 5, 7,
                                6, 7, 4, 6, 0, 4, 1, 5, 3, 7, 2, 6};
