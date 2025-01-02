@@ -34,7 +34,7 @@ struct get_edge_status_op {
 
 struct get_its_points_op {
     float3 *its_points;
-    const uint *cell_idx;
+    const uint *cell_indices;
     const uint *cell_offsets;
     const int *edge_status;
     const float *values;
@@ -43,11 +43,11 @@ struct get_its_points_op {
     const int *edges;
     const float level;
 
-    get_its_points_op(float3 *its_points, const uint *cell_idx,
+    get_its_points_op(float3 *its_points, const uint *cell_indices,
                       const uint *cell_offsets, const int *edge_status,
                       const float *values, const float3 *points,
                       const uint *cells, const int *edges, const float level)
-        : its_points(its_points), cell_idx(cell_idx),
+        : its_points(its_points), cell_indices(cell_indices),
           cell_offsets(cell_offsets), edge_status(edge_status), values(values),
           points(points), cells(cells), edges(edges), level(level) {}
 
@@ -58,7 +58,7 @@ struct get_its_points_op {
         // Compute the location of each cube vertex.
         float3 c_p[8];
         float c_v[8];
-        uint c_offset = cell_idx[idx] * 8;
+        uint c_offset = cell_indices[idx] * 8;
         for (uint32_t i = 0; i < 8; i++) {
             c_p[i] = points[cells[c_offset + i]];
             c_v[i] = values[cells[c_offset + i]];
@@ -97,15 +97,16 @@ get_intersection(Grid *grid, float level) {
                                         edge_table_dv.data().get(), level));
 
     // Remove empty cells.
-    thrust::device_vector<uint> cell_idx_dv(num_cells);
-    thrust::sequence(cell_idx_dv.begin(), cell_idx_dv.end());
-    cell_idx_dv.erase(thrust::remove_if(cell_idx_dv.begin(), cell_idx_dv.end(),
-                                        edge_status.begin(), is_zero_pred()),
-                      cell_idx_dv.end());
+    thrust::device_vector<uint> cell_indices_dv(num_cells);
+    thrust::sequence(cell_indices_dv.begin(), cell_indices_dv.end());
+    cell_indices_dv.erase(
+        thrust::remove_if(cell_indices_dv.begin(), cell_indices_dv.end(),
+                          edge_status.begin(), is_zero_pred()),
+        cell_indices_dv.end());
     edge_status.erase(thrust::remove_if(edge_status.begin(), edge_status.end(),
                                         is_zero_pred()),
                       edge_status.end());
-    num_cells = cell_idx_dv.size();
+    num_cells = cell_indices_dv.size();
 
     // Compute the number of intersections.
     NDArray<uint> cell_offsets({num_cells + 1});
@@ -124,7 +125,7 @@ get_intersection(Grid *grid, float level) {
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
         thrust::counting_iterator<uint>(num_cells),
-        get_its_points_op(its.points.data(), cell_idx_dv.data().get(),
+        get_its_points_op(its.points.data(), cell_indices_dv.data().get(),
                           its.cell_offsets.data(), edge_status.data().get(),
                           values.data(), points.data(), cells.data(),
                           edges_dv.data().get(), level));

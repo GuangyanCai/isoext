@@ -78,7 +78,7 @@ struct process_cube_op {
 
 void
 Nagae::run(const thrust::device_vector<uint8_t> &case_num_dv,
-           const thrust::device_vector<uint> &cell_idx_dv, float3 *v,
+           const thrust::device_vector<uint> &cell_indices_dv, float3 *v,
            const float *values, const float3 *points, const uint *cells,
            float level) {
     // Move the LUTs to the device.
@@ -89,10 +89,10 @@ Nagae::run(const thrust::device_vector<uint8_t> &case_num_dv,
         Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
 
     auto begin = thrust::make_zip_iterator(
-        thrust::make_tuple(case_num_dv.begin(), cell_idx_dv.begin(),
+        thrust::make_tuple(case_num_dv.begin(), cell_indices_dv.begin(),
                            thrust::counting_iterator<uint32_t>(0)));
     auto end = thrust::make_zip_iterator(thrust::make_tuple(
-        case_num_dv.end(), cell_idx_dv.end(),
+        case_num_dv.end(), cell_indices_dv.end(),
         thrust::counting_iterator<uint32_t>(case_num_dv.size())));
 
     thrust::for_each(begin, end,

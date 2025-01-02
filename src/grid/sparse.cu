@@ -39,63 +39,65 @@ SparseGrid::set_values(const NDArray<float> &new_values) {
 NDArray<uint>
 SparseGrid::get_cells() const {
     NDArray<uint> cells({get_num_cells(), 8});
-    thrust::for_each(cell_idx.begin(), cell_idx.end(),
+    thrust::for_each(cell_indices.begin(), cell_indices.end(),
                      idx_to_cell_op(cells.data_ptr.get(), shape));
     return cells;
 }
 
 void
-SparseGrid::add_cells(const NDArray<uint> &new_cell_idx) {
-    // Get current size of cells_idx
-    uint old_size = cell_idx.size();
-    uint new_size = new_cell_idx.size();
+SparseGrid::add_cells(const NDArray<uint> &new_cell_indices) {
+    // Get current size of cells_indices
+    uint old_size = cell_indices.size();
+    uint new_size = new_cell_indices.size();
 
-    // Resize cells_idx to fit new elements
-    cell_idx.resize(old_size + new_size);
+    // Resize cells_indices to fit new elements
+    cell_indices.resize(old_size + new_size);
 
-    // Copy new indices to end of cells_idx
-    thrust::copy(new_cell_idx.data_ptr, new_cell_idx.data_ptr + new_size,
-                 cell_idx.begin() + old_size);
+    // Copy new indices to end of cells_indices
+    thrust::copy(new_cell_indices.data_ptr,
+                 new_cell_indices.data_ptr + new_size,
+                 cell_indices.begin() + old_size);
 
     // Sort to prepare for unique
-    thrust::sort(cell_idx.begin(), cell_idx.end());
+    thrust::sort(cell_indices.begin(), cell_indices.end());
 
     // Remove duplicates
-    auto new_end = thrust::unique(cell_idx.begin(), cell_idx.end());
-    cell_idx.resize(new_end - cell_idx.begin());
+    auto new_end = thrust::unique(cell_indices.begin(), cell_indices.end());
+    cell_indices.resize(new_end - cell_indices.begin());
 
     // Resize values to match new number of cells (8 values per cell) and fill
     // with default value
-    values.resize(cell_idx.size() * 8);
+    values.resize(cell_indices.size() * 8);
     thrust::fill(values.begin(), values.end(), default_value);
 }
 
 void
-SparseGrid::remove_cells(const NDArray<uint> &new_cell_idx_) {
+SparseGrid::remove_cells(const NDArray<uint> &new_cell_indices_) {
     // Create temporary vector for set difference operation
-    thrust::device_vector<uint> result(cell_idx.size());
-    thrust::device_vector<uint> new_cell_idx(new_cell_idx_.size());
-    thrust::copy(new_cell_idx_.data_ptr,
-                 new_cell_idx_.data_ptr + new_cell_idx_.size(),
-                 new_cell_idx.begin());
-    thrust::sort(new_cell_idx.begin(), new_cell_idx.end());
+    thrust::device_vector<uint> result(cell_indices.size());
+    thrust::device_vector<uint> new_cell_indices(new_cell_indices_.size());
+    thrust::copy(new_cell_indices_.data_ptr,
+                 new_cell_indices_.data_ptr + new_cell_indices_.size(),
+                 new_cell_indices.begin());
+    thrust::sort(new_cell_indices.begin(), new_cell_indices.end());
     auto result_end = thrust::set_difference(
-        cell_idx.begin(), cell_idx.end(), new_cell_idx.begin(),
-        new_cell_idx.end(), result.begin());
+        cell_indices.begin(), cell_indices.end(), new_cell_indices.begin(),
+        new_cell_indices.end(), result.begin());
 
     // Resize result vector to actual size after set_difference
     result.resize(result_end - result.begin());
 
-    // Copy result back to cells_idx
-    cell_idx = result;
+    // Copy result back to cells_indices
+    cell_indices = result;
 
     // Resize values to match new number of cells (8 values per cell) and fill
     // with default value
-    values.resize(cell_idx.size() * 8);
+    values.resize(cell_indices.size() * 8);
     thrust::fill(values.begin(), values.end(), default_value);
 }
 
 NDArray<uint>
 SparseGrid::get_cell_indices() const {
-    return NDArray<uint>::copy(cell_idx.data().get(), {cell_idx.size()});
+    return NDArray<uint>::copy(cell_indices.data().get(),
+                               {cell_indices.size()});
 }

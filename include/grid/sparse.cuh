@@ -11,7 +11,7 @@
 class SparseGrid : public Grid {
   private:
     thrust::device_vector<float> values;
-    thrust::device_vector<uint> cell_idx;
+    thrust::device_vector<uint> cell_indices;
     uint3 shape;
     float3 aabb_min, aabb_max;
     float default_value;
@@ -22,9 +22,11 @@ class SparseGrid : public Grid {
 
     ~SparseGrid() = default;
 
-    inline uint get_num_cells() const override { return cell_idx.size(); }
+    inline uint get_num_cells() const override { return cell_indices.size(); }
 
-    inline uint get_num_points() const override { return cell_idx.size() * 8; }
+    inline uint get_num_points() const override {
+        return cell_indices.size() * 8;
+    }
 
     NDArray<float3> get_points() const override;
 
@@ -34,9 +36,9 @@ class SparseGrid : public Grid {
 
     NDArray<uint> get_cells() const override;
 
-    void add_cells(const NDArray<uint> &new_cell_idx);
+    void add_cells(const NDArray<uint> &new_cell_indices);
 
-    void remove_cells(const NDArray<uint> &new_cell_idx);
+    void remove_cells(const NDArray<uint> &new_cell_indices);
 
     NDArray<uint> get_cell_indices() const;
 };

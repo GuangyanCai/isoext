@@ -70,13 +70,13 @@ struct get_vtx_pos_op {
     }
 };
 
-struct get_case_idx_op {
+struct get_case_num_op {
     uint8_t *cases;
     const float *values;
     const uint *cells;
     const float level;
 
-    get_case_idx_op(uint8_t *cases, const float *values, const uint *cells,
+    get_case_num_op(uint8_t *cases, const float *values, const uint *cells,
                     const float level)
         : cases(cases), values(values), cells(cells), level(level) {}
 

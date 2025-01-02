@@ -26,19 +26,20 @@ marching_cubes(Grid *grid, float level, std::string method) {
     thrust::device_vector<uint8_t> cases_dv(num_cells);
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
-                     get_case_idx_op(cases_dv.data().get(), values.data(),
+                     get_case_num_op(cases_dv.data().get(), values.data(),
                                      cells.data(), level));
 
     // Remove empty cells.
-    thrust::device_vector<uint32_t> cell_idx_dv(num_cells);
-    thrust::sequence(cell_idx_dv.begin(), cell_idx_dv.end());
-    cell_idx_dv.erase(thrust::remove_if(cell_idx_dv.begin(), cell_idx_dv.end(),
-                                        cases_dv.begin(), is_empty_pred()),
-                      cell_idx_dv.end());
+    thrust::device_vector<uint32_t> cell_indices_dv(num_cells);
+    thrust::sequence(cell_indices_dv.begin(), cell_indices_dv.end());
+    cell_indices_dv.erase(thrust::remove_if(cell_indices_dv.begin(),
+                                            cell_indices_dv.end(),
+                                            cases_dv.begin(), is_empty_pred()),
+                          cell_indices_dv.end());
     cases_dv.erase(thrust::remove_if(cases_dv.begin(), cases_dv.end(),
                                      cases_dv.begin(), is_empty_pred()),
                    cases_dv.end());
-    num_cells = cell_idx_dv.size();
+    num_cells = cell_indices_dv.size();
 
     // Allocate memory for the vertex array
     thrust::device_vector<float3> v_dv(num_cells *
@@ -46,7 +47,7 @@ marching_cubes(Grid *grid, float level, std::string method) {
     thrust::fill(v_dv.begin(), v_dv.end(), make_float3(NAN, NAN, NAN));
 
     // Run Marching Cubes on each cube.
-    mc_variant->run(cases_dv, cell_idx_dv,
+    mc_variant->run(cases_dv, cell_indices_dv,
                     thrust::raw_pointer_cast(v_dv.data()), values.data(),
                     points.data(), cells.data(), level);
 

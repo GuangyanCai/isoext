@@ -23,7 +23,7 @@ using PyTorchCuda =
 // Input types
 using UniformGridData = PyTorchCuda<float, nb::ndim<3>>;
 using SparseGridData = PyTorchCuda<float, nb::shape<-1, 8>>;
-using SparseGridCellIdx = PyTorchCuda<int, nb::ndim<1>>;
+using SparseGridCellIndices = PyTorchCuda<int, nb::ndim<1>>;
 using Vector3 = PyTorchCuda<float, nb::shape<-1, 3>>;
 
 // Function to create a nanobind capsule for device memory
@@ -168,20 +168,20 @@ NB_MODULE(isoext_ext, m) {
                  return ours_to_nb(cells);
              })
         .def("add_cells",
-             [](SparseGrid &self, SparseGridCellIdx new_cell_idx) {
-                 NDArray<uint> new_cell_idx_ =
-                     nb_to_ours(new_cell_idx).cast<uint>();
-                 self.add_cells(new_cell_idx_);
+             [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
+                 NDArray<uint> new_cell_indices_ =
+                     nb_to_ours(new_cell_indices).cast<uint>();
+                 self.add_cells(new_cell_indices_);
              })
         .def("remove_cells",
-             [](SparseGrid &self, SparseGridCellIdx new_cell_idx) {
-                 NDArray<uint> new_cell_idx_ =
-                     nb_to_ours(new_cell_idx).cast<uint>();
-                 self.remove_cells(new_cell_idx_);
+             [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
+                 NDArray<uint> new_cell_indices_ =
+                     nb_to_ours(new_cell_indices).cast<uint>();
+                 self.remove_cells(new_cell_indices_);
              })
         .def("get_cell_indices", [](SparseGrid &self) {
-            NDArray<int> cell_idx = self.get_cell_indices().cast<int>();
-            return ours_to_nb(cell_idx);
+            NDArray<int> cell_indices = self.get_cell_indices().cast<int>();
+            return ours_to_nb(cell_indices);
         });
 
     nb::class_<Intersection>(m, "Intersection")
