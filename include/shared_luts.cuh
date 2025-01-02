@@ -40,9 +40,20 @@
 // LUTs for cells.
 
 // LUT for edges. Every two elements define an edge.
-constexpr size_t edges_size = 24;
-extern const int edges[edges_size];
+// The first element is always the smaller index.
+const size_t edges_size = 24;
+extern const int edges_table[edges_size];
 
 // LUT for edge intersection status.
-constexpr size_t edge_table_size = 256;
-extern const int edge_table[edge_table_size];
+const size_t edge_table_size = 256;
+extern const int edge_status_table[edge_table_size];
+
+// LUT for neighbor cells of a given point.
+// Give a point in uint3, its ith neighbor is given by subtracting
+// point_neighbor_table[i] from the point.
+const size_t point_neighbors_table_size = 8;
+extern const uint3 point_neighbors_table[point_neighbors_table_size];
+
+// LUT for neighbor cells of a given edge.
+const size_t edge_neighbors_table_size = 12;
+extern const uint3 edge_neighbors_table[edge_neighbors_table_size];

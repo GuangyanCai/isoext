@@ -15,6 +15,8 @@ template <typename DTYPE> struct NDArray {
     std::vector<size_t> shape;
     bool read_only;
 
+    NDArray() : data_ptr(nullptr), shape({}), read_only(true) {}
+
     NDArray(thrust::device_ptr<DTYPE> data_ptr, std::vector<size_t> shape,
             bool read_only = true)
         : data_ptr(data_ptr), shape(shape), read_only(read_only) {}
@@ -37,6 +39,20 @@ template <typename DTYPE> struct NDArray {
           read_only(other.read_only) {
         other.data_ptr = nullptr;
         other.read_only = true;
+    }
+
+    NDArray<DTYPE> &operator=(NDArray<DTYPE> &&other) noexcept {
+        if (this != &other) {
+            if (!read_only) {
+                thrust::device_free(data_ptr);
+            }
+            data_ptr = other.data_ptr;
+            shape = std::move(other.shape);
+            read_only = other.read_only;
+            other.data_ptr = nullptr;
+            other.read_only = true;
+        }
+        return *this;
     }
 
     ~NDArray() {

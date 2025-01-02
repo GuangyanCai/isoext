@@ -23,6 +23,12 @@ host_to_device(const T *h_ptr, size_t size) {
     return d_ptr;
 }
 
+__host__ __device__ uint3 idx_1d_to_3d(uint idx, uint3 shape);
+
+__device__ __host__ uint idx_3d_to_1d(uint3 idx, uint3 shape);
+
+__device__ __host__ uint point_idx_to_cell_idx(uint idx, uint3 shape);
+
 struct idx_to_cell_op {
     uint *cells;
     uint3 shape;
@@ -92,5 +98,63 @@ struct get_case_num_op {
     }
 };
 
+struct edge_to_neighbor_idx_op {
+    const uint3 *en_table;
+    const uint3 grid_shape;
+    const uint3 grid_offset;
+
+    edge_to_neighbor_idx_op(const uint3 *en_table, const uint3 grid_shape)
+        : en_table(en_table), grid_shape(grid_shape),
+          grid_offset(
+              make_uint3(grid_shape.x * grid_shape.y, grid_shape.y, 1)) {}
+
+    __host__ __device__ int4 operator()(uint2 edge) {
+        uint3 cell_idx = idx_1d_to_3d(edge.x, grid_shape);
+
+        uint offset = edge.y - edge.x;
+        if (offset == grid_offset.x) {
+            offset = 0;
+        } else if (offset == grid_offset.y) {
+            offset = 1;
+        } else {
+            offset = 2;
+        }
+        offset *= 4;
+
+        int r[4];
+        for (int i = 0; i < 4; i++) {
+            uint3 o = en_table[offset + i];
+            if (cell_idx.x < o.x || cell_idx.y < o.y || cell_idx.z < o.z) {
+                r[i] = -1;
+            } else {
+                r[i] = idx_3d_to_1d(cell_idx - o, grid_shape - 1);
+            }
+        }
+
+        return make_int4(r[0], r[1], r[2], r[3]);
+    }
+};
+
+struct get_its_point_avg_op {
+    const float3 *its_points;
+    const uint *cell_offsets;
+
+    get_its_point_avg_op(const float3 *its_points, const uint *cell_offsets)
+        : its_points(its_points), cell_offsets(cell_offsets) {}
+
+    __host__ __device__ float3 operator()(uint idx) {
+        float3 avg = make_float3(0.0f, 0.0f, 0.0f);
+        for (uint i = cell_offsets[idx]; i < cell_offsets[idx + 1]; i++) {
+            avg = avg + its_points[i];
+        }
+        avg = avg / (cell_offsets[idx + 1] - cell_offsets[idx]);
+        return avg;
+    }
+};
+
 void vertex_welding(thrust::device_vector<float3> &v,
                     thrust::device_vector<int> &f, bool skip_scatter = true);
+
+thrust::device_vector<int4>
+get_edge_neighbors(const thrust::device_vector<uint2> &edges_dv,
+                   uint3 grid_shape);

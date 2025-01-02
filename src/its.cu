@@ -32,24 +32,26 @@ struct get_edge_status_op {
     }
 };
 
-struct get_its_points_op {
+struct get_its_op {
     float3 *its_points;
-    const uint *cell_indices;
+    uint2 *its_edges;
     const uint *cell_offsets;
+    const uint *cell_indices;
     const int *edge_status;
     const float *values;
     const float3 *points;
     const uint *cells;
-    const int *edges;
+    const int *edges_table;
     const float level;
 
-    get_its_points_op(float3 *its_points, const uint *cell_indices,
-                      const uint *cell_offsets, const int *edge_status,
-                      const float *values, const float3 *points,
-                      const uint *cells, const int *edges, const float level)
-        : its_points(its_points), cell_indices(cell_indices),
-          cell_offsets(cell_offsets), edge_status(edge_status), values(values),
-          points(points), cells(cells), edges(edges), level(level) {}
+    get_its_op(float3 *its_points, uint2 *its_edges, const uint *cell_offsets,
+               const uint *cell_indices, const int *edge_status,
+               const float *values, const float3 *points, const uint *cells,
+               const int *edges_table, const float level)
+        : its_points(its_points), its_edges(its_edges),
+          cell_offsets(cell_offsets), cell_indices(cell_indices),
+          edge_status(edge_status), values(values), points(points),
+          cells(cells), edges_table(edges_table), level(level) {}
 
     __host__ __device__ void operator()(uint idx) {
         int status = edge_status[idx];
@@ -66,8 +68,13 @@ struct get_its_points_op {
 
         for (int i = 0; i < 12; i++) {
             if (status & (1 << i)) {
-                int p_0 = edges[i * 2];
-                int p_1 = edges[i * 2 + 1];
+                // Get the two vertices that form the edge.
+                int p_0 = edges_table[i * 2];
+                int p_1 = edges_table[i * 2 + 1];
+                its_edges[offset] =
+                    make_uint2(cells[c_offset + p_0], cells[c_offset + p_1]);
+
+                // Compute the intersection point.
                 float denom = c_v[p_1] - c_v[p_0];
                 float t = (denom != 0.0f) ? (level - c_v[p_0]) / denom : 0.0f;
                 its_points[offset] = lerp(t, c_p[p_0], c_p[p_1]);
@@ -84,17 +91,18 @@ get_intersection(Grid *grid, float level) {
     NDArray<float> values = grid->get_values();
     NDArray<float3> points = grid->get_points();
     NDArray<uint> cells = grid->get_cells();
-    thrust::device_vector<int> edges_dv(edges, edges + edges_size);
-    thrust::device_vector<int> edge_table_dv(edge_table,
-                                             edge_table + edge_table_size);
+    thrust::device_vector<int> edges_table_dv(edges_table,
+                                              edges_table + edges_size);
+    thrust::device_vector<int> edge_status_table_dv(
+        edge_status_table, edge_status_table + edge_table_size);
 
     // Get the case index of each cell.
     thrust::device_vector<int> edge_status(num_cells);
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
-                     get_edge_status_op(edge_status.data().get(), values.data(),
-                                        cells.data(),
-                                        edge_table_dv.data().get(), level));
+                     get_edge_status_op(
+                         edge_status.data().get(), values.data(), cells.data(),
+                         edge_status_table_dv.data().get(), level));
 
     // Remove empty cells.
     thrust::device_vector<uint> cell_indices_dv(num_cells);
@@ -120,15 +128,20 @@ get_intersection(Grid *grid, float level) {
                            cell_offsets.data_ptr, 0);
     uint num_points = cell_offsets.data_ptr[num_cells];
 
+    // Initialize the intersection struct.
+    Intersection its(num_points);
+    its.cell_offsets = std::move(cell_offsets);
+    its.cell_indices =
+        NDArray<uint>::copy(cell_indices_dv.data().get(), {num_cells});
+
     // Get the intersection points.
-    Intersection its(num_points, std::move(cell_offsets));
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
         thrust::counting_iterator<uint>(num_cells),
-        get_its_points_op(its.points.data(), cell_indices_dv.data().get(),
-                          its.cell_offsets.data(), edge_status.data().get(),
-                          values.data(), points.data(), cells.data(),
-                          edges_dv.data().get(), level));
+        get_its_op(its.points.data(), its.edges.data(), its.cell_offsets.data(),
+                   cell_indices_dv.data().get(), edge_status.data().get(),
+                   values.data(), points.data(), cells.data(),
+                   edges_table_dv.data().get(), level));
 
     return its;
 }

@@ -64,6 +64,16 @@ operator!=(float3 a, float3 b) {
     return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
+inline __host__ __device__ float3
+operator/(float3 a, float b) {
+    return make_float3(a.x / b, a.y / b, a.z / b);
+}
+
+inline __host__ __device__ uint3
+operator-(uint3 a, uint b) {
+    return make_uint3(a.x - b, a.y - b, a.z - b);
+}
+
 template <typename T>
 __host__ __device__ T
 lerp(float t, T a, T b) {
@@ -89,6 +99,22 @@ struct float3_elem_eq_pred {
                                         const float3 &rhs) const {
         return thrust::make_tuple(lhs.x, lhs.y, lhs.z) ==
                thrust::make_tuple(rhs.x, rhs.y, rhs.z);
+    }
+};
+
+struct uint2_less_pred {
+    __host__ __device__ bool operator()(const uint2 &lhs,
+                                        const uint2 &rhs) const {
+        return thrust::make_tuple(lhs.x, lhs.y) <
+               thrust::make_tuple(rhs.x, rhs.y);
+    }
+};
+
+struct uint2_equal_pred {
+    __host__ __device__ bool operator()(const uint2 &lhs,
+                                        const uint2 &rhs) const {
+        return thrust::make_tuple(lhs.x, lhs.y) ==
+               thrust::make_tuple(rhs.x, rhs.y);
     }
 };
 

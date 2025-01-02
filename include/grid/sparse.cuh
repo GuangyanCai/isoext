@@ -28,6 +28,8 @@ class SparseGrid : public Grid {
         return cell_indices.size() * 8;
     }
 
+    inline uint3 get_shape() const override { return shape; }
+
     NDArray<float3> get_points() const override;
 
     NDArray<float> get_values() const override;

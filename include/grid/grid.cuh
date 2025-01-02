@@ -13,6 +13,8 @@ class Grid {
 
     virtual uint get_num_points() const = 0;
 
+    virtual uint3 get_shape() const = 0;
+
     virtual NDArray<float3> get_points() const = 0;
 
     virtual NDArray<float> get_values() const = 0;

@@ -1,3 +1,4 @@
+#include "dc.cuh"
 #include "grid/sparse.cuh"
 #include "grid/uniform.cuh"
 #include "its.cuh"
@@ -195,6 +196,14 @@ NB_MODULE(isoext_ext, m) {
         });
 
     m.def("get_intersection", &get_intersection, "grid"_a, "level"_a = 0.f);
+
+    m.def(
+        "dual_contouring",
+        [](Grid *grid, Intersection its, float level) {
+            auto [v, f] = dual_contouring(grid, its, level);
+            return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+        },
+        "grid"_a, "its"_a, "level"_a = 0.f);
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";
 }

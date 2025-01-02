@@ -23,6 +23,8 @@ class UniformGrid : public Grid {
 
     inline uint get_num_points() const override { return num_points; }
 
+    inline uint3 get_shape() const override { return shape; }
+
     NDArray<float3> get_points() const override;
 
     NDArray<float> get_values() const override;

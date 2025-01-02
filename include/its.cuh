@@ -6,11 +6,12 @@
 struct Intersection {
     NDArray<float3> points;
     NDArray<float3> normals;
+    NDArray<uint2> edges;
+    NDArray<uint> cell_indices;
     NDArray<uint> cell_offsets;
 
-    Intersection(uint num_points, NDArray<uint> &&cell_offsets)
-        : points({num_points}), normals({num_points}),
-          cell_offsets(std::move(cell_offsets)) {}
+    Intersection(uint num_points)
+        : points({num_points}), normals({num_points}), edges({num_points}) {}
 
     inline NDArray<float3> get_points() { return points; }
     inline NDArray<float3> get_normals() { return normals; }

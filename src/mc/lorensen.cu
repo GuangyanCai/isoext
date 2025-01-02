@@ -16,18 +16,20 @@ struct process_cube_op {
     const float *values;
     const float3 *points;
     const uint *cells;
-    const int *edges;
-    const int *edge_table;
+    const int *edges_table;
+    const int *edge_status_table;
     const int *tri_table;
     const float level;
 
     process_cube_op(float3 *v, const uint8_t *cases, const uint *cell_indices,
                     const float *values, const float3 *points,
-                    const uint *cells, const int *edges, const int *edge_table,
-                    const int *tri_table, const float level)
+                    const uint *cells, const int *edges_table,
+                    const int *edge_status_table, const int *tri_table,
+                    const float level)
         : v(v), cases(cases), cell_indices(cell_indices), values(values),
-          points(points), cells(cells), edges(edges), edge_table(edge_table),
-          tri_table(tri_table), level(level) {}
+          points(points), cells(cells), edges_table(edges_table),
+          edge_status_table(edge_status_table), tri_table(tri_table),
+          level(level) {}
 
     __host__ __device__ void operator()(uint idx) {
         uint case_num = cases[idx];
@@ -43,12 +45,12 @@ struct process_cube_op {
         }
 
         // Compute the intersection between the isosurface and each edge.
-        int edge_status = edge_table[case_num];
+        int edge_status = edge_status_table[case_num];
         float3 cube_v[12];
         for (uint i = 0; i < 12; i++) {
             if (edge_status & (1 << i)) {
-                int p_0 = edges[i * 2];
-                int p_1 = edges[i * 2 + 1];
+                int p_0 = edges_table[i * 2];
+                int p_1 = edges_table[i * 2 + 1];
                 float denom = c_v[p_1] - c_v[p_0];
                 float t = (denom != 0.0f) ? (level - c_v[p_0]) / denom : 0.0f;
                 cube_v[i] = lerp(t, c_p[p_0], c_p[p_1]);
@@ -85,17 +87,18 @@ Lorensen::run(float3 *v, const uint num_cells, const uint8_t *cases,
               const uint *cell_indices, const float *values,
               const float3 *points, const uint *cells, const float level) {
     // Move the LUTs to the device.
-    thrust::device_vector<int> edges_dv(edges, edges + edges_size);
-    thrust::device_vector<int> edge_table_dv(edge_table,
-                                             edge_table + edge_table_size);
+    thrust::device_vector<int> edges_table_dv(edges_table,
+                                              edges_table + edges_size);
+    thrust::device_vector<int> edge_status_table_dv(
+        edge_status_table, edge_status_table + edge_table_size);
     thrust::device_vector<int> tri_table_dv(
         Lorensen::tri_table, Lorensen::tri_table + Lorensen::tri_table_size);
 
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
                      process_cube_op(v, cases, cell_indices, values, points,
-                                     cells, edges_dv.data().get(),
-                                     edge_table_dv.data().get(),
+                                     cells, edges_table_dv.data().get(),
+                                     edge_status_table_dv.data().get(),
                                      tri_table_dv.data().get(), level));
 }
 
