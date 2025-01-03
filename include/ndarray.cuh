@@ -8,6 +8,7 @@
 
 #include <array>
 #include <numeric>
+#include <string>
 #include <vector>
 
 template <typename DTYPE> struct NDArray {
@@ -37,8 +38,7 @@ template <typename DTYPE> struct NDArray {
     NDArray(NDArray<DTYPE> &&other) noexcept
         : data_ptr(other.data_ptr), shape(std::move(other.shape)),
           read_only(other.read_only) {
-        other.data_ptr = nullptr;
-        other.read_only = true;
+        other.free();
     }
 
     NDArray<DTYPE> &operator=(NDArray<DTYPE> &&other) noexcept {
@@ -49,17 +49,21 @@ template <typename DTYPE> struct NDArray {
             data_ptr = other.data_ptr;
             shape = std::move(other.shape);
             read_only = other.read_only;
-            other.data_ptr = nullptr;
-            other.read_only = true;
+            other.free();
         }
         return *this;
     }
 
-    ~NDArray() {
+    void free() {
         if (!read_only) {
             thrust::device_free(data_ptr);
+            data_ptr = nullptr;
+            read_only = true;
+            shape.clear();
         }
     }
+
+    ~NDArray() { free(); }
 
     inline size_t size() const {
         return std::accumulate(shape.begin(), shape.end(), size_t{1},
@@ -90,6 +94,13 @@ template <typename DTYPE> struct NDArray {
         return arr;
     }
 
+    template <typename... Dims> static NDArray<DTYPE> zeros(Dims... dims) {
+        std::vector<size_t> shape{static_cast<size_t>(dims)...};
+        NDArray<DTYPE> arr(shape);
+        thrust::fill(arr.data_ptr, arr.data_ptr + arr.size(), DTYPE{0});
+        return arr;
+    }
+
     void fill(DTYPE value) { thrust::fill(data_ptr, data_ptr + size(), value); }
 
     template <typename NEW_DTYPE> NDArray<NEW_DTYPE> cast() {
@@ -100,3 +111,6 @@ template <typename DTYPE> struct NDArray {
         return arr;
     }
 };
+
+void print_batched_matrix(const NDArray<float> &arr, const std::string &name);
+void print_batched_vector(const NDArray<float> &arr, const std::string &name);
