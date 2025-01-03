@@ -38,7 +38,8 @@ template <typename DTYPE> struct NDArray {
     NDArray(NDArray<DTYPE> &&other) noexcept
         : data_ptr(other.data_ptr), shape(std::move(other.shape)),
           read_only(other.read_only) {
-        other.free();
+        other.data_ptr = nullptr;
+        other.read_only = true;
     }
 
     NDArray<DTYPE> &operator=(NDArray<DTYPE> &&other) noexcept {
@@ -49,7 +50,8 @@ template <typename DTYPE> struct NDArray {
             data_ptr = other.data_ptr;
             shape = std::move(other.shape);
             read_only = other.read_only;
-            other.free();
+            other.data_ptr = nullptr;
+            other.read_only = true;
         }
         return *this;
     }
