@@ -1,3 +1,4 @@
+#include "batched_la.cuh"
 #include "dc.cuh"
 #include "math.cuh"
 #include "utils.cuh"
@@ -8,7 +9,108 @@
 #include <thrust/sort.h>
 #include <thrust/unique.h>
 
+#include <tuple>
+
 namespace {
+
+struct get_qef_op {
+    float *ATA;
+    float *ATb;
+    const float3 *its_points;
+    const float3 *its_normals;
+    const uint *cell_offsets;
+    const float lambda;
+
+    get_qef_op(float *ATA, float *ATb, const float3 *its_points,
+               const float3 *its_normals, const uint *cell_offsets,
+               float lambda)
+        : ATA(ATA), ATb(ATb), its_points(its_points), its_normals(its_normals),
+          cell_offsets(cell_offsets), lambda(lambda) {}
+
+    __host__ __device__ void operator()(uint idx) {
+        uint ATA_offset = idx * 9;
+        uint ATb_offset = idx * 3;
+        for (uint i = cell_offsets[idx]; i < cell_offsets[idx + 1]; i++) {
+            float3 n = its_normals[i];
+            float3 p = its_points[i];
+            float3 nnp = n * dot(n, p);
+
+            // ATA
+            ATA[ATA_offset + 0] += n.x * n.x;
+            ATA[ATA_offset + 1] += n.x * n.y;
+            ATA[ATA_offset + 2] += n.x * n.z;
+            ATA[ATA_offset + 3] += n.y * n.x;
+            ATA[ATA_offset + 4] += n.y * n.y;
+            ATA[ATA_offset + 5] += n.y * n.z;
+            ATA[ATA_offset + 6] += n.z * n.x;
+            ATA[ATA_offset + 7] += n.z * n.y;
+            ATA[ATA_offset + 8] += n.z * n.z;
+
+            // ATb
+            ATb[ATb_offset + 0] += nnp.x;
+            ATb[ATb_offset + 1] += nnp.y;
+            ATb[ATb_offset + 2] += nnp.z;
+        }
+
+        // Add λI
+        ATA[ATA_offset + 0] += lambda;
+        ATA[ATA_offset + 4] += lambda;
+        ATA[ATA_offset + 8] += lambda;
+    }
+};
+
+std::tuple<NDArray<float>, NDArray<float>>
+get_qef(const Intersection &its, float lambda) {
+    uint num_cells = its.cell_indices.size();
+    NDArray<float> ATA = NDArray<float>::zeros(num_cells, 3, 3);
+    NDArray<float> ATb = NDArray<float>::zeros(num_cells, 3);
+
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     get_qef_op(ATA.data(), ATb.data(), its.points.data(),
+                                its.normals.data(), its.cell_offsets.data(),
+                                lambda));
+
+    return {ATA, ATb};
+}
+
+struct fix_dual_v_op {
+    float3 *dual_v;
+    const float3 *its_points;
+    const uint *its_cell_indices;
+    const uint *its_cell_offsets;
+    const float3 *points;
+    const uint *cells;
+
+    fix_dual_v_op(float3 *dual_v, const float3 *its_points,
+                  const uint *its_cell_indices, const uint *its_cell_offsets,
+                  const float3 *points, const uint *cells)
+        : dual_v(dual_v), its_points(its_points),
+          its_cell_indices(its_cell_indices),
+          its_cell_offsets(its_cell_offsets), points(points), cells(cells) {}
+
+    __host__ __device__ void operator()(uint idx) {
+        uint offset = its_cell_indices[idx] * 8;
+        float3 aabb_min = points[cells[offset]];
+        float3 aabb_max = points[cells[offset + 7]];
+        float3 v = dual_v[idx];
+
+        // If vertex is outside AABB, we'll replace it with average point
+        if (v.x < aabb_min.x || v.x > aabb_max.x || v.y < aabb_min.y ||
+            v.y > aabb_max.y || v.z < aabb_min.z || v.z > aabb_max.z) {
+
+            float3 p_avg = make_float3(0.0f, 0.0f, 0.0f);
+            for (uint i = its_cell_offsets[idx]; i < its_cell_offsets[idx + 1];
+                 i++) {
+                float3 p = its_points[i];
+                p_avg = p_avg + p;
+            }
+            p_avg = p_avg / (its_cell_offsets[idx + 1] - its_cell_offsets[idx]);
+            dual_v[idx] = p_avg;
+        }
+    }
+};
+
 struct get_triangles_op {
     float3 *v;
     const float3 *dual_v;
@@ -73,7 +175,8 @@ struct get_triangles_op {
 }   // anonymous namespace
 
 std::pair<NDArray<float3>, NDArray<int>>
-dual_contouring(Grid *grid, const Intersection &its, float level) {
+dual_contouring(Grid *grid, const Intersection &its, float level, float lambda,
+                float svd_tol) {
     thrust::device_vector<uint2> edges_dv(its.edges.data(),
                                           its.edges.data() + its.edges.size());
 
@@ -92,19 +195,28 @@ dual_contouring(Grid *grid, const Intersection &its, float level) {
     thrust::device_vector<int4> edge_neighbors =
         get_edge_neighbors(edges_dv, shape);
 
+    auto [ATA, ATb] = get_qef(its, lambda);
+    BatchedLASolver solver;
+    auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
+
     // Get average intersection point for each cell
-    uint num_cells = its.cell_indices.size();
-    thrust::device_vector<float3> its_points_avg_dv(num_cells);
-    thrust::transform(
-        thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(num_cells), its_points_avg_dv.begin(),
-        get_its_point_avg_op(its.points.data(), its.cell_offsets.data()));
+    NDArray<uint> cells = grid->get_cells();
+    NDArray<float3> points = grid->get_points();
+    uint num_active_cells = its.cell_indices.size();
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_active_cells),
+                     fix_dual_v_op(reinterpret_cast<float3 *>(dual_v.data()),
+                                   its.points.data(), its.cell_indices.data(),
+                                   its.cell_offsets.data(), points.data(),
+                                   cells.data()));
+    cells.free();
+    points.free();
 
     // Create index map that maps cell indices to its_points_avg_dv indices
     thrust::device_vector<int> idx_map(grid->get_num_cells(), -1);
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(num_cells),
+        thrust::counting_iterator<uint>(its.cell_indices.size()),
         [idx_map = idx_map.data(),
          cell_indices = its.cell_indices.data()] __device__(uint i) {
             idx_map[cell_indices[i]] = i;
@@ -113,12 +225,13 @@ dual_contouring(Grid *grid, const Intersection &its, float level) {
     const NDArray<float> &values = grid->get_values();
     thrust::device_vector<float3> v_dv(num_edges * 6,
                                        make_float3(NAN, NAN, NAN));
-    thrust::for_each(
-        thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(num_edges),
-        get_triangles_op(v_dv.data().get(), its_points_avg_dv.data().get(),
-                         edge_neighbors.data().get(), edges_dv.data().get(),
-                         values.data(), idx_map.data().get()));
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_edges),
+                     get_triangles_op(v_dv.data().get(),
+                                      reinterpret_cast<float3 *>(dual_v.data()),
+                                      edge_neighbors.data().get(),
+                                      edges_dv.data().get(), values.data(),
+                                      idx_map.data().get()));
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
@@ -127,7 +240,7 @@ dual_contouring(Grid *grid, const Intersection &its, float level) {
     // Weld/merge vertices.
     thrust::device_vector<int> f_dv(v_dv.size());
     thrust::sequence(f_dv.begin(), f_dv.end());
-    // vertex_welding(v_dv, f_dv);
+    vertex_welding(v_dv, f_dv);
 
     NDArray<float3> v = NDArray<float3>::copy(v_dv.data().get(), {v_dv.size()});
     NDArray<int> f =

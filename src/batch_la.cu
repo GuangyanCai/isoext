@@ -135,16 +135,24 @@ BatchedLASolver::gemv(const NDArray<float> &A, const NDArray<float> &x,
 
 std::tuple<NDArray<float>, NDArray<int>>
 BatchedLASolver::lsq_svd(const NDArray<float> &A, const NDArray<float> &b,
-                         float threshold) {
+                         float tol) {
     // Compute SVD
     auto [U, VT, S, info] = svd(A);
     // Compute U^T * b
     auto UTb = gemv(U, b, true);
+
     // Inverse S with threshold for numerical stability
-    thrust::transform(S.data_ptr, S.data_ptr + S.size(), S.data_ptr,
-                      [threshold] __device__(float s) {
-                          return s > threshold ? 1.0f / s : 0.0f;
-                      });
+    thrust::for_each(thrust::counting_iterator<int>(0),
+                     thrust::counting_iterator<int>(S.shape[0]),
+                     [tol, S = S.data(), len = S.shape[1]] __device__(int i) {
+                         int offset = i * len;
+                         float threshold = tol * S[offset];
+                         for (int j = 0; j < len; ++j) {
+                             S[offset + j] = S[offset + j] > threshold
+                                                 ? 1.0f / S[offset + j]
+                                                 : 0.0f;
+                         }
+                     });
     // Multiply by S^-1
     NDArray<float> S_inv_UTb({S.shape.begin(), S.shape.end()});
     thrust::transform(S.data_ptr, S.data_ptr + S.size(), UTb.data_ptr,

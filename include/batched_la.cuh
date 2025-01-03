@@ -25,7 +25,6 @@ class BatchedLASolver {
     NDArray<float> gemv(const NDArray<float> &A, const NDArray<float> &x,
                         bool transa = false);
 
-    std::tuple<NDArray<float>, NDArray<int>> lsq_svd(const NDArray<float> &A,
-                                                     const NDArray<float> &b,
-                                                     float threshold = 1e-7);
+    std::tuple<NDArray<float>, NDArray<int>>
+    lsq_svd(const NDArray<float> &A, const NDArray<float> &b, float tol);
 };

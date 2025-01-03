@@ -135,23 +135,6 @@ struct edge_to_neighbor_idx_op {
     }
 };
 
-struct get_its_point_avg_op {
-    const float3 *its_points;
-    const uint *cell_offsets;
-
-    get_its_point_avg_op(const float3 *its_points, const uint *cell_offsets)
-        : its_points(its_points), cell_offsets(cell_offsets) {}
-
-    __host__ __device__ float3 operator()(uint idx) {
-        float3 avg = make_float3(0.0f, 0.0f, 0.0f);
-        for (uint i = cell_offsets[idx]; i < cell_offsets[idx + 1]; i++) {
-            avg = avg + its_points[i];
-        }
-        avg = avg / (cell_offsets[idx + 1] - cell_offsets[idx]);
-        return avg;
-    }
-};
-
 void vertex_welding(thrust::device_vector<float3> &v,
                     thrust::device_vector<int> &f, bool skip_scatter = true);
 

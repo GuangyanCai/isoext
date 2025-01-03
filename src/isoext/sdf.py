@@ -41,6 +41,22 @@ class TorusSDF(SDF):
 
 
 @dataclass
+class CuboidSDF(SDF):
+    size: List[float]  # full lengths in x, y, z directions
+
+    def __call__(self, p):
+        # Convert size to tensor and move to same device as input points
+        # Divide by 2 since original formula uses half-lengths
+        b = torch.tensor(self.size).to(p) / 2
+        # Get distance from point to box boundary
+        q = torch.abs(p) - b
+        # Length of q.max(0) plus length of remaining positive components
+        return torch.norm(
+            torch.maximum(q, torch.zeros_like(q)), dim=-1
+        ) + torch.minimum(q.max(dim=-1).values, torch.zeros_like(q[..., 0]))
+
+
+@dataclass
 class UnionOp(SDF):
     sdf_list: List[SDF]
 
