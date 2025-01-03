@@ -80,6 +80,22 @@ lerp(float t, T a, T b) {
     return (1 - t) * a + t * b;
 }
 
+inline __host__ __device__ float
+dot(float3 a, float3 b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline __host__ __device__ float3
+cross(float3 a, float3 b) {
+    return make_float3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z,
+                       a.x * b.y - a.y * b.x);
+}
+
+inline __host__ __device__ float
+norm(float3 a) {
+    return sqrt(dot(a, a));
+}
+
 struct is_nan_pred {
     __host__ __device__ bool operator()(const float3 &v) {
         return isnan(v.x) || isnan(v.y) || isnan(v.z);

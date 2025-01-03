@@ -42,12 +42,31 @@ struct get_triangles_op {
                 make_int4(quad_idx.w, quad_idx.z, quad_idx.y, quad_idx.x);
         }
 
-        v[idx * 6 + 0] = dual_v[quad_idx.x];
-        v[idx * 6 + 1] = dual_v[quad_idx.y];
-        v[idx * 6 + 2] = dual_v[quad_idx.z];
-        v[idx * 6 + 3] = dual_v[quad_idx.x];
-        v[idx * 6 + 4] = dual_v[quad_idx.z];
-        v[idx * 6 + 5] = dual_v[quad_idx.w];
+        float3 v0 = dual_v[quad_idx.x];
+        float3 v1 = dual_v[quad_idx.y];
+        float3 v2 = dual_v[quad_idx.z];
+        float3 v3 = dual_v[quad_idx.w];
+
+        // 0 3
+        // 1 2
+
+        if (norm(v0 - v2) > norm(v1 - v3)) {
+            // Split along the edge v1-v3
+            v[idx * 6 + 0] = v1;
+            v[idx * 6 + 1] = v3;
+            v[idx * 6 + 2] = v0;
+            v[idx * 6 + 3] = v3;
+            v[idx * 6 + 4] = v1;
+            v[idx * 6 + 5] = v2;
+        } else {
+            // Split along the edge v0-v2
+            v[idx * 6 + 0] = v2;
+            v[idx * 6 + 1] = v0;
+            v[idx * 6 + 2] = v1;
+            v[idx * 6 + 3] = v0;
+            v[idx * 6 + 4] = v2;
+            v[idx * 6 + 5] = v3;
+        }
     }
 };
 
