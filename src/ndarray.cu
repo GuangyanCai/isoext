@@ -5,7 +5,9 @@
 
 void
 print_batched_matrix(const NDArray<float> &arr, const std::string &name) {
-    assert(arr.ndim() == 3);
+    if (arr.ndim() != 3) {
+        throw std::runtime_error("Input matrix must be 3D");
+    }
     const int batch = arr.shape[0];
     const int m = arr.shape[1];
     const int n = arr.shape[2];
@@ -30,7 +32,9 @@ print_batched_matrix(const NDArray<float> &arr, const std::string &name) {
 
 void
 print_batched_vector(const NDArray<float> &arr, const std::string &name) {
-    assert(arr.ndim() == 2);
+    if (arr.ndim() != 2) {
+        throw std::runtime_error("Input vector must be 2D");
+    }
     const int batch = arr.shape[0];
     const int n = arr.shape[1];
 

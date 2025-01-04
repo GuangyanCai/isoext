@@ -3,10 +3,15 @@
 
 UniformGrid::UniformGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
                          float default_value)
-    : values({shape.x, shape.y, shape.z}), shape(shape), aabb_min(aabb_min),
-      aabb_max(aabb_max),
+    : shape(shape), aabb_min(aabb_min), aabb_max(aabb_max),
       num_cells((shape.x - 1) * (shape.y - 1) * (shape.z - 1)),
       num_points(shape.x * shape.y * shape.z) {
+    size_t size_check = (size_t) shape.x * (size_t) shape.y * (size_t) shape.z;
+    if (size_check > INT_MAX) {
+        throw std::runtime_error(
+            "Number of points exceeds maximum value 2147483647 (max int)");
+    }
+    values = NDArray<float>({shape.x, shape.y, shape.z});
     values.fill(default_value);
 }
 

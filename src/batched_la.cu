@@ -16,7 +16,9 @@ BatchedLASolver::~BatchedLASolver() {
 
 std::tuple<NDArray<float>, NDArray<float>, NDArray<float>, NDArray<int>>
 BatchedLASolver::svd(const NDArray<float> &A) {
-    assert(A.ndim() == 3);
+    if (A.ndim() != 3) {
+        throw std::runtime_error("Input matrix must be 3D");
+    }
     const int batch = A.shape[0];
     const int m = A.shape[1];
     const int n = A.shape[2];
@@ -55,8 +57,12 @@ BatchedLASolver::svd(const NDArray<float> &A) {
 NDArray<float>
 BatchedLASolver::gemm(const NDArray<float> &A, const NDArray<float> &B,
                       bool transa, bool transb) {
-    assert(A.ndim() == 3 && B.ndim() == 3);
-    assert(A.shape[0] == B.shape[0]);   // same batch size
+    if (A.ndim() != 3 || B.ndim() != 3) {
+        throw std::runtime_error("Input matrices must be 3D");
+    }
+    if (A.shape[0] != B.shape[0]) {
+        throw std::runtime_error("Batch sizes must match");
+    }
     const int batch = A.shape[0];
 
     // Get matrix dimensions based on transpose flags
@@ -65,7 +71,9 @@ BatchedLASolver::gemm(const NDArray<float> &A, const NDArray<float> &B,
     const int n = transb ? B.shape[1] : B.shape[2];
 
     // Verify matrix dimensions are compatible
-    assert(k == (transb ? B.shape[2] : B.shape[1]));
+    if (k != (transb ? B.shape[2] : B.shape[1])) {
+        throw std::runtime_error("Matrix dimensions are not compatible");
+    }
 
     // Leading dimensions
     const int lda = A.shape[1];   // Leading dimension of A
@@ -96,8 +104,13 @@ BatchedLASolver::gemm(const NDArray<float> &A, const NDArray<float> &B,
 NDArray<float>
 BatchedLASolver::gemv(const NDArray<float> &A, const NDArray<float> &x,
                       bool transa) {
-    assert(A.ndim() == 3 && x.ndim() == 2);
-    assert(A.shape[0] == x.shape[0]);   // same batch size
+    if (A.ndim() != 3 || x.ndim() != 2) {
+        throw std::runtime_error(
+            "Input matrices must be 3D and vectors must be 2D");
+    }
+    if (A.shape[0] != x.shape[0]) {
+        throw std::runtime_error("Batch sizes must match");
+    }
     const int batch = A.shape[0];
 
     // Get matrix dimensions based on transpose flag
@@ -105,7 +118,9 @@ BatchedLASolver::gemv(const NDArray<float> &A, const NDArray<float> &x,
     const int n = transa ? A.shape[1] : A.shape[2];
 
     // Verify vector dimension is compatible
-    assert(x.shape[1] == n);
+    if (x.shape[1] != n) {
+        throw std::runtime_error("Vector dimension is not compatible");
+    }
 
     // Leading dimensions
     const int lda = A.shape[1];   // Leading dimension of A

@@ -8,7 +8,15 @@
 SparseGrid::SparseGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
                        float default_value)
     : shape(shape), aabb_min(aabb_min), aabb_max(aabb_max),
-      default_value(default_value) {}
+      default_value(default_value) {
+    size_t size_check = (size_t) shape.x * (size_t) shape.y * (size_t) shape.z;
+    std::cout << "size_check: " << size_check << std::endl;
+    if (size_check > INT_MAX) {
+        throw std::runtime_error(
+            "Maximum number of points exceeds maximum value 2147483647 "
+            "(max int)");
+    }
+}
 
 NDArray<float3>
 SparseGrid::get_points() const {
