@@ -96,6 +96,13 @@ norm(float3 a) {
     return sqrt(dot(a, a));
 }
 
+inline __host__ __device__ float3
+clip(float3 a, float3 min, float3 max) {
+    return make_float3(fminf(fmaxf(a.x, min.x), max.x),
+                       fminf(fmaxf(a.y, min.y), max.y),
+                       fminf(fmaxf(a.z, min.z), max.z));
+}
+
 struct is_nan_pred {
     __host__ __device__ bool operator()(const float3 &v) {
         return isnan(v.x) || isnan(v.y) || isnan(v.z);

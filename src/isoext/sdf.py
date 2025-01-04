@@ -66,6 +66,22 @@ class UnionOp(SDF):
 
 
 @dataclass
+class SmoothUnionOp(SDF):
+    sdf_list: List[SDF]
+    k: float  # blending parameter
+
+    def __call__(self, p):
+        results = [sdf(p) for sdf in self.sdf_list]
+        # results is [d1, d2, ...]
+        # We take a pairwise or reduce approach to do a smooth union:
+        d = results[0]
+        for i in range(1, len(results)):
+            d2 = results[i]
+            d = -self.k * torch.log(torch.exp(-d / self.k) + torch.exp(-d2 / self.k))
+        return d
+
+
+@dataclass
 class IntersectionOp(SDF):
     sdf_list: List[SDF]
 

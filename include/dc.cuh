@@ -8,4 +8,4 @@
 
 std::pair<NDArray<float3>, NDArray<int>>
 dual_contouring(Grid *grid, const Intersection &its, float level = 0.0f,
-                float lambda = 1e-5f, float svd_tol = 1e-6f);
+                float reg = 1e-2f, float svd_tol = 1e-6f);
