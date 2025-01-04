@@ -199,7 +199,8 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float lambda,
     BatchedLASolver solver;
     auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
 
-    // Get average intersection point for each cell
+    // Check whether the dual vertex is inside the cell, and if not, replace it
+    // with the average point of the cell.
     NDArray<uint> cells = grid->get_cells();
     NDArray<float3> points = grid->get_points();
     uint num_active_cells = its.cell_indices.size();
@@ -212,7 +213,7 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float lambda,
     cells.free();
     points.free();
 
-    // Create index map that maps cell indices to its_points_avg_dv indices
+    // Create index map that maps cell indices to dual_v indices
     thrust::device_vector<int> idx_map(grid->get_num_cells(), -1);
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
