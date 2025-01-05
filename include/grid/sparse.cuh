@@ -56,6 +56,7 @@ class SparseGrid : public Grid {
                                       const NDArray<float> &new_values,
                                       float level = 0.f) const;
 
-    void convert_edges(thrust::device_vector<uint2> &edges_dv,
-                       thrust::device_vector<int4> &edge_neighbors_dv) override;
+    std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+    get_dual_quads(const NDArray<uint2> &edges,
+                   const NDArray<bool> &is_out) const override;
 };

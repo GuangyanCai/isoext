@@ -8,7 +8,6 @@ struct Intersection {
     NDArray<float3> normals;
     NDArray<uint2> edges;
     NDArray<uint> cell_indices;
-    NDArray<uint> actual_cell_indices;
     NDArray<uint> cell_offsets;
     NDArray<bool> is_out;
 

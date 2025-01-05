@@ -108,7 +108,7 @@ SparseGrid::remove_cells(const NDArray<uint> &new_cell_indices_) {
         cell_indices.begin(), cell_indices.end(), new_cell_indices.begin(),
         new_cell_indices.end(), result.begin());
 
-    // Resize result vector to actual size after set_difference
+    // Resize result vector
     result.resize(result_end - result.begin());
 
     // Copy result back to cells_indices
@@ -178,11 +178,49 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
     return filtered_cell_indices;
 }
 
-void
-SparseGrid::convert_edges(thrust::device_vector<uint2> &edges_dv,
-                          thrust::device_vector<int4> &edge_neighbors_dv) {
-    uint num_cells = shape.x * shape.y * shape.z;
-    thrust::device_vector<int> idx_map_dv(num_cells, -1);
+std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+SparseGrid::get_dual_quads(const NDArray<uint2> &edges,
+                           const NDArray<bool> &is_out) const {
+    // Copy edges and is_out
+    thrust::device_vector<uint2> edges_dv(edges.data(),
+                                          edges.data() + edges.size());
+    thrust::device_vector<bool> is_out_dv(is_out.data(),
+                                          is_out.data() + is_out.size());
+
+    // Convert cell indices to uniform cells (diffrent from get_cells())
+    uint num_cells = cell_indices.size();
+    thrust::device_vector<uint> uniform_cells_dv(num_cells * 8);
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     idx_to_cell_op(uniform_cells_dv.data().get(),
+                                    cell_indices.data().get(), shape));
+
+    // Convert edges in a sparse grid to edges in a uniform grid
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(edges_dv.size()),
+        [edges = edges_dv.data().get(),
+         uniform_cells = uniform_cells_dv.data().get()] __device__(uint idx) {
+            uint2 &e = edges[idx];
+            e.x = uniform_cells[e.x];
+            e.y = uniform_cells[e.y];
+        });
+
+    // Remove duplicated edges. At the same time, update the is_out array
+    // accordingly.
+    thrust::sort_by_key(edges_dv.begin(), edges_dv.end(), is_out_dv.begin(),
+                        uint2_less_pred());
+    auto new_end = thrust::unique_by_key(edges_dv.begin(), edges_dv.end(),
+                                         is_out_dv.begin(), uint2_equal_pred());
+    edges_dv.erase(new_end.first, edges_dv.end());
+    is_out_dv.erase(new_end.second, is_out_dv.end());
+
+    // Get edge neighbors
+    thrust::device_vector<int4> edge_neighbors_dv =
+        get_edge_neighbors(edges_dv, shape);
+
+    // Create a map from uniform grid cell indices to sparse grid cell indices
+    thrust::device_vector<int> idx_map_dv(shape.x * shape.y * shape.z, -1);
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
         thrust::counting_iterator<uint>(cell_indices.size()),
@@ -191,6 +229,8 @@ SparseGrid::convert_edges(thrust::device_vector<uint2> &edges_dv,
             idx_map[cell_indices[idx]] = idx;
         });
 
+    // Convert edge neighbors in a uniform grid to edge neighbors in a sparse
+    // grid
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(edge_neighbors_dv.size()),
                      [edge_neighbors = edge_neighbors_dv.data().get(),
@@ -201,4 +241,6 @@ SparseGrid::convert_edges(thrust::device_vector<uint2> &edges_dv,
                          en.z = idx_map[en.z];
                          en.w = idx_map[en.w];
                      });
+
+    return {edge_neighbors_dv, is_out_dv};
 }

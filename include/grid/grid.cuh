@@ -5,6 +5,8 @@
 
 #include <thrust/device_vector.h>
 
+#include <tuple>
+
 class Grid {
   public:
     Grid() = default;
@@ -27,7 +29,7 @@ class Grid {
 
     virtual thrust::device_vector<uint> get_cell_indices() const = 0;
 
-    virtual void
-    convert_edges(thrust::device_vector<uint2> &edges_dv,
-                  thrust::device_vector<int4> &edge_neighbors_dv) = 0;
+    virtual std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+    get_dual_quads(const NDArray<uint2> &edges,
+                   const NDArray<bool> &is_out) const = 0;
 };

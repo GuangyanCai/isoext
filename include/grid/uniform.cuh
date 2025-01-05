@@ -1,7 +1,6 @@
 #pragma once
 
 #include "grid/grid.cuh"
-#include "math.cuh"
 #include "ndarray.cuh"
 
 #include <array>
@@ -35,7 +34,7 @@ class UniformGrid : public Grid {
 
     thrust::device_vector<uint> get_cell_indices() const override;
 
-    inline void
-    convert_edges(thrust::device_vector<uint2> &edges_dv,
-                  thrust::device_vector<int4> &edge_neighbors_dv) override {}
+    std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+    get_dual_quads(const NDArray<uint2> &edges,
+                   const NDArray<bool> &is_out) const override;
 };

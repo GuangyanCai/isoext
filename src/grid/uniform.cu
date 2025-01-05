@@ -2,6 +2,8 @@
 #include "utils.cuh"
 
 #include <thrust/sequence.h>
+#include <thrust/sort.h>
+#include <thrust/unique.h>
 
 UniformGrid::UniformGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
                          float default_value)
@@ -53,4 +55,29 @@ UniformGrid::get_cell_indices() const {
     thrust::device_vector<uint> cell_indices(num_cells);
     thrust::sequence(cell_indices.begin(), cell_indices.end());
     return cell_indices;
+}
+
+std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+UniformGrid::get_dual_quads(const NDArray<uint2> &edges,
+                            const NDArray<bool> &is_out) const {
+    // Copy edges and is_out
+    thrust::device_vector<uint2> edges_dv(edges.data(),
+                                          edges.data() + edges.size());
+    thrust::device_vector<bool> is_out_dv(is_out.data(),
+                                          is_out.data() + is_out.size());
+
+    // Remove duplicated edges. At the same time, update the is_out array
+    // accordingly.
+    thrust::sort_by_key(edges_dv.begin(), edges_dv.end(), is_out_dv.begin(),
+                        uint2_less_pred());
+    auto new_end = thrust::unique_by_key(edges_dv.begin(), edges_dv.end(),
+                                         is_out_dv.begin(), uint2_equal_pred());
+    edges_dv.erase(new_end.first, edges_dv.end());
+    is_out_dv.erase(new_end.second, is_out_dv.end());
+
+    // Get edge neighbors
+    thrust::device_vector<int4> edge_neighbors_dv =
+        get_edge_neighbors(edges_dv, shape);
+
+    return {edge_neighbors_dv, is_out_dv};
 }

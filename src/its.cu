@@ -3,7 +3,6 @@
 #include "utils.cuh"
 
 #include <thrust/device_vector.h>
-#include <thrust/host_vector.h>
 #include <thrust/remove.h>
 #include <thrust/scan.h>
 #include <thrust/sequence.h>
@@ -44,21 +43,18 @@ struct get_its_op {
     const float *values;
     const float3 *points;
     const uint *cells;
-    const uint *actual_cells;
     const int *edges_table;
     const float level;
 
     get_its_op(float3 *its_points, uint2 *its_edges, bool *its_is_out,
                const uint *cell_offsets, const uint *cell_indices,
                const int *edge_status, const float *values,
-               const float3 *points, const uint *cells,
-               const uint *actual_cells, const int *edges_table,
+               const float3 *points, const uint *cells, const int *edges_table,
                const float level)
         : its_points(its_points), its_edges(its_edges), its_is_out(its_is_out),
           cell_offsets(cell_offsets), cell_indices(cell_indices),
           edge_status(edge_status), values(values), points(points),
-          cells(cells), actual_cells(actual_cells), edges_table(edges_table),
-          level(level) {}
+          cells(cells), edges_table(edges_table), level(level) {}
 
     __host__ __device__ void operator()(uint idx) {
         int status = edge_status[idx];
@@ -78,8 +74,8 @@ struct get_its_op {
                 // Get the two vertices that form the edge.
                 int p_0 = edges_table[i * 2];
                 int p_1 = edges_table[i * 2 + 1];
-                its_edges[offset] = make_uint2(actual_cells[idx * 8 + p_0],
-                                               actual_cells[idx * 8 + p_1]);
+                its_edges[offset] =
+                    make_uint2(cells[c_offset + p_0], cells[c_offset + p_1]);
                 its_is_out[offset] = c_v[p_0] <= c_v[p_1];
 
                 // Compute the intersection point.
@@ -143,29 +139,6 @@ get_intersection(Grid *grid, float level) {
     its.cell_indices =
         NDArray<uint>::copy(cell_indices_dv.data().get(), {num_cells});
 
-    // Get the actual cell indices. For UniformGrid, this is the same as
-    // cell_indices. But for SparseGrid, cell_indices gives the indices of the
-    // cells in the sparse grid, while actual_cell_indices gives the indices of
-    // the cells in the uniform grid.
-    thrust::device_vector<uint> actual_cell_indices_dv =
-        grid->get_cell_indices();
-    its.actual_cell_indices = NDArray<uint>({num_cells});
-    thrust::transform(cell_indices_dv.begin(), cell_indices_dv.end(),
-                      its.actual_cell_indices.data_ptr,
-                      [actual_cell_indices =
-                           actual_cell_indices_dv.data()] __device__(uint idx) {
-                          return actual_cell_indices[idx];
-                      });
-
-    // For SparseGrid, cells and actual_cells are different. cells is used for
-    // accessing points and values, while actual_cells gives the actual cell
-    // indices, treating the grid as a uniform grid.
-    NDArray<uint> actual_cells({num_cells, 8});
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_cells),
-                     idx_to_cell_op(actual_cells.data(),
-                                    its.actual_cell_indices.data(), shape));
-
     // Get the intersection points.
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
@@ -173,8 +146,7 @@ get_intersection(Grid *grid, float level) {
         get_its_op(its.points.data(), its.edges.data(), its.is_out.data(),
                    its.cell_offsets.data(), cell_indices_dv.data().get(),
                    edge_status.data().get(), values.data(), points.data(),
-                   cells.data(), actual_cells.data(),
-                   edges_table_dv.data().get(), level));
+                   cells.data(), edges_table_dv.data().get(), level));
 
     return its;
 }
