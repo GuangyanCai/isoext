@@ -1,6 +1,7 @@
 #include "grid/sparse.cuh"
 #include "utils.cuh"
 
+#include <thrust/remove.h>
 #include <thrust/set_operations.h>
 #include <thrust/sort.h>
 #include <thrust/unique.h>
@@ -10,7 +11,6 @@ SparseGrid::SparseGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
     : shape(shape), aabb_min(aabb_min), aabb_max(aabb_max),
       default_value(default_value) {
     size_t size_check = (size_t) shape.x * (size_t) shape.y * (size_t) shape.z;
-    std::cout << "size_check: " << size_check << std::endl;
     if (size_check > INT_MAX) {
         throw std::runtime_error(
             "Maximum number of points exceeds maximum value 2147483647 "
@@ -19,13 +19,27 @@ SparseGrid::SparseGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
 }
 
 NDArray<float3>
-SparseGrid::get_points() const {
-    NDArray<float3> points({get_num_cells(), 8});
-    NDArray<uint> cells = get_cells();
+SparseGrid::get_points_from_cell_indices(
+    const NDArray<uint> &cell_indices_) const {
+    uint num_cells = cell_indices_.size();
+
+    NDArray<uint> cells({num_cells, 8});
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     idx_to_cell_op(cells.data(), cell_indices_.data(), shape));
+
+    NDArray<float3> points({num_cells, 8});
     thrust::transform(cells.data_ptr, cells.data_ptr + cells.size(),
                       points.data_ptr,
                       get_vtx_pos_op(shape, aabb_min, aabb_max));
     return points;
+}
+
+NDArray<float3>
+SparseGrid::get_points() const {
+    NDArray<uint> cell_indices_ =
+        NDArray<uint>::copy(cell_indices.data().get(), {cell_indices.size()});
+    return get_points_from_cell_indices(cell_indices_);
 }
 
 NDArray<float>
@@ -46,9 +60,11 @@ SparseGrid::set_values(const NDArray<float> &new_values) {
 
 NDArray<uint>
 SparseGrid::get_cells() const {
-    NDArray<uint> cells({get_num_cells(), 8});
-    thrust::for_each(cell_indices.begin(), cell_indices.end(),
-                     idx_to_cell_op(cells.data_ptr.get(), shape));
+    uint num_cells = cell_indices.size();
+    thrust::device_vector<uint> cells_dv(num_cells * 8);
+    thrust::sequence(cells_dv.begin(), cells_dv.end());
+    NDArray<uint> cells =
+        NDArray<uint>::copy(cells_dv.data().get(), {num_cells, 8});
     return cells;
 }
 
@@ -104,8 +120,60 @@ SparseGrid::remove_cells(const NDArray<uint> &new_cell_indices_) {
     thrust::fill(values.begin(), values.end(), default_value);
 }
 
-NDArray<uint>
+thrust::device_vector<uint>
 SparseGrid::get_cell_indices() const {
-    return NDArray<uint>::copy(cell_indices.data().get(),
-                               {cell_indices.size()});
+    return cell_indices;
+}
+
+std::vector<NDArray<int>>
+SparseGrid::get_potential_cell_indices(uint chunk_size) const {
+    uint num_cells = shape.x * shape.y * shape.z;
+    uint num_chunks = (num_cells + chunk_size - 1) / chunk_size;
+    std::vector<NDArray<int>> potential_cell_indices(num_chunks);
+    for (size_t i = 0; i < num_chunks; ++i) {
+        uint start = i * chunk_size;
+        uint end = std::min(start + chunk_size, num_cells);
+        uint size = end - start;
+        potential_cell_indices[i] = NDArray<int>({size});
+        thrust::sequence(potential_cell_indices[i].data_ptr,
+                         potential_cell_indices[i].data_ptr + size, start);
+    }
+    return potential_cell_indices;
+}
+
+NDArray<float3>
+SparseGrid::get_points_by_cell_indices(
+    const NDArray<uint> &new_cell_indices) const {
+    return get_points_from_cell_indices(new_cell_indices);
+}
+
+NDArray<uint>
+SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
+                                const NDArray<float> &new_values,
+                                float level) const {
+    uint num_cells = new_cell_indices.size();
+
+    // Convert cell indices to cells
+    thrust::device_vector<uint> cells_dv(num_cells * 8);
+    thrust::sequence(cells_dv.begin(), cells_dv.end());
+
+    // Get the case index of each cell.
+    thrust::device_vector<uint8_t> cases_dv(num_cells);
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     get_case_num_op(cases_dv.data().get(), new_values.data(),
+                                     cells_dv.data().get(), level));
+    // Remove empty cells.
+    thrust::device_vector<uint> cell_indices_dv(
+        new_cell_indices.data_ptr, new_cell_indices.data_ptr + num_cells);
+    cell_indices_dv.erase(thrust::remove_if(cell_indices_dv.begin(),
+                                            cell_indices_dv.end(),
+                                            cases_dv.begin(), is_empty_pred()),
+                          cell_indices_dv.end());
+    num_cells = cell_indices_dv.size();
+
+    // Convert cell indices back to cell indices
+    NDArray<uint> filtered_cell_indices =
+        NDArray<uint>::copy(cell_indices_dv.data().get(), {num_cells});
+    return filtered_cell_indices;
 }

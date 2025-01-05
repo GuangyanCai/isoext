@@ -3,6 +3,8 @@
 #include "math.cuh"
 #include "ndarray.cuh"
 
+#include <thrust/device_vector.h>
+
 class Grid {
   public:
     Grid() = default;
@@ -22,4 +24,6 @@ class Grid {
     virtual void set_values(const NDArray<float> &new_values) = 0;
 
     virtual NDArray<uint> get_cells() const = 0;
+
+    virtual thrust::device_vector<uint> get_cell_indices() const = 0;
 };

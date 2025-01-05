@@ -32,4 +32,6 @@ class UniformGrid : public Grid {
     void set_values(const NDArray<float> &new_values) override;
 
     NDArray<uint> get_cells() const override;
+
+    thrust::device_vector<uint> get_cell_indices() const override;
 };

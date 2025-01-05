@@ -16,6 +16,9 @@ class SparseGrid : public Grid {
     float3 aabb_min, aabb_max;
     float default_value;
 
+    NDArray<float3>
+    get_points_from_cell_indices(const NDArray<uint> &cell_indices) const;
+
   public:
     SparseGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
                float default_value = FMAX);
@@ -42,5 +45,14 @@ class SparseGrid : public Grid {
 
     void remove_cells(const NDArray<uint> &new_cell_indices);
 
-    NDArray<uint> get_cell_indices() const;
+    thrust::device_vector<uint> get_cell_indices() const override;
+
+    std::vector<NDArray<int>> get_potential_cell_indices(uint chunk_size) const;
+
+    NDArray<float3>
+    get_points_by_cell_indices(const NDArray<uint> &new_cell_indices) const;
+
+    NDArray<uint> filter_cell_indices(const NDArray<uint> &new_cell_indices,
+                                      const NDArray<float> &new_values,
+                                      float level = 0.f) const;
 };

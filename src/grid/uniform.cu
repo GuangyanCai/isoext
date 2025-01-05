@@ -1,6 +1,8 @@
 #include "grid/uniform.cuh"
 #include "utils.cuh"
 
+#include <thrust/sequence.h>
+
 UniformGrid::UniformGrid(uint3 shape, float3 aabb_min, float3 aabb_max,
                          float default_value)
     : shape(shape), aabb_min(aabb_min), aabb_max(aabb_max),
@@ -38,8 +40,17 @@ UniformGrid::set_values(const NDArray<float> &new_values) {
 NDArray<uint>
 UniformGrid::get_cells() const {
     NDArray<uint> cells({shape.x - 1, shape.y - 1, shape.z - 1, 8});
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_cells),
-                     idx_to_cell_op(cells.data_ptr.get(), shape));
+    thrust::device_vector<uint> cell_indices(num_cells);
+    thrust::sequence(cell_indices.begin(), cell_indices.end());
+    thrust::for_each(
+        cell_indices.begin(), cell_indices.end(),
+        idx_to_cell_op(cells.data(), cell_indices.data().get(), shape));
     return cells;
+}
+
+thrust::device_vector<uint>
+UniformGrid::get_cell_indices() const {
+    thrust::device_vector<uint> cell_indices(num_cells);
+    thrust::sequence(cell_indices.begin(), cell_indices.end());
+    return cell_indices;
 }

@@ -8,10 +8,13 @@ struct Intersection {
     NDArray<float3> normals;
     NDArray<uint2> edges;
     NDArray<uint> cell_indices;
+    NDArray<uint> actual_cell_indices;
     NDArray<uint> cell_offsets;
+    NDArray<bool> is_out;
 
     Intersection(uint num_points)
-        : points({num_points}), normals({num_points}), edges({num_points}) {}
+        : points({num_points}), normals({num_points}), edges({num_points}),
+          is_out({num_points}) {}
 
     inline NDArray<float3> get_points() { return points; }
     inline NDArray<float3> get_normals() { return normals; }

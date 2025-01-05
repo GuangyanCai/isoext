@@ -31,20 +31,23 @@ __device__ __host__ uint point_idx_to_cell_idx(uint idx, uint3 shape);
 
 struct idx_to_cell_op {
     uint *cells;
-    uint3 shape;
+    const uint *cell_indices;
+    const uint3 shape;
 
-    __host__ __device__ idx_to_cell_op(uint *cells, uint3 shape)
-        : cells(cells), shape(shape) {}
+    __host__ __device__ idx_to_cell_op(uint *cells, const uint *cell_indices,
+                                       const uint3 shape)
+        : cells(cells), shape(shape), cell_indices(cell_indices) {}
 
     __host__ __device__ void operator()(uint idx) {
         uint x, y, z, yz, i;
-        i = idx;
+        i = cell_indices[idx];
         z = i % (shape.z - 1);
         i /= (shape.z - 1);
         y = i % (shape.y - 1);
         x = i / (shape.y - 1);
         idx *= 8;
         yz = shape.y * shape.z;
+
         cells[idx + 0] = x * yz + y * shape.z + z;
         cells[idx + 1] = cells[idx + 0] + 1;
         cells[idx + 2] = cells[idx + 0] + shape.z;

@@ -10,6 +10,7 @@
 #include <nanobind/stl/array.h>
 #include <nanobind/stl/optional.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 #include <nanobind/trampoline.h>
 
 #include <limits>
@@ -180,9 +181,44 @@ NB_MODULE(isoext_ext, m) {
                      nb_to_ours(new_cell_indices).cast<uint>();
                  self.remove_cells(new_cell_indices_);
              })
-        .def("get_cell_indices", [](SparseGrid &self) {
-            NDArray<int> cell_indices = self.get_cell_indices().cast<int>();
-            return ours_to_nb(cell_indices);
+        .def("get_cell_indices",
+             [](SparseGrid &self) {
+                 thrust::device_vector<uint> cell_indices_dv =
+                     self.get_cell_indices();
+                 NDArray<int> cell_indices =
+                     NDArray<uint>::copy(cell_indices_dv.data().get(),
+                                         {cell_indices_dv.size()})
+                         .cast<int>();
+                 return ours_to_nb(cell_indices);
+             })
+        .def("get_potential_cell_indices",
+             [](SparseGrid &self, uint chunk_size) {
+                 auto cell_indices =
+                     self.get_potential_cell_indices(chunk_size);
+                 std::vector<PyTorchCuda<int>> cell_indices_vec;
+                 for (auto &cell_indices_ : cell_indices) {
+                     cell_indices_vec.push_back(ours_to_nb(cell_indices_));
+                 }
+                 return cell_indices_vec;
+             })
+        .def("get_points_by_cell_indices",
+             [](SparseGrid &self, SparseGridCellIndices cell_indices) {
+                 NDArray<int> cell_indices_int = nb_to_ours(cell_indices);
+                 NDArray<uint> cell_indices_uint =
+                     cell_indices_int.cast<uint>();
+                 NDArray<float3> points =
+                     self.get_points_by_cell_indices(cell_indices_uint);
+                 return ours_to_nb(points);
+             })
+        .def("filter_cell_indices", [](SparseGrid &self,
+                                       SparseGridCellIndices cell_indices,
+                                       SparseGridData values, float level) {
+            NDArray<uint> cell_indices_ = nb_to_ours(cell_indices).cast<uint>();
+            NDArray<float> values_ = nb_to_ours(values);
+            NDArray<int> filtered_cell_indices =
+                self.filter_cell_indices(cell_indices_, values_, level)
+                    .cast<int>();
+            return ours_to_nb(filtered_cell_indices);
         });
 
     nb::class_<Intersection>(m, "Intersection")
