@@ -33,6 +33,9 @@ find_package(Python 3.8
 # Import nanobind through CMake's find_package mechanism
 find_package(nanobind CONFIG REQUIRED)
 
+# Import CUDA through CMake's find_package mechanism
+find_package(CUDAToolkit REQUIRED)
+
 include(cmake/get_cpm.cmake)
 
 # This will automatically clone CCCL from GitHub and make the exported cmake targets available
@@ -78,7 +81,7 @@ nanobind_add_module(
     ${SOURCE_LIST}
 )
 
-target_link_libraries(isoext_ext PRIVATE CCCL::CCCL)
+target_link_libraries(isoext_ext PRIVATE CCCL::CCCL CUDA::cusolver CUDA::cublas)
 target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
 
 # Install directive for scikit-build-core

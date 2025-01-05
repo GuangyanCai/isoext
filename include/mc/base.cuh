@@ -13,10 +13,10 @@ class MCBase {
   public:
     virtual ~MCBase() = default;
 
-    virtual void run(const thrust::device_vector<uint8_t> &case_idx_dv,
-                     const thrust::device_vector<uint32_t> &grid_idx_dv,
-                     float3 *v, const float *grid, const float3 *cells,
-                     const uint3 res, float level, bool tight) = 0;
+    virtual void run(float3 *v, const uint num_cells, const uint8_t *cases,
+                     const uint *cell_indices, const float *values,
+                     const float3 *points, const uint *cells,
+                     const float level) = 0;
 
     virtual size_t get_max_triangles() const = 0;
 

@@ -1,10 +1,8 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <nanobind/nanobind.h>
-#include <thrust/device_vector.h>
-
 #include "math.cuh"
+
+#include <thrust/device_vector.h>
 
 // Function to copy data from device to host
 template <typename T>
@@ -25,63 +23,39 @@ host_to_device(const T *h_ptr, size_t size) {
     return d_ptr;
 }
 
-// Structure representing a cube in a 3D grid
-struct Cube {
-    uint32_t vi[8];   // indices of the cube vertices in the grid
-    uint3 ci;         // 3D cube index
+__host__ __device__ uint3 idx_1d_to_3d(uint idx, uint3 shape);
 
-    // Constructor to initialize the cube based on its index and grid resolution
-    __host__ __device__ Cube(uint32_t cube_idx, uint3 res, bool tight) {
-        // Cube layout:
-        //
-        //        v3------e10-----v7
-        //       /|               /|
-        //      / |              / |
-        //    e1  |            e5  |
-        //    /  e2            /   e6
-        //   /    |           /    |
-        //  v1------e9------v5     |
-        //  |     |          |     |
-        //  |    v2------e11-|----v6
-        //  |    /           |    /
-        // e0  e3           e4  e7
-        //  |  /             |  /
-        //  | /              | /
-        //  |/               |/
-        //  v0------e8------v4
-        //
-        //  z
-        //  |  y
-        //  | /
-        //  |/
-        //  +----x
+__device__ __host__ uint idx_3d_to_1d(uint3 idx, uint3 shape);
 
-        // When the grid is tight, neighbor cubes share faces. In this case,
-        // there are (res.x - 1) * (res.y - 1) * (res.z - 1) cubes.
-        if (tight) {
-            ci.z = cube_idx % (res.z - 1);
-            cube_idx /= (res.z - 1);
-            ci.y = cube_idx % (res.y - 1);
-            ci.x = cube_idx / (res.y - 1);
-        }
-        // Otherwise, each cube is separate from others. In this case, res must
-        // be (2n, 2, 2), where n is the number of cubes.
-        else {
-            ci.x = 2 * cube_idx;
-            ci.y = 0;
-            ci.z = 0;
-        }
+__device__ __host__ uint point_idx_to_cell_idx(uint idx, uint3 shape);
 
-        // Compute the indices of the cube's vertices in the array.
-        uint32_t res_yz = res.y * res.z;
-        vi[0] = ci.x * res.y * res.z + ci.y * res.z + ci.z;   // (x, y, z)
-        vi[1] = vi[0] + 1;                                    // (x, y, z+1)
-        vi[2] = vi[0] + res.z;                                // (x, y+1, z)
-        vi[3] = vi[1] + res.z;                                // (x, y+1, z+1)
-        vi[4] = vi[0] + res_yz;                               // (x+1, y, z)
-        vi[5] = vi[1] + res_yz;                               // (x+1, y, z+1)
-        vi[6] = vi[2] + res_yz;                               // (x+1, y+1, z)
-        vi[7] = vi[3] + res_yz;                               // (x+1, y+1, z+1)
+struct idx_to_cell_op {
+    uint *cells;
+    const uint *cell_indices;
+    const uint3 shape;
+
+    __host__ __device__ idx_to_cell_op(uint *cells, const uint *cell_indices,
+                                       const uint3 shape)
+        : cells(cells), shape(shape), cell_indices(cell_indices) {}
+
+    __host__ __device__ void operator()(uint idx) {
+        uint x, y, z, yz, i;
+        i = cell_indices[idx];
+        z = i % (shape.z - 1);
+        i /= (shape.z - 1);
+        y = i % (shape.y - 1);
+        x = i / (shape.y - 1);
+        idx *= 8;
+        yz = shape.y * shape.z;
+
+        cells[idx + 0] = x * yz + y * shape.z + z;
+        cells[idx + 1] = cells[idx + 0] + 1;
+        cells[idx + 2] = cells[idx + 0] + shape.z;
+        cells[idx + 3] = cells[idx + 1] + shape.z;
+        cells[idx + 4] = cells[idx + 0] + yz;
+        cells[idx + 5] = cells[idx + 1] + yz;
+        cells[idx + 6] = cells[idx + 2] + yz;
+        cells[idx + 7] = cells[idx + 3] + yz;
     }
 };
 
@@ -94,7 +68,7 @@ struct get_vtx_pos_op {
                    const float3 aabb_max)
         : res(res), aabb_min(aabb_min), aabb_size(aabb_max - aabb_min) {}
 
-    __host__ __device__ float3 operator()(uint32_t idx) {
+    __host__ __device__ float3 operator()(uint idx) {
         float3 pos;
         pos.z = (idx % res.z) / (float) (res.z - 1);
         idx /= res.z;
@@ -105,35 +79,68 @@ struct get_vtx_pos_op {
     }
 };
 
-struct get_case_idx_op {
+struct get_case_num_op {
     uint8_t *cases;
-    const float *grid;
-    const uint3 res;
+    const float *values;
+    const uint *cells;
     const float level;
-    const bool tight;
 
-    get_case_idx_op(uint8_t *cases, const float *grid, const uint3 res,
-                    const float level, const bool tight)
-        : cases(cases), grid(grid), res(res), level(level), tight(tight) {}
+    get_case_num_op(uint8_t *cases, const float *values, const uint *cells,
+                    const float level)
+        : cases(cases), values(values), cells(cells), level(level) {}
 
-    __host__ __device__ void operator()(uint32_t cube_idx) {
-        // For each cube vertex, compute the index to the grid array.
-        Cube c(cube_idx, res, tight);
-
+    __host__ __device__ void operator()(uint32_t cell_idx) {
         // Compute the sign of each cube vertex and derive the case number
-        // (table_idx).
-        uint8_t table_idx = 0;
-        float p_val[8];
-        for (uint32_t i = 0; i < 8; i++) {
-            p_val[i] = grid[c.vi[i]];
-            table_idx |= (p_val[i] - level < 0) << i;
+        uint8_t case_num = 0;
+        uint offset = cell_idx * 8;
+        for (uint i = 0; i < 8; i++) {
+            float p_val = values[cells[offset + i]];
+            case_num |= (p_val - level < 0) << i;
         }
-        cases[cube_idx] = table_idx;
+        cases[cell_idx] = case_num;
+    }
+};
+
+struct edge_to_neighbor_idx_op {
+    const uint3 *en_table;
+    const uint3 grid_shape;
+    const uint3 grid_offset;
+
+    edge_to_neighbor_idx_op(const uint3 *en_table, const uint3 grid_shape)
+        : en_table(en_table), grid_shape(grid_shape),
+          grid_offset(
+              make_uint3(grid_shape.x * grid_shape.y, grid_shape.y, 1)) {}
+
+    __host__ __device__ int4 operator()(uint2 edge) {
+        uint3 cell_idx = idx_1d_to_3d(edge.x, grid_shape);
+
+        uint offset = edge.y - edge.x;
+        if (offset == grid_offset.x) {
+            offset = 0;
+        } else if (offset == grid_offset.y) {
+            offset = 1;
+        } else {
+            offset = 2;
+        }
+        offset *= 4;
+
+        int r[4];
+        for (int i = 0; i < 4; i++) {
+            uint3 o = en_table[offset + i];
+            if (cell_idx.x < o.x || cell_idx.y < o.y || cell_idx.z < o.z) {
+                r[i] = -1;
+            } else {
+                r[i] = idx_3d_to_1d(cell_idx - o, grid_shape - 1);
+            }
+        }
+
+        return make_int4(r[0], r[1], r[2], r[3]);
     }
 };
 
 void vertex_welding(thrust::device_vector<float3> &v,
                     thrust::device_vector<int> &f, bool skip_scatter = true);
 
-thrust::device_vector<float3> get_cells_from_aabb(std::array<float, 6> aabb,
-                                                  uint3 res);
+thrust::device_vector<int4>
+get_edge_neighbors(const thrust::device_vector<uint2> &edges_dv,
+                   uint3 grid_shape);
