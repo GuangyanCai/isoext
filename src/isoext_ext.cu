@@ -130,10 +130,13 @@ NB_MODULE(isoext_ext, m) {
                  NDArray<float> values = self.get_values();
                  return ours_to_nb(values);
              })
-        .def("set_values", [](UniformGrid &self, UniformGridData new_values) {
-            NDArray<float> values = nb_to_ours(new_values);
-            self.set_values(values);
-        });
+        .def(
+            "set_values",
+            [](UniformGrid &self, UniformGridData new_values) {
+                NDArray<float> values = nb_to_ours(new_values);
+                self.set_values(values);
+            },
+            "new_values"_a);
 
     nb::class_<SparseGrid, Grid>(m, "SparseGrid")
         .def(
@@ -159,28 +162,34 @@ NB_MODULE(isoext_ext, m) {
                  NDArray<float> values = self.get_values();
                  return ours_to_nb(values);
              })
-        .def("set_values",
-             [](SparseGrid &self, SparseGridData new_values) {
-                 NDArray<float> values = nb_to_ours(new_values);
-                 self.set_values(values);
-             })
+        .def(
+            "set_values",
+            [](SparseGrid &self, SparseGridData new_values) {
+                NDArray<float> values = nb_to_ours(new_values);
+                self.set_values(values);
+            },
+            "new_values"_a)
         .def("get_cells",
              [](SparseGrid &self) {
                  NDArray<uint> cells = self.get_cells();
                  return ours_to_nb(cells);
              })
-        .def("add_cells",
-             [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
-                 NDArray<uint> new_cell_indices_ =
-                     nb_to_ours(new_cell_indices).cast<uint>();
-                 self.add_cells(new_cell_indices_);
-             })
-        .def("remove_cells",
-             [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
-                 NDArray<uint> new_cell_indices_ =
-                     nb_to_ours(new_cell_indices).cast<uint>();
-                 self.remove_cells(new_cell_indices_);
-             })
+        .def(
+            "add_cells",
+            [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
+                NDArray<uint> new_cell_indices_ =
+                    nb_to_ours(new_cell_indices).cast<uint>();
+                self.add_cells(new_cell_indices_);
+            },
+            "new_cell_indices"_a)
+        .def(
+            "remove_cells",
+            [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
+                NDArray<uint> new_cell_indices_ =
+                    nb_to_ours(new_cell_indices).cast<uint>();
+                self.remove_cells(new_cell_indices_);
+            },
+            "new_cell_indices"_a)
         .def("get_cell_indices",
              [](SparseGrid &self) {
                  thrust::device_vector<uint> cell_indices_dv =
@@ -201,42 +210,49 @@ NB_MODULE(isoext_ext, m) {
                  }
                  return cell_indices_vec;
              })
-        .def("get_points_by_cell_indices",
-             [](SparseGrid &self, SparseGridCellIndices cell_indices) {
-                 NDArray<int> cell_indices_int = nb_to_ours(cell_indices);
-                 NDArray<uint> cell_indices_uint =
-                     cell_indices_int.cast<uint>();
-                 NDArray<float3> points =
-                     self.get_points_by_cell_indices(cell_indices_uint);
-                 return ours_to_nb(points);
-             })
-        .def("filter_cell_indices", [](SparseGrid &self,
-                                       SparseGridCellIndices cell_indices,
-                                       SparseGridData values, float level) {
-            NDArray<uint> cell_indices_ = nb_to_ours(cell_indices).cast<uint>();
-            NDArray<float> values_ = nb_to_ours(values);
-            NDArray<int> filtered_cell_indices =
-                self.filter_cell_indices(cell_indices_, values_, level)
-                    .cast<int>();
-            return ours_to_nb(filtered_cell_indices);
-        });
+        .def(
+            "get_points_by_cell_indices",
+            [](SparseGrid &self, SparseGridCellIndices cell_indices) {
+                NDArray<int> cell_indices_int = nb_to_ours(cell_indices);
+                NDArray<uint> cell_indices_uint = cell_indices_int.cast<uint>();
+                NDArray<float3> points =
+                    self.get_points_by_cell_indices(cell_indices_uint);
+                return ours_to_nb(points);
+            },
+            "cell_indices"_a)
+        .def(
+            "filter_cell_indices",
+            [](SparseGrid &self, SparseGridCellIndices cell_indices,
+               SparseGridData values, float level = 0.f) {
+                NDArray<uint> cell_indices_ =
+                    nb_to_ours(cell_indices).cast<uint>();
+                NDArray<float> values_ = nb_to_ours(values);
+                NDArray<int> filtered_cell_indices =
+                    self.filter_cell_indices(cell_indices_, values_, level)
+                        .cast<int>();
+                return ours_to_nb(filtered_cell_indices);
+            },
+            "cell_indices"_a, "values"_a, "level"_a = 0.f);
 
     nb::class_<Intersection>(m, "Intersection")
         .def("get_points",
              [](Intersection &self) { return ours_to_nb(self.points); })
         .def("get_normals",
              [](Intersection &self) { return ours_to_nb(self.normals); })
-        .def("set_normals", [](Intersection &self, Vector3 new_normals) {
-            NDArray<float3> normals = nb_to_ours(new_normals);
-            self.set_normals(normals);
-        });
+        .def(
+            "set_normals",
+            [](Intersection &self, Vector3 new_normals) {
+                NDArray<float3> normals = nb_to_ours(new_normals);
+                self.set_normals(normals);
+            },
+            "new_normals"_a);
 
     m.def("get_intersection", &get_intersection, "grid"_a, "level"_a = 0.f);
 
     m.def(
         "dual_contouring",
-        [](Grid *grid, Intersection its, float level, float reg,
-           float svd_tol) {
+        [](Grid *grid, Intersection its, float level = 0.f, float reg = 1e-2f,
+           float svd_tol = 1e-6f) {
             auto [v, f] = dual_contouring(grid, its, level, reg, svd_tol);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
