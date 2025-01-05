@@ -105,14 +105,16 @@ struct get_triangles_op {
     const float3 *dual_v;
     const int4 *quad_indices;
     const uint2 *its_edges;
+    const bool *its_is_out;
     const float *values;
     const int *idx_map;
 
     get_triangles_op(float3 *v, const float3 *dual_v, const int4 *quad_indices,
-                     const uint2 *its_edges, const float *values,
-                     const int *idx_map)
+                     const uint2 *its_edges, const bool *its_is_out,
+                     const float *values, const int *idx_map)
         : v(v), dual_v(dual_v), quad_indices(quad_indices),
-          its_edges(its_edges), values(values), idx_map(idx_map) {}
+          its_edges(its_edges), its_is_out(its_is_out), values(values),
+          idx_map(idx_map) {}
 
     __host__ __device__ void operator()(uint idx) {
         int4 quad_idx = quad_indices[idx];
@@ -128,7 +130,7 @@ struct get_triangles_op {
 
         // If the edge is pointing inward, swap the quad indices.
         uint2 edge = its_edges[idx];
-        if (values[edge.x] > values[edge.y]) {
+        if (!its_is_out[idx]) {
             quad_idx =
                 make_int4(quad_idx.w, quad_idx.z, quad_idx.y, quad_idx.x);
         }
@@ -168,21 +170,31 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
                 float svd_tol) {
     thrust::device_vector<uint2> edges_dv(its.edges.data(),
                                           its.edges.data() + its.edges.size());
+    thrust::device_vector<bool> is_out_dv(
+        its.is_out.data(), its.is_out.data() + its.is_out.size());
 
-    // Sort edges to bring duplicates together
-    thrust::sort(edges_dv.begin(), edges_dv.end(), uint2_less_pred());
+    // // Sort edges to bring duplicates together
+    // thrust::sort(edges_dv.begin(), edges_dv.end(), uint2_less_pred());
 
-    // Remove duplicates
-    edges_dv.erase(
-        thrust::unique(edges_dv.begin(), edges_dv.end(), uint2_equal_pred()),
-        edges_dv.end());
+    // // Remove duplicates
+    // edges_dv.erase(
+    //     thrust::unique(edges_dv.begin(), edges_dv.end(), uint2_equal_pred()),
+    //     edges_dv.end());
+
+    thrust::sort_by_key(edges_dv.begin(), edges_dv.end(), is_out_dv.begin(),
+                        uint2_less_pred());
+    auto new_end = thrust::unique_by_key(edges_dv.begin(), edges_dv.end(),
+                                         is_out_dv.begin(), uint2_equal_pred());
+    edges_dv.erase(new_end.first, edges_dv.end());
+    is_out_dv.erase(new_end.second, is_out_dv.end());
 
     uint num_edges = edges_dv.size();
 
     // Get edge neighbors
     uint3 shape = grid->get_shape();
-    thrust::device_vector<int4> edge_neighbors =
+    thrust::device_vector<int4> edge_neighbors_dv =
         get_edge_neighbors(edges_dv, shape);
+    grid->convert_edges(edges_dv, edge_neighbors_dv);
 
     auto [ATA, ATb] = get_qef(its, reg);
     BatchedLASolver solver;
@@ -213,13 +225,13 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
     const NDArray<float> &values = grid->get_values();
     thrust::device_vector<float3> v_dv(num_edges * 6,
                                        make_float3(NAN, NAN, NAN));
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_edges),
-                     get_triangles_op(v_dv.data().get(),
-                                      reinterpret_cast<float3 *>(dual_v.data()),
-                                      edge_neighbors.data().get(),
-                                      edges_dv.data().get(), values.data(),
-                                      idx_map.data().get()));
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_edges),
+        get_triangles_op(
+            v_dv.data().get(), reinterpret_cast<float3 *>(dual_v.data()),
+            edge_neighbors_dv.data().get(), edges_dv.data().get(),
+            is_out_dv.data().get(), values.data(), idx_map.data().get()));
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),

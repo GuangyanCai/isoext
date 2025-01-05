@@ -34,4 +34,8 @@ class UniformGrid : public Grid {
     NDArray<uint> get_cells() const override;
 
     thrust::device_vector<uint> get_cell_indices() const override;
+
+    inline void
+    convert_edges(thrust::device_vector<uint2> &edges_dv,
+                  thrust::device_vector<int4> &edge_neighbors_dv) override {}
 };

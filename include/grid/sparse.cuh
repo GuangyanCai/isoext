@@ -55,4 +55,7 @@ class SparseGrid : public Grid {
     NDArray<uint> filter_cell_indices(const NDArray<uint> &new_cell_indices,
                                       const NDArray<float> &new_values,
                                       float level = 0.f) const;
+
+    void convert_edges(thrust::device_vector<uint2> &edges_dv,
+                       thrust::device_vector<int4> &edge_neighbors_dv) override;
 };

@@ -177,3 +177,28 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
         NDArray<uint>::copy(cell_indices_dv.data().get(), {num_cells});
     return filtered_cell_indices;
 }
+
+void
+SparseGrid::convert_edges(thrust::device_vector<uint2> &edges_dv,
+                          thrust::device_vector<int4> &edge_neighbors_dv) {
+    uint num_cells = shape.x * shape.y * shape.z;
+    thrust::device_vector<int> idx_map_dv(num_cells, -1);
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(cell_indices.size()),
+        [idx_map = idx_map_dv.data().get(),
+         cell_indices = cell_indices.data().get()] __device__(uint idx) {
+            idx_map[cell_indices[idx]] = idx;
+        });
+
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(edge_neighbors_dv.size()),
+                     [edge_neighbors = edge_neighbors_dv.data().get(),
+                      idx_map = idx_map_dv.data().get()] __device__(uint idx) {
+                         int4 &en = edge_neighbors[idx];
+                         en.x = idx_map[en.x];
+                         en.y = idx_map[en.y];
+                         en.z = idx_map[en.z];
+                         en.w = idx_map[en.w];
+                     });
+}
