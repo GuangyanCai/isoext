@@ -252,12 +252,12 @@ NB_MODULE(isoext_ext, m) {
     m.def(
         "dual_contouring",
         [](Grid *grid, Intersection its, float level = 0.f, float reg = 1e-2f,
-           float svd_tol = 1e-6f) {
-            auto [v, f] = dual_contouring(grid, its, level, reg, svd_tol);
+           float svd_tol = 1e-6f, bool clip = true) {
+            auto [v, f] = dual_contouring(grid, its, level, reg, svd_tol, clip);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
         "grid"_a, "its"_a, "level"_a = 0.f, "reg"_a = 1e-2f,
-        "svd_tol"_a = 1e-6f);
+        "svd_tol"_a = 1e-6f, "clip"_a = true);
 
     m.doc() = "A library for extracting iso-surfaces from level-set functions";
 }

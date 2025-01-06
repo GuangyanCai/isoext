@@ -160,7 +160,7 @@ struct get_triangles_op {
 
 std::pair<NDArray<float3>, NDArray<int>>
 dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
-                float svd_tol) {
+                float svd_tol, bool clip) {
     auto [dual_quads_dv, is_out_dv] =
         grid->get_dual_quads(its.edges, its.is_out);
 
@@ -169,16 +169,17 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
     auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
 
     // Clip dual vertices to the cell AABB
-    NDArray<uint> cells = grid->get_cells();
-    NDArray<float3> points = grid->get_points();
-    uint num_active_cells = its.cell_indices.size();
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_active_cells),
-                     fix_dual_v_op(reinterpret_cast<float3 *>(dual_v.data()),
-                                   its.cell_indices.data(), points.data(),
-                                   cells.data()));
-    cells.free();
-    points.free();
+    if (clip) {
+        NDArray<uint> cells = grid->get_cells();
+        NDArray<float3> points = grid->get_points();
+        uint num_active_cells = its.cell_indices.size();
+        thrust::for_each(
+            thrust::counting_iterator<uint>(0),
+            thrust::counting_iterator<uint>(num_active_cells),
+            fix_dual_v_op(reinterpret_cast<float3 *>(dual_v.data()),
+                          its.cell_indices.data(), points.data(),
+                          cells.data()));
+    }
 
     // Create index map that maps cell indices to dual_v indices
     thrust::device_vector<int> idx_map(grid->get_num_cells(), -1);
