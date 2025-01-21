@@ -42,6 +42,7 @@ The simplest way to install `isoext` is via pip:
 ```bash
 pip install isoext
 ```
+*On Windows, you might encounter compilation errors due to the system’s default limit on maximum path length  (260 characters). You can enable long paths on Windows by following tutorials such as [this one](https://www.howtogeek.com/266621/how-to-make-windows-10-accept-file-paths-over-260-characters/)*
 ### Install from Source
 
 ```bash
