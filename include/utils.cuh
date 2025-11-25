@@ -109,7 +109,7 @@ struct edge_to_neighbor_idx_op {
     edge_to_neighbor_idx_op(const uint3 *en_table, const uint3 grid_shape)
         : en_table(en_table), grid_shape(grid_shape),
           grid_offset(
-              make_uint3(grid_shape.x * grid_shape.y, grid_shape.y, 1)) {}
+              make_uint3(grid_shape.y * grid_shape.z, grid_shape.z, 1)) {}
 
     __host__ __device__ int4 operator()(uint2 edge) {
         uint3 cell_idx = idx_1d_to_3d(edge.x, grid_shape);
