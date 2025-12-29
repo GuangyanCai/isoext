@@ -1,5 +1,3 @@
-from typing import List, Union
-
 import torch
 
 
@@ -27,7 +25,7 @@ def write_obj(obj_path: str, v: torch.Tensor, f: torch.Tensor) -> None:
         obj_file.writelines(lines)
 
 
-def make_grid(aabb: List[float], res: Union[int, List[int]], device: str = "cuda") -> torch.Tensor:
+def make_grid(aabb: list[float], res: int | list[int], device: str = "cuda") -> torch.Tensor:
     """Create a uniform grid from an axis-aligned bounding box.
 
     Args:

@@ -1,8 +1,10 @@
-from pathlib import Path
-from argparse import ArgumentParser
 import json
-from isoext.utils import write_obj
+from argparse import ArgumentParser
+from pathlib import Path
+
 import torch
+
+from isoext.utils import write_obj
 
 
 def gen(case_file: Path, output_path: Path):
@@ -111,7 +113,7 @@ def gen(case_file: Path, output_path: Path):
         return [tri[::-1] for tri in tris]
 
     # Read the base cases from the case file
-    with open(case_file, "r") as f:
+    with open(case_file) as f:
         case_file = json.load(f)
     base_cases = case_file["base_cases"]
     use_reflection = case_file.get("use_reflection", True)
@@ -146,7 +148,7 @@ def gen(case_file: Path, output_path: Path):
     edge_points = []
     for i in range(num_edges):
         v0, v1 = edge_pairs[i]
-        edge_points.append((0.5 * (verts[v0] + verts[v1])))
+        edge_points.append(0.5 * (verts[v0] + verts[v1]))
     edge_points = torch.stack(edge_points)
 
     # # Output the cases to the test_cases directory
@@ -183,7 +185,7 @@ def gen(case_file: Path, output_path: Path):
                 edge_status[e] = 1
         edge_status_lut.append("0b" + "".join(str(e) for e in edge_status[::-1]))
 
-    with open(output_path / "luts" / f"edge_status.txt", "w") as f:
+    with open(output_path / "luts" / "edge_status.txt", "w") as f:
         for i in range(num_cases):
             f.write(edge_status_lut[i] + ",\n")
 
@@ -200,7 +202,7 @@ def gen(case_file: Path, output_path: Path):
         tris.extend([-1] * (max_length - len(tris)))  # Fill with -1 to max_length
         triangle_lut.extend(tris)
 
-    with open(output_path / "luts" / f"triangle.txt", "w") as f:
+    with open(output_path / "luts" / "triangle.txt", "w") as f:
         for i in range(0, len(triangle_lut), max_length):
             f.write(", ".join(str(t) for t in triangle_lut[i : i + max_length]) + ",\n")
 

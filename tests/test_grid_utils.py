@@ -54,7 +54,7 @@ def test_write_obj():
 
         # Verify file was created and has content
         assert os.path.exists(tmp_path)
-        with open(tmp_path, "r") as f:
+        with open(tmp_path) as f:
             content = f.read()
             assert "v " in content
             assert "f " in content

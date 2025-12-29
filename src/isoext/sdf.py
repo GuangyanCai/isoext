@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Protocol
+from typing import Protocol
 
 import torch
 
@@ -101,7 +101,7 @@ class CuboidSDF(SDF):
         size: Full lengths in x, y, z directions
     """
 
-    size: List[float]  # full lengths in x, y, z directions
+    size: list[float]  # full lengths in x, y, z directions
 
     def __call__(self, p: torch.Tensor) -> torch.Tensor:
         # Convert size to tensor and move to same device as input points
@@ -118,7 +118,7 @@ class CuboidSDF(SDF):
 class UnionOp(SDF):
     """Union operation combining multiple SDFs (minimum distance)."""
 
-    sdf_list: List[SDF]
+    sdf_list: list[SDF]
 
     def __call__(self, p: torch.Tensor) -> torch.Tensor:
         results = [sdf(p) for sdf in self.sdf_list]
@@ -134,7 +134,7 @@ class SmoothUnionOp(SDF):
         k: Blending parameter (smaller values = sharper transition)
     """
 
-    sdf_list: List[SDF]
+    sdf_list: list[SDF]
     k: float  # blending parameter
 
     def __call__(self, p: torch.Tensor) -> torch.Tensor:
@@ -152,7 +152,7 @@ class SmoothUnionOp(SDF):
 class IntersectionOp(SDF):
     """Intersection operation combining multiple SDFs (maximum distance)."""
 
-    sdf_list: List[SDF]
+    sdf_list: list[SDF]
 
     def __call__(self, p: torch.Tensor) -> torch.Tensor:
         results = [sdf(p) for sdf in self.sdf_list]
@@ -174,7 +174,7 @@ class TranslationOp(SDF):
     """Translation operation (moves SDF by an offset)."""
 
     sdf: SDF
-    offset: List[float]
+    offset: list[float]
 
     def __call__(self, p: torch.Tensor) -> torch.Tensor:
         return self.sdf(p - torch.tensor(self.offset).to(p))
@@ -192,7 +192,7 @@ class RotationOp(SDF):
     """
 
     sdf: SDF
-    axis: List[float]
+    axis: list[float]
     angle: float
     use_degree: bool = True
 

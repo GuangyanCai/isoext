@@ -1,7 +1,5 @@
 """Integration tests combining multiple features."""
 
-import torch
-
 import isoext
 from isoext.sdf import (
     IntersectionOp,
