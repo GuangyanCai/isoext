@@ -51,6 +51,10 @@ isoext = { path = ".", editable = true }
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"
 numpy = "*"
+pytest = "*"
+
+[tool.pixi.feature.dev.tasks]
+test = { cmd = "pytest tests/", cwd = "."}
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }
