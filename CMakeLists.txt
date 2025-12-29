@@ -36,15 +36,6 @@ find_package(nanobind CONFIG REQUIRED)
 # Import CUDA through CMake's find_package mechanism
 find_package(CUDAToolkit REQUIRED)
 
-include(cmake/get_cpm.cmake)
-
-# This will automatically clone CCCL from GitHub and make the exported cmake targets available
-CPMAddPackage(
-    NAME CCCL
-    GITHUB_REPOSITORY nvidia/cccl
-    GIT_TAG v2.6.1 # Fixing the version to avoid breaking changes
-)
-
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/*.cuh")
 file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
 
@@ -81,7 +72,7 @@ nanobind_add_module(
     ${SOURCE_LIST}
 )
 
-target_link_libraries(isoext_ext PRIVATE CCCL::CCCL CUDA::cusolver CUDA::cublas)
+target_link_libraries(isoext_ext PRIVATE CUDA::cusolver CUDA::cublas)
 target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
 
 # Install directive for scikit-build-core
