@@ -7,7 +7,7 @@ name = "isoext"
 version = "0.5.1"
 description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.13"
 authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -50,6 +50,11 @@ isoext = { path = ".", editable = true }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"
+numpy = "*"
+
+[tool.pixi.feature.cu128.pypi-dependencies]
+torch = { index = "https://download.pytorch.org/whl/cu128" }
 
 [tool.pixi.environments]
 dev = { features = ["dev"] }
+cu128 = { features = ["dev", "cu128"] }
