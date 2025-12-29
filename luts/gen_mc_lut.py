@@ -4,6 +4,7 @@ import json
 from isoext.utils import write_obj
 import torch
 
+
 def gen(case_file: Path, output_path: Path):
     #        v3------e10-----v7
     #       /|               /|
@@ -25,7 +26,7 @@ def gen(case_file: Path, output_path: Path):
     #  |  y
     #  | /
     #  |/
-    #  +----x    
+    #  +----x
     #
     # This ASCII art represents a 3D cube with:
     # - Vertices labeled v0 to v7 in Morton order
@@ -47,25 +48,12 @@ def gen(case_file: Path, output_path: Path):
     verts = [[float(digit) for digit in format(i, "03b")] for i in range(num_verts)]
 
     # Given the edge index i, the pair of vertices is given by edge_pairs[i:i+2].
-    edge_pairs = [
-        (0, 1),
-        (1, 3),
-        (2, 3),
-        (0, 2),
-        (4, 5),
-        (5, 7),
-        (6, 7),
-        (4, 6),
-        (0, 4),
-        (1, 5),
-        (3, 7),
-        (2, 6)
-    ]
+    edge_pairs = [(0, 1), (1, 3), (2, 3), (0, 2), (4, 5), (5, 7), (6, 7), (4, 6), (0, 4), (1, 5), (3, 7), (2, 6)]
 
     # All possible rotations of the cube
     vert_rotations = [
         [0, 1, 2, 3, 4, 5, 6, 7],  # identity
-        # Rotate around the spindle going through opposite faces 
+        # Rotate around the spindle going through opposite faces
         [2, 0, 3, 1, 6, 4, 7, 5],  # rotate 90 degrees around x
         [3, 2, 1, 0, 7, 6, 5, 4],  # rotate 180 degrees around x
         [1, 3, 0, 2, 5, 7, 4, 6],  # rotate 270 degrees around x
@@ -108,7 +96,7 @@ def gen(case_file: Path, output_path: Path):
     # Rotate the vertices of a case
     def rotate_verts(case, vert_rotation):
         status = [int(s) for s in case]
-        return ''.join(str(status[vert_rotation.index(i)]) for i in range(num_verts))
+        return "".join(str(status[vert_rotation.index(i)]) for i in range(num_verts))
 
     # Rotate the triangles of a case
     def rotate_tris(tris, edge_rotation):
@@ -116,7 +104,7 @@ def gen(case_file: Path, output_path: Path):
 
     # Flip the vertices of a case
     def reflect_verts(case):
-        return ''.join(str(1 - int(s)) for s in case)
+        return "".join(str(1 - int(s)) for s in case)
 
     # Flip the triangles of a case
     def reflect_tris(tris):
@@ -145,13 +133,13 @@ def gen(case_file: Path, output_path: Path):
     num_cases = len(cases)
 
     # Check that we have found all 256 cases
-    print(f'{num_cases} cases found.')
+    print(f"{num_cases} cases found.")
     if num_cases != 256:
         for i in range(256):
             case = format(i, "08b")
             if case not in cases:
-                print(f'case {case} not found')
-        exit() 
+                print(f"case {case} not found")
+        exit()
 
     # Generate the edge points for the cube
     verts = torch.tensor(verts)
@@ -162,27 +150,27 @@ def gen(case_file: Path, output_path: Path):
     edge_points = torch.stack(edge_points)
 
     # # Output the cases to the test_cases directory
-    print(f'Writing meshes for base cases to {output_path / "base_cases"}')
+    print(f"Writing meshes for base cases to {output_path / 'base_cases'}")
     (output_path / "base_cases").mkdir(exist_ok=True, parents=True)
     for case, tris in base_cases.items():
         faces = torch.tensor(tris)
         write_obj(output_path / "base_cases" / f"{case}.obj", edge_points, faces)
 
-    print(f'Writing meshes for all cases to {output_path / "all_cases"}')
+    print(f"Writing meshes for all cases to {output_path / 'all_cases'}")
     (output_path / "all_cases").mkdir(exist_ok=True, parents=True)
     for case, tris in cases.items():
         faces = torch.tensor(tris)
         write_obj(output_path / "all_cases" / f"{case}.obj", edge_points, faces)
 
     # Generate the lookup tables
-    print(f'Writing lookup tables to {output_path / "luts"}')
+    print(f"Writing lookup tables to {output_path / 'luts'}")
     (output_path / "luts").mkdir(exist_ok=True, parents=True)
 
     # Generate the edge pairs lookup table
     edge_pairs_lut = torch.tensor(edge_pairs).long().flatten().tolist()
     with open(output_path / "luts" / "edge_pairs.txt", "w") as f:
         for i in range(0, len(edge_pairs_lut), 2):
-            f.write(", ".join(str(e) for e in edge_pairs_lut[i:i+2]) + ",\n")
+            f.write(", ".join(str(e) for e in edge_pairs_lut[i : i + 2]) + ",\n")
 
     # Generate the edge status lookup table
     edge_status_lut = []
@@ -193,7 +181,7 @@ def gen(case_file: Path, output_path: Path):
         for tri in tris:
             for e in tri:
                 edge_status[e] = 1
-        edge_status_lut.append("0b" + ''.join(str(e) for e in edge_status[::-1]))
+        edge_status_lut.append("0b" + "".join(str(e) for e in edge_status[::-1]))
 
     with open(output_path / "luts" / f"edge_status.txt", "w") as f:
         for i in range(num_cases):
@@ -214,7 +202,8 @@ def gen(case_file: Path, output_path: Path):
 
     with open(output_path / "luts" / f"triangle.txt", "w") as f:
         for i in range(0, len(triangle_lut), max_length):
-            f.write(", ".join(str(t) for t in triangle_lut[i:i+max_length]) + ",\n")
+            f.write(", ".join(str(t) for t in triangle_lut[i : i + max_length]) + ",\n")
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()
