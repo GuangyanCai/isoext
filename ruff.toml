@@ -1,0 +1,20 @@
+line-length = 120
+target-version = "py38"
+fix = true
+
+[lint]
+select = [
+  "E",    # pycodestyle errors
+  "F",    # pyflakes
+  "I",    # isort
+  "UP",   # pyupgrade
+  "W",    # pycodestyle warnings
+]
+ignore = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+

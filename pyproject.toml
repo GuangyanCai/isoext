@@ -47,3 +47,9 @@ platforms = ["linux-64"]
 isoext = { path = ".", editable = true }
 
 [tool.pixi.tasks]
+
+[tool.pixi.feature.dev.dependencies]
+ruff = "*"
+
+[tool.pixi.environments]
+dev = { features = ["dev"] }
