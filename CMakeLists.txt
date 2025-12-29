@@ -75,5 +75,16 @@ nanobind_add_module(
 target_link_libraries(isoext_ext PRIVATE CUDA::cusolver CUDA::cublas)
 target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
 
+# Add stub for the extension module
+nanobind_add_stub(
+    isoext_ext_stub
+    MODULE isoext_ext
+    MARKER_FILE py.typed
+    OUTPUT isoext_ext.pyi
+    PYTHON_PATH $<TARGET_FILE_DIR:isoext_ext>
+    DEPENDS isoext_ext
+)
+
 # Install directive for scikit-build-core
 install(TARGETS isoext_ext LIBRARY DESTINATION isoext)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/isoext_ext.pyi ${CMAKE_CURRENT_BINARY_DIR}/py.typed DESTINATION "isoext")
