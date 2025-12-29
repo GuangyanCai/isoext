@@ -5,7 +5,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "isoext"
 version = "0.5.1"
-description = "A collection of algorithms for iso-sufrace extraction on GPU. Supports pytorch."
+description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
@@ -38,3 +38,12 @@ build-verbosity = 1
 # Run pytest to ensure that the package was correctly built
 test-command = "pytest {project}/tests"
 test-requires = "pytest"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-dependencies]
+isoext = { path = ".", editable = true }
+
+[tool.pixi.tasks]

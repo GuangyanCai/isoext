@@ -10,3 +10,6 @@ build
 luts/*
 !luts/gen_mc_lut.py
 !luts/mc_methods/*
+# pixi environments
+.pixi/*
+!.pixi/config.toml
