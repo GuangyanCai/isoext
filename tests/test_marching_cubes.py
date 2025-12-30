@@ -5,6 +5,8 @@ import torch
 import isoext
 from isoext.sdf import SphereSDF
 
+from conftest import populate_sparse_grid
+
 
 def test_marching_cubes_nagae():
     """Test marching cubes with nagae method (default)."""
@@ -150,3 +152,49 @@ def test_marching_cubes_non_uniform_resolution_extreme():
     assert f.shape[1] == 3
     assert len(v) > 0
     assert len(f) > 0
+
+
+def test_marching_cubes_sparse_grid():
+    """Test marching cubes with SparseGrid."""
+    sphere = SphereSDF(radius=0.5)
+    shape = [32, 32, 32]
+    grid = isoext.SparseGrid(shape, aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    populate_sparse_grid(grid, sphere, shape, level=0.0)
+
+    v, f = isoext.marching_cubes(grid, level=0.0)
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert len(f) > 0
+
+
+def test_marching_cubes_sparse_grid_lorensen():
+    """Test marching cubes with SparseGrid using lorensen method."""
+    sphere = SphereSDF(radius=0.5)
+    shape = [32, 32, 32]
+    grid = isoext.SparseGrid(shape, aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    populate_sparse_grid(grid, sphere, shape, level=0.0)
+
+    v, f = isoext.marching_cubes(grid, level=0.0, method="lorensen")
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert len(f) > 0
+
+
+def test_marching_cubes_sparse_grid_different_levels():
+    """Test marching cubes with SparseGrid at different iso-levels."""
+    sphere = SphereSDF(radius=0.5)
+    shape = [32, 32, 32]
+
+    for level in [-0.1, 0.0, 0.1]:
+        grid = isoext.SparseGrid(shape, aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+        populate_sparse_grid(grid, sphere, shape, level=level)
+
+        if grid.get_num_cells() > 0:
+            v, f = isoext.marching_cubes(grid, level=level)
+
+            assert v.shape[1] == 3
+            assert f.shape[1] == 3
