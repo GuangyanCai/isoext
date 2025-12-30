@@ -14,6 +14,7 @@ luts/*
 .pixi/*
 !.pixi/config.toml
 # documentation
-doc/_build/
+doc/_build/*
+!doc/_build/html/
 doc/.ipynb_checkpoints/
 doc/*.obj

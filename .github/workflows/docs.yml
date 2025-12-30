@@ -3,6 +3,8 @@ name: Deploy Documentation
 on:
   push:
     branches: [master]
+    paths:
+      - 'doc/_build/html/**'
   workflow_dispatch:
 
 permissions:
@@ -15,38 +17,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          pip install sphinx furo myst-nb
-
-      - name: Build documentation
-        run: |
-          cd doc
-          sphinx-build -b html . _build/html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: doc/_build/html
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

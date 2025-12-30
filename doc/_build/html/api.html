@@ -1,0 +1,647 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="SDF Utilities" href="sdf_guide.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>API Reference - isoext documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">isoext  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">isoext  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API Reference</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/api.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.marching_cubes">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">marching_cubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nagae'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.marching_cubes" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface from a grid using the Marching Cubes algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid (UniformGrid or SparseGrid) containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value at which to extract the surface. Default is 0.0.</p></li>
+<li><p><strong>method</strong> – The marching cubes variant to use. Options are ‘nagae’ (default) or ‘lorensen’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions
+and faces is an (M, 3) uint32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.dual_contouring">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">its</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svd_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using the Dual Contouring algorithm.</p>
+<p>Dual Contouring produces meshes with better-placed vertices than Marching Cubes,
+especially for sharp features. It solves a QEF (Quadric Error Function) per cell
+to find optimal vertex positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>its</strong> – Intersection data from get_intersection().</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>reg</strong> – Regularization weight for the QEF solver. Default is 0.01.</p></li>
+<li><p><strong>svd_tol</strong> – SVD tolerance for the QEF solver. Default is 1e-6.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
+and faces is an (M, 4) uint32 tensor of quad indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.get_intersection">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">get_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a></span></span><a class="headerlink" href="#isoext.get_intersection" title="Link to this definition">¶</a></dt>
+<dd><p>Compute edge-surface intersections for dual contouring.</p>
+<p>Finds where grid edges cross the iso-surface and computes intersection
+points and normals using linear interpolation and central differences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An Intersection object containing points and normals.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.make_grid">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">make_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aabb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cuda'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.make_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Create a uniform grid from an axis-aligned bounding box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>aabb</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Axis-aligned bounding box as [x_min, y_min, z_min, x_max, y_max, z_max]</p></li>
+<li><p><strong>res</strong> (<em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em>) – Resolution, either a single int or list of 3 ints for [x_res, y_res, z_res]</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – Device to create the grid on (default: “cuda”)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Grid tensor with shape (x_res, y_res, z_res, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.write_obj">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">write_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.write_obj" title="Link to this definition">¶</a></dt>
+<dd><p>Write vertices and faces to an OBJ file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj_path</strong> (<em>str</em>) – Path to the output OBJ file</p></li>
+<li><p><strong>v</strong> (<em>Tensor</em>) – Tensor of vertices with shape (N, 3)</p></li>
+<li><p><strong>f</strong> (<em>Tensor</em>) – Tensor of face indices with shape (M, 3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<section id="grid-classes">
+<h3>Grid Classes<a class="headerlink" href="#grid-classes" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.UniformGrid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">UniformGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.UniformGrid" title="Link to this definition">¶</a></dt>
+<dd><p>A dense uniform grid for storing scalar values.</p>
+<p>The grid divides a 3D axis-aligned bounding box into a regular lattice of cells.
+Each cell has 8 corner points where scalar values are stored.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.UniformGrid.get_points">
+<span class="sig-name descname"><span class="pre">get_points</span></span><a class="headerlink" href="#isoext.UniformGrid.get_points" title="Link to this definition">¶</a></dt>
+<dd><p>Return the 3D coordinates of all grid points as a (X, Y, Z, 3) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.UniformGrid.get_values">
+<span class="sig-name descname"><span class="pre">get_values</span></span><a class="headerlink" href="#isoext.UniformGrid.get_values" title="Link to this definition">¶</a></dt>
+<dd><p>Return the scalar values as a (X, Y, Z) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.UniformGrid.set_values">
+<span class="sig-name descname"><span class="pre">set_values</span></span><a class="headerlink" href="#isoext.UniformGrid.set_values" title="Link to this definition">¶</a></dt>
+<dd><p>Set the scalar values from a (X, Y, Z) float32 tensor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.SparseGrid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">SparseGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.SparseGrid" title="Link to this definition">¶</a></dt>
+<dd><p>A sparse adaptive grid for storing scalar values.</p>
+<p>Unlike UniformGrid, SparseGrid only allocates memory for cells that are explicitly added.
+This is useful for large domains where only a small region contains the iso-surface.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.add_cells">
+<span class="sig-name descname"><span class="pre">add_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.add_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Add cells to the grid by their linear indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_cell_indices</strong> – 1D int32 tensor of cell indices to add.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.filter_cell_indices">
+<span class="sig-name descname"><span class="pre">filter_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.filter_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Filter cells to keep only those that cross the iso-surface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cell_indices</strong> – 1D int32 tensor of cell indices to filter.</p></li>
+<li><p><strong>values</strong> – (N, 8) float32 tensor of scalar values at cell corners.</p></li>
+<li><p><strong>level</strong> – The iso-value to check against. Default is 0.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 1D int32 tensor of cell indices that cross the iso-surface.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_cell_indices">
+<span class="sig-name descname"><span class="pre">get_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.get_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Return the linear indices of all active cells as a 1D int32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_cells">
+<span class="sig-name descname"><span class="pre">get_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.get_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Return the cell connectivity as point indices.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_num_cells">
+<span class="sig-name descname"><span class="pre">get_num_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.get_num_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Return the number of active cells in the grid.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_num_points">
+<span class="sig-name descname"><span class="pre">get_num_points</span></span><a class="headerlink" href="#isoext.SparseGrid.get_num_points" title="Link to this definition">¶</a></dt>
+<dd><p>Return the number of points in active cells (num_cells * 8).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_points">
+<span class="sig-name descname"><span class="pre">get_points</span></span><a class="headerlink" href="#isoext.SparseGrid.get_points" title="Link to this definition">¶</a></dt>
+<dd><p>Return the 3D coordinates of points in active cells as an (N, 8, 3) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_points_by_cell_indices">
+<span class="sig-name descname"><span class="pre">get_points_by_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.get_points_by_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Get the corner points of specified cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cell_indices</strong> – 1D int32 tensor of cell indices.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An (N, 8, 3) float32 tensor of corner coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_potential_cell_indices">
+<span class="sig-name descname"><span class="pre">get_potential_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.get_potential_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Get potential cell indices in chunks for memory-efficient processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chunk_size</strong> – Maximum number of cells per chunk.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of 1D int32 tensors, each containing cell indices for a chunk.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.get_values">
+<span class="sig-name descname"><span class="pre">get_values</span></span><a class="headerlink" href="#isoext.SparseGrid.get_values" title="Link to this definition">¶</a></dt>
+<dd><p>Return the scalar values at active cell corners as an (N, 8) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.remove_cells">
+<span class="sig-name descname"><span class="pre">remove_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.remove_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Remove cells from the grid by their linear indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_cell_indices</strong> – 1D int32 tensor of cell indices to remove.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.SparseGrid.set_values">
+<span class="sig-name descname"><span class="pre">set_values</span></span><a class="headerlink" href="#isoext.SparseGrid.set_values" title="Link to this definition">¶</a></dt>
+<dd><p>Set the scalar values from an (N, 8) float32 tensor.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="intersection">
+<h3>Intersection<a class="headerlink" href="#intersection" title="Link to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.Intersection">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">Intersection</span></span><a class="headerlink" href="#isoext.Intersection" title="Link to this definition">¶</a></dt>
+<dd><p>Stores edge-surface intersection points and normals for dual contouring.</p>
+<p>Created by get_intersection() and used as input to dual_contouring().
+You can modify the normals to control the surface reconstruction.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.Intersection.get_normals">
+<span class="sig-name descname"><span class="pre">get_normals</span></span><a class="headerlink" href="#isoext.Intersection.get_normals" title="Link to this definition">¶</a></dt>
+<dd><p>Return the surface normals at intersection points as an (N, 3) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.Intersection.get_points">
+<span class="sig-name descname"><span class="pre">get_points</span></span><a class="headerlink" href="#isoext.Intersection.get_points" title="Link to this definition">¶</a></dt>
+<dd><p>Return the intersection points as an (N, 3) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.Intersection.set_normals">
+<span class="sig-name descname"><span class="pre">set_normals</span></span><a class="headerlink" href="#isoext.Intersection.set_normals" title="Link to this definition">¶</a></dt>
+<dd><p>Set custom normals for the intersection points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_normals</strong> – (N, 3) float32 tensor of normal vectors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="sdf_guide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">SDF Utilities</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Guangyan Cai
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">API Reference</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#isoext.marching_cubes"><code class="docutils literal notranslate"><span class="pre">marching_cubes()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.get_intersection"><code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.make_grid"><code class="docutils literal notranslate"><span class="pre">make_grid()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.write_obj"><code class="docutils literal notranslate"><span class="pre">write_obj()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#classes">Classes</a><ul>
+<li><a class="reference internal" href="#grid-classes">Grid Classes</a><ul>
+<li><a class="reference internal" href="#isoext.UniformGrid"><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.UniformGrid.get_points"><code class="docutils literal notranslate"><span class="pre">UniformGrid.get_points</span></code></a></li>
+<li><a class="reference internal" href="#isoext.UniformGrid.get_values"><code class="docutils literal notranslate"><span class="pre">UniformGrid.get_values</span></code></a></li>
+<li><a class="reference internal" href="#isoext.UniformGrid.set_values"><code class="docutils literal notranslate"><span class="pre">UniformGrid.set_values</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#isoext.SparseGrid"><code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.SparseGrid.add_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.add_cells</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.filter_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.filter_cell_indices</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_cell_indices</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_cells</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_num_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_num_cells</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_num_points"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_num_points</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_points"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_points</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_points_by_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_points_by_cell_indices</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_potential_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_potential_cell_indices</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.get_values"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_values</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.remove_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.remove_cells</span></code></a></li>
+<li><a class="reference internal" href="#isoext.SparseGrid.set_values"><code class="docutils literal notranslate"><span class="pre">SparseGrid.set_values</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#intersection">Intersection</a><ul>
+<li><a class="reference internal" href="#isoext.Intersection"><code class="docutils literal notranslate"><span class="pre">Intersection</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.Intersection.get_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.get_normals</span></code></a></li>
+<li><a class="reference internal" href="#isoext.Intersection.get_points"><code class="docutils literal notranslate"><span class="pre">Intersection.get_points</span></code></a></li>
+<li><a class="reference internal" href="#isoext.Intersection.set_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.set_normals</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
