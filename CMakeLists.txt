@@ -72,6 +72,7 @@ nanobind_add_module(
     ${SOURCE_LIST}
 )
 
+target_compile_options(isoext_ext PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Wno-deprecated-gpu-targets>)
 target_link_libraries(isoext_ext PRIVATE CUDA::cusolver CUDA::cublas)
 target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
 
