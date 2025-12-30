@@ -312,6 +312,9 @@ NB_MODULE(isoext_ext, m) {
         .def("get_normals",
              [](Intersection &self) { return ours_to_nb(self.normals); },
              "Return the surface normals at intersection points as an (N, 3) float32 tensor.")
+        .def("has_normals",
+             [](Intersection &self) { return self.has_normals(); },
+             "Return True if normals have been set or computed.")
         .def(
             "set_normals",
             [](Intersection &self, Vector3 new_normals) {
@@ -323,33 +326,51 @@ NB_MODULE(isoext_ext, m) {
             "Args:\n"
             "    new_normals: (N, 3) float32 tensor of normal vectors.");
 
-    m.def("get_intersection", &get_intersection, "grid"_a, "level"_a = 0.f,
+    m.def(
+        "get_intersection",
+        [](Grid *grid, float level, bool compute_normals) {
+            return get_intersection(grid, level, compute_normals);
+        },
+        "grid"_a, "level"_a = 0.f, "compute_normals"_a = false,
         "Compute edge-surface intersections for dual contouring.\n\n"
         "Finds where grid edges cross the iso-surface and computes intersection\n"
-        "points and normals using linear interpolation and central differences.\n\n"
+        "points using linear interpolation.\n\n"
         "Args:\n"
         "    grid: The input grid containing scalar values.\n"
-        "    level: The iso-value. Default is 0.0.\n\n"
+        "    level: The iso-value. Default is 0.0.\n"
+        "    compute_normals: If True, compute normals from grid values. Default is False.\n\n"
         "Returns:\n"
-        "    An Intersection object containing points and normals.");
+        "    An Intersection object containing points (and normals if compute_normals=True).");
 
     m.def(
         "dual_contouring",
-        [](Grid *grid, Intersection its, float level = 0.f, float reg = 1e-2f,
-           float svd_tol = 1e-6f) {
+        [](Grid *grid, float level, std::optional<Intersection> its_opt,
+           float reg, float svd_tol) {
+            Intersection its = its_opt.has_value()
+                                   ? std::move(its_opt.value())
+                                   : get_intersection(grid, level, true);
+
+            // If normals are not set, compute them
+            if (!its.has_normals()) {
+                compute_intersection_normals(its, grid);
+                its._has_normals = true;
+            }
+
             auto [v, f] = dual_contouring(grid, its, level, reg, svd_tol);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
-        "grid"_a, "its"_a, "level"_a = 0.f, "reg"_a = 1e-2f,
-        "svd_tol"_a = 1e-6f,
+        "grid"_a, "level"_a = 0.f, "intersection"_a = nb::none(),
+        "reg"_a = 1e-2f, "svd_tol"_a = 1e-6f,
         "Extract an iso-surface using the Dual Contouring algorithm.\n\n"
         "Dual Contouring produces meshes with better-placed vertices than Marching Cubes,\n"
         "especially for sharp features. It solves a QEF (Quadric Error Function) per cell\n"
         "to find optimal vertex positions.\n\n"
         "Args:\n"
         "    grid: The input grid containing scalar values.\n"
-        "    its: Intersection data from get_intersection().\n"
         "    level: The iso-value. Default is 0.0.\n"
+        "    intersection: Optional Intersection data from get_intersection().\n"
+        "        If not provided, intersections are computed automatically.\n"
+        "        If provided but normals not set, normals are computed automatically.\n"
         "    reg: Regularization weight for the QEF solver. Default is 0.01.\n"
         "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n\n"
         "Returns:\n"

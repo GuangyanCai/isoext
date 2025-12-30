@@ -1,4 +1,5 @@
 #include "its.cuh"
+#include "math.cuh"
 #include "shared_luts.cuh"
 #include "utils.cuh"
 
@@ -90,7 +91,7 @@ struct get_its_op {
 }   // anonymous namespace
 
 Intersection
-get_intersection(Grid *grid, float level) {
+get_intersection(Grid *grid, float level, bool compute_normals) {
     uint num_cells = grid->get_num_cells();
     uint3 shape = grid->get_shape();
     NDArray<float> values = grid->get_values();
@@ -148,5 +149,136 @@ get_intersection(Grid *grid, float level) {
                    edge_status.data().get(), values.data(), points.data(),
                    cells.data(), edges_table_dv.data().get(), level));
 
+    // Optionally compute normals
+    if (compute_normals) {
+        compute_intersection_normals(its, grid);
+        its._has_normals = true;
+    }
+
     return its;
+}
+
+// Cube corner ordering (from idx_to_cell_op in utils.cuh):
+// Corner index = x*4 + y*2 + z where x,y,z are 0 or 1
+//   0: (0,0,0)  1: (0,0,1)  2: (0,1,0)  3: (0,1,1)
+//   4: (1,0,0)  5: (1,0,1)  6: (1,1,0)  7: (1,1,1)
+
+namespace {
+
+// Trilinear interpolation of a value at position t within a cell
+// t is in [0,1]^3, c_v are the 8 corner values
+__host__ __device__ float
+trilinear_interp(float3 t, const float *c_v) {
+    // Interpolate along z first
+    float c00 = c_v[0] * (1 - t.z) + c_v[1] * t.z;  // x=0, y=0
+    float c01 = c_v[2] * (1 - t.z) + c_v[3] * t.z;  // x=0, y=1
+    float c10 = c_v[4] * (1 - t.z) + c_v[5] * t.z;  // x=1, y=0
+    float c11 = c_v[6] * (1 - t.z) + c_v[7] * t.z;  // x=1, y=1
+
+    // Interpolate along y
+    float c0 = c00 * (1 - t.y) + c01 * t.y;  // x=0
+    float c1 = c10 * (1 - t.y) + c11 * t.y;  // x=1
+
+    // Interpolate along x
+    return c0 * (1 - t.x) + c1 * t.x;
+}
+
+struct compute_normals_op {
+    float3 *normals;
+    const float3 *its_points;
+    const uint *cell_offsets;
+    const uint *cell_indices;
+    const float *values;
+    const float3 *grid_points;
+    const uint *cells;
+
+    compute_normals_op(float3 *normals, const float3 *its_points,
+                       const uint *cell_offsets, const uint *cell_indices,
+                       const float *values, const float3 *grid_points,
+                       const uint *cells)
+        : normals(normals), its_points(its_points), cell_offsets(cell_offsets),
+          cell_indices(cell_indices), values(values), grid_points(grid_points),
+          cells(cells) {}
+
+    __host__ __device__ void operator()(uint cell_idx) {
+        uint offset = cell_offsets[cell_idx];
+        uint next_offset = cell_offsets[cell_idx + 1];
+
+        // Get the 8 corner values and positions
+        uint c_offset = cell_indices[cell_idx] * 8;
+        float c_v[8];
+        float3 c_p[8];
+        for (uint i = 0; i < 8; i++) {
+            c_p[i] = grid_points[cells[c_offset + i]];
+            c_v[i] = values[cells[c_offset + i]];
+        }
+
+        // Cell origin and size
+        // Corner 0 is at (min_x, min_y, min_z), corner 7 is at (max_x, max_y, max_z)
+        float3 cell_min = c_p[0];
+        float3 cell_size = c_p[7] - c_p[0];
+
+        // Process each intersection point in this cell
+        for (uint i = offset; i < next_offset; i++) {
+            float3 p = its_points[i];
+
+            // Compute normalized position within cell [0,1]^3
+            float3 t = (p - cell_min) / cell_size;
+
+            // Clamp to valid range
+            t.x = fmaxf(0.01f, fminf(0.99f, t.x));
+            t.y = fmaxf(0.01f, fminf(0.99f, t.y));
+            t.z = fmaxf(0.01f, fminf(0.99f, t.z));
+
+            // Compute gradient using central differences
+            // Sample at p ± epsilon in each direction
+            float eps = 0.02f;   // Small offset in normalized coords
+
+            float3 t_px = make_float3(fminf(t.x + eps, 0.99f), t.y, t.z);
+            float3 t_mx = make_float3(fmaxf(t.x - eps, 0.01f), t.y, t.z);
+            float3 t_py = make_float3(t.x, fminf(t.y + eps, 0.99f), t.z);
+            float3 t_my = make_float3(t.x, fmaxf(t.y - eps, 0.01f), t.z);
+            float3 t_pz = make_float3(t.x, t.y, fminf(t.z + eps, 0.99f));
+            float3 t_mz = make_float3(t.x, t.y, fmaxf(t.z - eps, 0.01f));
+
+            float dfdx = (trilinear_interp(t_px, c_v) -
+                          trilinear_interp(t_mx, c_v)) /
+                         ((t_px.x - t_mx.x) * cell_size.x);
+            float dfdy = (trilinear_interp(t_py, c_v) -
+                          trilinear_interp(t_my, c_v)) /
+                         ((t_py.y - t_my.y) * cell_size.y);
+            float dfdz = (trilinear_interp(t_pz, c_v) -
+                          trilinear_interp(t_mz, c_v)) /
+                         ((t_pz.z - t_mz.z) * cell_size.z);
+
+            float3 grad = make_float3(dfdx, dfdy, dfdz);
+
+            // Normalize to get the normal
+            float grad_len = norm(grad);
+            float3 n;
+            if (grad_len > 1e-8f) {
+                n = grad / grad_len;
+            } else {
+                n = make_float3(0.0f, 0.0f, 1.0f);   // fallback
+            }
+
+            normals[i] = n;
+        }
+    }
+};
+}   // anonymous namespace
+
+void
+compute_intersection_normals(Intersection &its, Grid *grid) {
+    NDArray<float> values = grid->get_values();
+    NDArray<float3> grid_points = grid->get_points();
+    NDArray<uint> cells = grid->get_cells();
+
+    uint num_cells = its.cell_indices.size();
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_cells),
+        compute_normals_op(its.normals.data(), its.points.data(),
+                           its.cell_offsets.data(), its.cell_indices.data(),
+                           values.data(), grid_points.data(), cells.data()));
 }

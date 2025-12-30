@@ -9,7 +9,7 @@
         <title>Dual Contouring - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -246,7 +246,14 @@
         <article role="main" id="furo-main-content">
           <section id="dual-contouring">
 <h1>Dual Contouring<a class="headerlink" href="#dual-contouring" title="Link to this heading">¶</a></h1>
-<p>Dual Contouring extracts a <strong>quad mesh</strong> with vertices placed optimally within each cell. Unlike Marching Cubes, it can preserve sharp features when given accurate surface normals.</p>
+<p>Dual Contouring extracts a <strong>triangle mesh</strong> with vertices placed optimally within each cell. Unlike Marching Cubes, it can preserve sharp features when given accurate surface normals.</p>
+<section id="simple-usage">
+<h2>Simple Usage<a class="headerlink" href="#simple-usage" title="Link to this heading">¶</a></h2>
+<p>For most cases, you can use the simple one-liner interface:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This automatically computes intersection points and normals from the grid values.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -256,30 +263,57 @@
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running cmake --build &amp; --install in /home/gcnick/Documents/code/isoext/build/cp312-abi3-linux_x86_64
+</pre></div>
 </div>
-<section id="the-algorithm">
-<h2>The Algorithm<a class="headerlink" href="#the-algorithm" title="Link to this heading">¶</a></h2>
-<p>Dual Contouring works in three steps:</p>
-<ol class="arabic simple">
-<li><p><strong>Find intersections</strong> — Locate where grid edges cross the iso-surface</p></li>
-<li><p><strong>Compute normals</strong> — Get surface normals at intersection points</p></li>
-<li><p><strong>Solve QEF</strong> — Find optimal vertex position per cell by minimizing quadric error</p></li>
-</ol>
+</div>
+</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a cube (has sharp edges — good test for DC)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simple usage - just call dual_contouring directly</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
 <span class="n">cube</span> <span class="o">=</span> <span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="c1"># Step 1: Find edge-surface intersections</span>
-<span class="n">intersection</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="n">intersection</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> intersection points&quot;</span><span class="p">)</span>
+<span class="c1"># One-liner: normals computed automatically from grid values</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Found 24,576 intersection points
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Vertices: torch.Size([6146, 3])
+Faces: torch.Size([12288, 3])
+</pre></div>
+</div>
+<img alt="_images/f6824002caec5341565488f112638e6f94f93442be38a7ef249b0f11b9e83250.png" src="_images/f6824002caec5341565488f112638e6f94f93442be38a7ef249b0f11b9e83250.png" />
+</div>
+</div>
+</section>
+<section id="custom-normals-for-sharp-features">
+<h2>Custom Normals for Sharp Features<a class="headerlink" href="#custom-normals-for-sharp-features" title="Link to this heading">¶</a></h2>
+<p>For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:</p>
+<ol class="arabic simple">
+<li><p><strong>Get intersections</strong> — Call <code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code> to get intersection points</p></li>
+<li><p><strong>Compute normals</strong> — Use SDF gradient for accurate surface normals</p></li>
+<li><p><strong>Run dual contouring</strong> — Pass the intersection with custom normals</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 1: Find edge-surface intersections</span>
+<span class="n">intersection</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Intersection shape: </span><span class="si">{</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Intersection shape: torch.Size([24576, 3])
 </pre></div>
 </div>
 </div>
@@ -287,7 +321,6 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 2: Compute accurate normals using the SDF gradient</span>
-<span class="n">points</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
 <span class="n">normals</span> <span class="o">=</span> <span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
 <span class="n">intersection</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">normals</span><span class="p">)</span>
 
@@ -303,13 +336,13 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 3: Run dual contouring</span>
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 3: Run dual contouring with custom normals</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">intersection</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        <span class="c1"># (M, 4) uint32 — quads!</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        <span class="c1"># (M, 3) int32</span>
 
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">)</span>
+<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">,</span> <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -318,10 +351,7 @@
 Faces: torch.Size([12288, 3])
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Yellow">2025-12-30 01:12:25.315 (   0.797s) [    78ED6D44D740]vtkXOpenGLRenderWindow.:1458  WARN| bad X server connection. DISPLAY=</span>
-</pre></div>
-</div>
-<img alt="_images/06ee90b69958163ba5c8d04bc1d1f187aa568cb7d8733bae97d1978bae968f14.png" src="_images/06ee90b69958163ba5c8d04bc1d1f187aa568cb7d8733bae97d1978bae968f14.png" />
+<img alt="_images/1299278a4fcb88ca592a223f577116075ea6bb1ddbfc986a73d466a029b98fdc.png" src="_images/1299278a4fcb88ca592a223f577116075ea6bb1ddbfc986a73d466a029b98fdc.png" />
 </div>
 </div>
 </section>
@@ -383,7 +413,8 @@ Faces: torch.Size([12288, 3])
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Dual Contouring</a><ul>
-<li><a class="reference internal" href="#the-algorithm">The Algorithm</a></li>
+<li><a class="reference internal" href="#simple-usage">Simple Usage</a></li>
+<li><a class="reference internal" href="#custom-normals-for-sharp-features">Custom Normals for Sharp Features</a></li>
 </ul>
 </li>
 </ul>

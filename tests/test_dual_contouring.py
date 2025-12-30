@@ -6,8 +6,44 @@ import isoext
 from isoext.sdf import SphereSDF, get_sdf_normal
 
 
-def test_dual_contouring_basic():
-    """Test basic dual contouring extraction."""
+def test_dual_contouring_simple():
+    """Test simplest dual contouring usage - no intersection provided."""
+    sphere = SphereSDF(radius=0.5)
+    grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    sdf_values = sphere(grid.get_points())
+    grid.set_values(sdf_values)
+
+    # Simple one-liner: no intersection needed
+    v, f = isoext.dual_contouring(grid, level=0.0)
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert len(f) > 0
+
+
+def test_dual_contouring_with_intersection_auto_normals():
+    """Test dual contouring with intersection but normals computed automatically."""
+    sphere = SphereSDF(radius=0.5)
+    grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    sdf_values = sphere(grid.get_points())
+    grid.set_values(sdf_values)
+
+    # Get intersection without computing normals
+    its = isoext.get_intersection(grid, level=0.0, compute_normals=False)
+    assert not its.has_normals()
+
+    # Dual contouring should compute normals automatically
+    v, f = isoext.dual_contouring(grid, level=0.0, intersection=its)
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert len(f) > 0
+
+
+def test_dual_contouring_with_custom_normals():
+    """Test dual contouring with user-provided normals."""
     sphere = SphereSDF(radius=0.5)
     grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
     sdf_values = sphere(grid.get_points())
@@ -17,12 +53,13 @@ def test_dual_contouring_basic():
     its = isoext.get_intersection(grid, level=0.0)
     points = its.get_points()
 
-    # Compute normals
+    # Compute custom normals using SDF gradient
     normals = get_sdf_normal(sphere, points)
     its.set_normals(normals)
+    assert its.has_normals()
 
-    # Run dual contouring
-    v, f = isoext.dual_contouring(grid, its, level=0.0)
+    # Run dual contouring with custom normals
+    v, f = isoext.dual_contouring(grid, level=0.0, intersection=its)
 
     assert v.shape[1] == 3
     assert f.shape[1] == 3
@@ -38,15 +75,8 @@ def test_dual_contouring_different_levels():
     grid.set_values(sdf_values)
 
     for level in [-0.1, 0.0, 0.1]:
-        its = isoext.get_intersection(grid, level=level)
-        points = its.get_points()
-
-        if len(points) > 0:
-            normals = get_sdf_normal(sphere, points)
-            its.set_normals(normals)
-
-            v, f = isoext.dual_contouring(grid, its, level=level)
-
+        v, f = isoext.dual_contouring(grid, level=level)
+        if len(v) > 0:
             assert v.shape[1] == 3
             assert f.shape[1] == 3
 
@@ -58,18 +88,11 @@ def test_dual_contouring_parameters():
     sdf_values = sphere(grid.get_points())
     grid.set_values(sdf_values)
 
-    its = isoext.get_intersection(grid, level=0.0)
-    points = its.get_points()
+    # Test with different regularization
+    v, f = isoext.dual_contouring(grid, level=0.0, reg=0.01)
 
-    if len(points) > 0:
-        normals = get_sdf_normal(sphere, points)
-        its.set_normals(normals)
-
-        # Test with different regularization
-        v, f = isoext.dual_contouring(grid, its, level=0.0, reg=0.01)
-
-        assert v.shape[1] == 3
-        assert f.shape[1] == 3
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
 
 
 def test_get_intersection():
@@ -81,11 +104,27 @@ def test_get_intersection():
 
     its = isoext.get_intersection(grid, level=0.0)
     points = its.get_points()
+
+    assert points.shape[1] == 3
+    assert len(points) > 0
+    assert not its.has_normals()  # Normals not computed by default
+
+
+def test_get_intersection_with_normals():
+    """Test getting intersection with normals computed."""
+    sphere = SphereSDF(radius=0.5)
+    grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    sdf_values = sphere(grid.get_points())
+    grid.set_values(sdf_values)
+
+    its = isoext.get_intersection(grid, level=0.0, compute_normals=True)
+    points = its.get_points()
     normals = its.get_normals()
 
     assert points.shape[1] == 3
     assert normals.shape[1] == 3
     assert len(points) > 0
+    assert its.has_normals()
 
 
 def test_intersection_set_normals():
@@ -96,11 +135,13 @@ def test_intersection_set_normals():
     grid.set_values(sdf_values)
 
     its = isoext.get_intersection(grid, level=0.0)
-    points = its.get_points()
+    assert not its.has_normals()
 
+    points = its.get_points()
     if len(points) > 0:
         normals = get_sdf_normal(sphere, points)
         its.set_normals(normals)
+        assert its.has_normals()
 
         # Verify normals were set
         retrieved_normals = its.get_normals()
@@ -109,55 +150,33 @@ def test_intersection_set_normals():
 
 
 def test_dual_contouring_non_uniform_resolution():
-    """Test dual contouring with non-uniform resolution (different resolutions for each dimension)."""
+    """Test dual contouring with non-uniform resolution."""
     sphere = SphereSDF(radius=0.5)
-    # Use different resolutions for x, y, z dimensions
     grid = isoext.UniformGrid([16, 32, 48], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
     sdf_values = sphere(grid.get_points())
     grid.set_values(sdf_values)
 
-    # Get intersection points
-    its = isoext.get_intersection(grid, level=0.0)
-    points = its.get_points()
+    v, f = isoext.dual_contouring(grid, level=0.0)
 
-    if len(points) > 0:
-        # Compute normals
-        normals = get_sdf_normal(sphere, points)
-        its.set_normals(normals)
-
-        # Run dual contouring
-        v, f = isoext.dual_contouring(grid, its, level=0.0)
-
-        assert v.shape[1] == 3
-        assert f.shape[1] == 3
-        assert len(v) > 0
-        assert len(f) > 0
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert len(f) > 0
 
 
 def test_dual_contouring_non_uniform_resolution_extreme():
     """Test dual contouring with extreme non-uniform resolution ratios."""
     sphere = SphereSDF(radius=0.5)
-    # Use very different resolutions (e.g., 8, 64, 16)
     grid = isoext.UniformGrid([8, 64, 16], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
     sdf_values = sphere(grid.get_points())
     grid.set_values(sdf_values)
 
-    # Get intersection points
-    its = isoext.get_intersection(grid, level=0.0)
-    points = its.get_points()
+    v, f = isoext.dual_contouring(grid, level=0.0)
 
-    if len(points) > 0:
-        # Compute normals
-        normals = get_sdf_normal(sphere, points)
-        its.set_normals(normals)
-
-        # Run dual contouring
-        v, f = isoext.dual_contouring(grid, its, level=0.0)
-
-        assert v.shape[1] == 3
-        assert f.shape[1] == 3
-        assert len(v) > 0
-        assert len(f) > 0
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert len(f) > 0
 
 
 def test_get_intersection_non_uniform_resolution():
@@ -167,11 +186,12 @@ def test_get_intersection_non_uniform_resolution():
     sdf_values = sphere(grid.get_points())
     grid.set_values(sdf_values)
 
-    its = isoext.get_intersection(grid, level=0.0)
+    its = isoext.get_intersection(grid, level=0.0, compute_normals=True)
     points = its.get_points()
     normals = its.get_normals()
 
     assert points.shape[1] == 3
     assert normals.shape[1] == 3
+    assert its.has_normals()
     if len(points) > 0:
         assert len(points) > 0

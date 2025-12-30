@@ -269,7 +269,7 @@ and faces is an (M, 3) uint32 tensor of triangle indices.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.dual_contouring">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">its</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svd_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svd_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
 <dd><p>Extract an iso-surface using the Dual Contouring algorithm.</p>
 <p>Dual Contouring produces meshes with better-placed vertices than Marching Cubes,
 especially for sharp features. It solves a QEF (Quadric Error Function) per cell
@@ -278,34 +278,37 @@ to find optimal vertex positions.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
-<li><p><strong>its</strong> – Intersection data from get_intersection().</p></li>
 <li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
+If not provided, intersections are computed automatically.
+If provided but normals not set, normals are computed automatically.</p></li>
 <li><p><strong>reg</strong> – Regularization weight for the QEF solver. Default is 0.01.</p></li>
 <li><p><strong>svd_tol</strong> – SVD tolerance for the QEF solver. Default is 1e-6.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
-and faces is an (M, 4) uint32 tensor of quad indices.</p>
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.get_intersection">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">get_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a></span></span><a class="headerlink" href="#isoext.get_intersection" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">get_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_normals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a></span></span><a class="headerlink" href="#isoext.get_intersection" title="Link to this definition">¶</a></dt>
 <dd><p>Compute edge-surface intersections for dual contouring.</p>
 <p>Finds where grid edges cross the iso-surface and computes intersection
-points and normals using linear interpolation and central differences.</p>
+points using linear interpolation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
 <li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>compute_normals</strong> – If True, compute normals from grid values. Default is False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>An Intersection object containing points and normals.</p>
+<dd class="field-even"><p>An Intersection object containing points (and normals if compute_normals=True).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -543,6 +546,12 @@ You can modify the normals to control the surface reconstruction.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.Intersection.has_normals">
+<span class="sig-name descname"><span class="pre">has_normals</span></span><a class="headerlink" href="#isoext.Intersection.has_normals" title="Link to this definition">¶</a></dt>
+<dd><p>Return True if normals have been set or computed.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="isoext.Intersection.set_normals">
 <span class="sig-name descname"><span class="pre">set_normals</span></span><a class="headerlink" href="#isoext.Intersection.set_normals" title="Link to this definition">¶</a></dt>
 <dd><p>Set custom normals for the intersection points.</p>
@@ -647,6 +656,7 @@ You can modify the normals to control the surface reconstruction.</p>
 <li><a class="reference internal" href="#isoext.Intersection"><code class="docutils literal notranslate"><span class="pre">Intersection</span></code></a><ul>
 <li><a class="reference internal" href="#isoext.Intersection.get_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.get_normals</span></code></a></li>
 <li><a class="reference internal" href="#isoext.Intersection.get_points"><code class="docutils literal notranslate"><span class="pre">Intersection.get_points</span></code></a></li>
+<li><a class="reference internal" href="#isoext.Intersection.has_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.has_normals</span></code></a></li>
 <li><a class="reference internal" href="#isoext.Intersection.set_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.set_normals</span></code></a></li>
 </ul>
 </li>

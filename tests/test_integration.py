@@ -46,6 +46,26 @@ def test_complex_shape_dual_contouring():
     sdf_v = sdf(grid.get_points())
     grid.set_values(sdf_v)
 
+    # Simple interface - no intersection needed
+    v, f = isoext.dual_contouring(grid, level=0.0)
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+
+
+def test_complex_shape_dual_contouring_custom_normals():
+    """Test dual contouring with custom normals for better sharp features."""
+    torus_a = TorusSDF(R=0.75, r=0.15)
+    torus_b = RotationOp(sdf=torus_a, axis=[1, 0, 0], angle=90)
+    torus_c = RotationOp(sdf=torus_a, axis=[0, 1, 0], angle=90)
+    sphere_a = SphereSDF(radius=0.75)
+    sdf = IntersectionOp([sphere_a, NegationOp(UnionOp([torus_a, torus_b, torus_c]))])
+
+    grid = isoext.UniformGrid([64, 64, 64], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    sdf_v = sdf(grid.get_points())
+    grid.set_values(sdf_v)
+
+    # Get intersection and set custom normals from SDF gradient
     its = isoext.get_intersection(grid, level=0.0)
     points = its.get_points()
 
@@ -53,7 +73,7 @@ def test_complex_shape_dual_contouring():
         normals = get_sdf_normal(sdf, points)
         its.set_normals(normals)
 
-        v, f = isoext.dual_contouring(grid, its, level=0.0)
+        v, f = isoext.dual_contouring(grid, level=0.0, intersection=its)
 
         assert v.shape[1] == 3
         assert f.shape[1] == 3

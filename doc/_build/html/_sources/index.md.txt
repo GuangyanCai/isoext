@@ -7,7 +7,7 @@
 ## Features
 
 - **Marching Cubes** — Fast triangular mesh extraction
-- **Dual Contouring** — Quad mesh extraction with sharp feature preservation
+- **Dual Contouring** — Triangle mesh extraction with sharp feature preservation
 - **Flexible Grids** — Dense uniform grids and memory-efficient sparse grids
 - **SDF Utilities** — Optional primitives and CSG operations
 
