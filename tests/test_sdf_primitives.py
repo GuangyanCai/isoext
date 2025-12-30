@@ -3,12 +3,11 @@
 import torch
 
 import isoext
-from isoext.sdf import CuboidSDF, SphereSDF, TorusSDF
+from isoext.sdf import CuboidSDF
 
 
-def test_sphere_sdf():
+def test_sphere_sdf(sphere):
     """Test SphereSDF primitive."""
-    sphere = SphereSDF(radius=0.5)
     points = torch.tensor([[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [1.0, 0.0, 0.0]], device="cuda")
     sdf_values = sphere(points)
 
@@ -22,9 +21,8 @@ def test_sphere_sdf():
     assert sdf_values[2] > 0
 
 
-def test_torus_sdf():
+def test_torus_sdf(torus):
     """Test TorusSDF primitive."""
-    torus = TorusSDF(R=0.5, r=0.2)
     points = torch.tensor(
         [
             [0.5, 0.0, 0.0],  # On major radius, should be on surface
@@ -68,14 +66,9 @@ def test_cuboid_sdf():
     assert sdf_values[2] > 0
 
 
-def test_sphere_marching_cubes():
+def test_sphere_marching_cubes(sphere_grid):
     """Test marching cubes extraction on sphere."""
-    sphere = SphereSDF(radius=0.5)
-    grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
-    sdf_values = sphere(grid.get_points())
-    grid.set_values(sdf_values)
-
-    v, f = isoext.marching_cubes(grid, level=0.0)
+    v, f = isoext.marching_cubes(sphere_grid, level=0.0)
 
     assert v.shape[1] == 3  # Vertices have 3 coordinates
     assert f.shape[1] == 3  # Faces have 3 vertices
@@ -83,14 +76,9 @@ def test_sphere_marching_cubes():
     assert len(f) > 0  # Should have faces
 
 
-def test_torus_marching_cubes():
+def test_torus_marching_cubes(torus_grid):
     """Test marching cubes extraction on torus."""
-    torus = TorusSDF(R=0.5, r=0.2)
-    grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
-    sdf_values = torus(grid.get_points())
-    grid.set_values(sdf_values)
-
-    v, f = isoext.marching_cubes(grid, level=0.0)
+    v, f = isoext.marching_cubes(torus_grid, level=0.0)
 
     assert v.shape[1] == 3
     assert f.shape[1] == 3

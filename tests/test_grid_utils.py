@@ -6,7 +6,6 @@ import tempfile
 import torch
 
 import isoext
-from isoext.sdf import SphereSDF
 from isoext.utils import make_grid, write_obj
 
 
@@ -95,10 +94,9 @@ def test_uniform_grid_basic():
     assert len(values.shape) == 3
 
 
-def test_uniform_grid_set_values():
+def test_uniform_grid_set_values(sphere):
     """Test setting values on UniformGrid."""
     grid = isoext.UniformGrid([16, 16, 16], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
-    sphere = SphereSDF(radius=0.5)
 
     points = grid.get_points()
     sdf_values = sphere(points)

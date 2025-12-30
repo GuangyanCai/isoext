@@ -2,12 +2,11 @@
 
 import torch
 
-from isoext.sdf import CuboidSDF, SphereSDF, TorusSDF, get_sdf_grad, get_sdf_normal
+from isoext.sdf import CuboidSDF, get_sdf_grad, get_sdf_normal
 
 
-def test_get_sdf_grad_sphere():
+def test_get_sdf_grad_sphere(sphere):
     """Test gradient computation for sphere SDF."""
-    sphere = SphereSDF(radius=0.5)
     points = torch.tensor([[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [1.0, 0.0, 0.0]], device="cuda")
     grad = get_sdf_grad(sphere, points)
 
@@ -20,9 +19,8 @@ def test_get_sdf_grad_sphere():
     assert grad[2, 0] > 0
 
 
-def test_get_sdf_normal_sphere():
+def test_get_sdf_normal_sphere(sphere):
     """Test normal computation for sphere SDF."""
-    sphere = SphereSDF(radius=0.5)
     points = torch.tensor([[0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]], device="cuda")
     normals = get_sdf_normal(sphere, points)
 
@@ -35,18 +33,16 @@ def test_get_sdf_normal_sphere():
     assert torch.allclose(normals[0], torch.tensor([1.0, 0.0, 0.0], device="cuda"), atol=1e-4)
 
 
-def test_get_sdf_grad_torus():
+def test_get_sdf_grad_torus(torus):
     """Test gradient computation for torus SDF."""
-    torus = TorusSDF(R=0.5, r=0.2)
     points = torch.tensor([[0.5, 0.0, 0.0], [0.0, 0.0, 0.0]], device="cuda")
     grad = get_sdf_grad(torus, points)
 
     assert grad.shape == (2, 3)
 
 
-def test_get_sdf_normal_torus():
+def test_get_sdf_normal_torus(torus):
     """Test normal computation for torus SDF."""
-    torus = TorusSDF(R=0.5, r=0.2)
     # Use points that are clearly on or near the surface (avoid singularities like center)
     points = torch.tensor([[0.6, 0.1, 0.0], [0.4, 0.1, 0.0], [0.5, 0.2, 0.0]], device="cuda")
     normals = get_sdf_normal(torus, points)
@@ -85,9 +81,8 @@ def test_get_sdf_normal_cuboid():
     assert torch.allclose(norms, torch.ones_like(norms), atol=1e-5)
 
 
-def test_get_sdf_normal_batch():
+def test_get_sdf_normal_batch(sphere):
     """Test normal computation with batched points."""
-    sphere = SphereSDF(radius=0.5)
     # Create a batch of points with shape (2, 3, 3)
     points = torch.randn(2, 3, 3, device="cuda")
     normals = get_sdf_normal(sphere, points)
