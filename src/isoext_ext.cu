@@ -98,17 +98,37 @@ NB_MODULE(isoext_ext, m) {
             auto [v, f] = mc::marching_cubes(grid, level, method);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
-        "grid"_a, "level"_a = 0.f, "method"_a = "nagae");
+        "grid"_a, "level"_a = 0.f, "method"_a = "nagae",
+        "Extract an iso-surface from a grid using the Marching Cubes algorithm.\n\n"
+        "Args:\n"
+        "    grid: The input grid (UniformGrid or SparseGrid) containing scalar values.\n"
+        "    level: The iso-value at which to extract the surface. Default is 0.0.\n"
+        "    method: The marching cubes variant to use. Options are 'nagae' (default) or 'lorensen'.\n\n"
+        "Returns:\n"
+        "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions\n"
+        "    and faces is an (M, 3) uint32 tensor of triangle indices.");
 
-    nb::class_<Grid, PyGrid>(m, "Grid")
-        .def("get_num_cells", &Grid::get_num_cells)
-        .def("get_num_points", &Grid::get_num_points)
-        .def("get_points", &Grid::get_points)
-        .def("get_values", &Grid::get_values)
-        .def("set_values", &Grid::set_values)
-        .def("get_cells", &Grid::get_cells);
+    nb::class_<Grid, PyGrid>(m, "Grid",
+        "Abstract base class for all grid types.\n\n"
+        "Grids store scalar values at discrete points and define the topology of cells.\n"
+        "Use UniformGrid for dense regular grids or SparseGrid for adaptive grids.")
+        .def("get_num_cells", &Grid::get_num_cells,
+            "Return the number of cells in the grid.")
+        .def("get_num_points", &Grid::get_num_points,
+            "Return the number of points (vertices) in the grid.")
+        .def("get_points", &Grid::get_points,
+            "Return the 3D coordinates of all grid points as an (N, 3) float32 tensor.")
+        .def("get_values", &Grid::get_values,
+            "Return the scalar values at all grid points.")
+        .def("set_values", &Grid::set_values,
+            "Set the scalar values at all grid points.")
+        .def("get_cells", &Grid::get_cells,
+            "Return the cell connectivity as a tensor of point indices.");
 
-    nb::class_<UniformGrid, Grid>(m, "UniformGrid")
+    nb::class_<UniformGrid, Grid>(m, "UniformGrid",
+        "A dense uniform grid for storing scalar values.\n\n"
+        "The grid divides a 3D axis-aligned bounding box into a regular lattice of cells.\n"
+        "Each cell has 8 corner points where scalar values are stored.")
         .def(
             "__init__",
             [](UniformGrid *self, std::array<uint, 3> shape,
@@ -119,26 +139,38 @@ NB_MODULE(isoext_ext, m) {
             },
             "shape"_a, "aabb_min"_a = std::array<float, 3>{-1, -1, -1},
             "aabb_max"_a = std::array<float, 3>{1, 1, 1},
-            "default_value"_a = FMAX)
+            "default_value"_a = FMAX,
+            "Create a uniform grid.\n\n"
+            "Args:\n"
+            "    shape: The number of cells in each dimension (x, y, z).\n"
+            "    aabb_min: The minimum corner of the bounding box. Default is [-1, -1, -1].\n"
+            "    aabb_max: The maximum corner of the bounding box. Default is [1, 1, 1].\n"
+            "    default_value: Initial scalar value for all points. Default is float max.")
         .def("get_points",
              [](UniformGrid &self) {
                  NDArray<float3> points = self.get_points();
                  return ours_to_nb(points);
-             })
+             },
+             "Return the 3D coordinates of all grid points as a (X, Y, Z, 3) float32 tensor.")
         .def("get_values",
              [](UniformGrid &self) {
                  NDArray<float> values = self.get_values();
                  return ours_to_nb(values);
-             })
+             },
+             "Return the scalar values as a (X, Y, Z) float32 tensor.")
         .def(
             "set_values",
             [](UniformGrid &self, UniformGridData new_values) {
                 NDArray<float> values = nb_to_ours(new_values);
                 self.set_values(values);
             },
-            "new_values"_a);
+            "new_values"_a,
+            "Set the scalar values from a (X, Y, Z) float32 tensor.");
 
-    nb::class_<SparseGrid, Grid>(m, "SparseGrid")
+    nb::class_<SparseGrid, Grid>(m, "SparseGrid",
+        "A sparse adaptive grid for storing scalar values.\n\n"
+        "Unlike UniformGrid, SparseGrid only allocates memory for cells that are explicitly added.\n"
+        "This is useful for large domains where only a small region contains the iso-surface.")
         .def(
             "__init__",
             [](SparseGrid *self, std::array<uint, 3> shape,
@@ -149,31 +181,43 @@ NB_MODULE(isoext_ext, m) {
             },
             "shape"_a, "aabb_min"_a = std::array<float, 3>{-1, -1, -1},
             "aabb_max"_a = std::array<float, 3>{1, 1, 1},
-            "default_value"_a = std::numeric_limits<float>::max())
-        .def("get_num_cells", &SparseGrid::get_num_cells)
-        .def("get_num_points", &SparseGrid::get_num_points)
+            "default_value"_a = std::numeric_limits<float>::max(),
+            "Create a sparse grid.\n\n"
+            "Args:\n"
+            "    shape: The maximum number of cells in each dimension (x, y, z).\n"
+            "    aabb_min: The minimum corner of the bounding box. Default is [-1, -1, -1].\n"
+            "    aabb_max: The maximum corner of the bounding box. Default is [1, 1, 1].\n"
+            "    default_value: Default scalar value for unset points. Default is float max.")
+        .def("get_num_cells", &SparseGrid::get_num_cells,
+            "Return the number of active cells in the grid.")
+        .def("get_num_points", &SparseGrid::get_num_points,
+            "Return the number of points in active cells (num_cells * 8).")
         .def("get_points",
              [](SparseGrid &self) {
                  NDArray<float3> points = self.get_points();
                  return ours_to_nb(points);
-             })
+             },
+             "Return the 3D coordinates of points in active cells as an (N, 8, 3) float32 tensor.")
         .def("get_values",
              [](SparseGrid &self) {
                  NDArray<float> values = self.get_values();
                  return ours_to_nb(values);
-             })
+             },
+             "Return the scalar values at active cell corners as an (N, 8) float32 tensor.")
         .def(
             "set_values",
             [](SparseGrid &self, SparseGridData new_values) {
                 NDArray<float> values = nb_to_ours(new_values);
                 self.set_values(values);
             },
-            "new_values"_a)
+            "new_values"_a,
+            "Set the scalar values from an (N, 8) float32 tensor.")
         .def("get_cells",
              [](SparseGrid &self) {
                  NDArray<uint> cells = self.get_cells();
                  return ours_to_nb(cells);
-             })
+             },
+             "Return the cell connectivity as point indices.")
         .def(
             "add_cells",
             [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
@@ -181,7 +225,10 @@ NB_MODULE(isoext_ext, m) {
                     nb_to_ours(new_cell_indices).cast<uint>();
                 self.add_cells(new_cell_indices_);
             },
-            "new_cell_indices"_a)
+            "new_cell_indices"_a,
+            "Add cells to the grid by their linear indices.\n\n"
+            "Args:\n"
+            "    new_cell_indices: 1D int32 tensor of cell indices to add.")
         .def(
             "remove_cells",
             [](SparseGrid &self, SparseGridCellIndices new_cell_indices) {
@@ -189,7 +236,10 @@ NB_MODULE(isoext_ext, m) {
                     nb_to_ours(new_cell_indices).cast<uint>();
                 self.remove_cells(new_cell_indices_);
             },
-            "new_cell_indices"_a)
+            "new_cell_indices"_a,
+            "Remove cells from the grid by their linear indices.\n\n"
+            "Args:\n"
+            "    new_cell_indices: 1D int32 tensor of cell indices to remove.")
         .def("get_cell_indices",
              [](SparseGrid &self) {
                  thrust::device_vector<uint> cell_indices_dv =
@@ -199,7 +249,8 @@ NB_MODULE(isoext_ext, m) {
                                          {cell_indices_dv.size()})
                          .cast<int>();
                  return ours_to_nb(cell_indices);
-             })
+             },
+             "Return the linear indices of all active cells as a 1D int32 tensor.")
         .def("get_potential_cell_indices",
              [](SparseGrid &self, uint chunk_size) {
                  auto cell_indices =
@@ -209,7 +260,12 @@ NB_MODULE(isoext_ext, m) {
                      cell_indices_vec.push_back(ours_to_nb(cell_indices_));
                  }
                  return cell_indices_vec;
-             })
+             },
+             "Get potential cell indices in chunks for memory-efficient processing.\n\n"
+             "Args:\n"
+             "    chunk_size: Maximum number of cells per chunk.\n\n"
+             "Returns:\n"
+             "    A list of 1D int32 tensors, each containing cell indices for a chunk.")
         .def(
             "get_points_by_cell_indices",
             [](SparseGrid &self, SparseGridCellIndices cell_indices) {
@@ -219,7 +275,12 @@ NB_MODULE(isoext_ext, m) {
                     self.get_points_by_cell_indices(cell_indices_uint);
                 return ours_to_nb(points);
             },
-            "cell_indices"_a)
+            "cell_indices"_a,
+            "Get the corner points of specified cells.\n\n"
+            "Args:\n"
+            "    cell_indices: 1D int32 tensor of cell indices.\n\n"
+            "Returns:\n"
+            "    An (N, 8, 3) float32 tensor of corner coordinates.")
         .def(
             "filter_cell_indices",
             [](SparseGrid &self, SparseGridCellIndices cell_indices,
@@ -232,22 +293,45 @@ NB_MODULE(isoext_ext, m) {
                         .cast<int>();
                 return ours_to_nb(filtered_cell_indices);
             },
-            "cell_indices"_a, "values"_a, "level"_a = 0.f);
+            "cell_indices"_a, "values"_a, "level"_a = 0.f,
+            "Filter cells to keep only those that cross the iso-surface.\n\n"
+            "Args:\n"
+            "    cell_indices: 1D int32 tensor of cell indices to filter.\n"
+            "    values: (N, 8) float32 tensor of scalar values at cell corners.\n"
+            "    level: The iso-value to check against. Default is 0.0.\n\n"
+            "Returns:\n"
+            "    A 1D int32 tensor of cell indices that cross the iso-surface.");
 
-    nb::class_<Intersection>(m, "Intersection")
+    nb::class_<Intersection>(m, "Intersection",
+        "Stores edge-surface intersection points and normals for dual contouring.\n\n"
+        "Created by get_intersection() and used as input to dual_contouring().\n"
+        "You can modify the normals to control the surface reconstruction.")
         .def("get_points",
-             [](Intersection &self) { return ours_to_nb(self.points); })
+             [](Intersection &self) { return ours_to_nb(self.points); },
+             "Return the intersection points as an (N, 3) float32 tensor.")
         .def("get_normals",
-             [](Intersection &self) { return ours_to_nb(self.normals); })
+             [](Intersection &self) { return ours_to_nb(self.normals); },
+             "Return the surface normals at intersection points as an (N, 3) float32 tensor.")
         .def(
             "set_normals",
             [](Intersection &self, Vector3 new_normals) {
                 NDArray<float3> normals = nb_to_ours(new_normals);
                 self.set_normals(normals);
             },
-            "new_normals"_a);
+            "new_normals"_a,
+            "Set custom normals for the intersection points.\n\n"
+            "Args:\n"
+            "    new_normals: (N, 3) float32 tensor of normal vectors.");
 
-    m.def("get_intersection", &get_intersection, "grid"_a, "level"_a = 0.f);
+    m.def("get_intersection", &get_intersection, "grid"_a, "level"_a = 0.f,
+        "Compute edge-surface intersections for dual contouring.\n\n"
+        "Finds where grid edges cross the iso-surface and computes intersection\n"
+        "points and normals using linear interpolation and central differences.\n\n"
+        "Args:\n"
+        "    grid: The input grid containing scalar values.\n"
+        "    level: The iso-value. Default is 0.0.\n\n"
+        "Returns:\n"
+        "    An Intersection object containing points and normals.");
 
     m.def(
         "dual_contouring",
@@ -257,7 +341,23 @@ NB_MODULE(isoext_ext, m) {
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
         "grid"_a, "its"_a, "level"_a = 0.f, "reg"_a = 1e-2f,
-        "svd_tol"_a = 1e-6f);
+        "svd_tol"_a = 1e-6f,
+        "Extract an iso-surface using the Dual Contouring algorithm.\n\n"
+        "Dual Contouring produces meshes with better-placed vertices than Marching Cubes,\n"
+        "especially for sharp features. It solves a QEF (Quadric Error Function) per cell\n"
+        "to find optimal vertex positions.\n\n"
+        "Args:\n"
+        "    grid: The input grid containing scalar values.\n"
+        "    its: Intersection data from get_intersection().\n"
+        "    level: The iso-value. Default is 0.0.\n"
+        "    reg: Regularization weight for the QEF solver. Default is 0.01.\n"
+        "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n\n"
+        "Returns:\n"
+        "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor\n"
+        "    and faces is an (M, 4) uint32 tensor of quad indices.");
 
-    m.doc() = "A library for extracting iso-surfaces from level-set functions";
+    m.doc() = "GPU-accelerated iso-surface extraction algorithms.\n\n"
+              "This module provides implementations of Marching Cubes and Dual Contouring\n"
+              "for extracting surfaces from scalar fields stored on uniform or sparse grids.\n"
+              "All operations run on CUDA and use PyTorch tensors for data exchange.";
 }
