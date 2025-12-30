@@ -50,6 +50,7 @@ sdf_guide
 :caption: Extras
 :hidden:
 
+occupancy_grids
 more_sdf
 ```
 

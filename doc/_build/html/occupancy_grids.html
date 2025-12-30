@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="API Reference" href="api.html"><link rel="prev" title="Working with Occupancy Grids" href="occupancy_grids.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Using External SDF Libraries" href="more_sdf.html"><link rel="prev" title="SDF Utilities" href="sdf_guide.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Using External SDF Libraries - isoext documentation</title>
+        <title>Working with Occupancy Grids - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -205,8 +205,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extras</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Using External SDF Libraries</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Working with Occupancy Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -231,7 +231,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/more_sdf.ipynb.txt" title="View this page">
+  <a class="muted-link" href="_sources/occupancy_grids.ipynb.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -249,18 +249,20 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="using-external-sdf-libraries">
-<h1>Using External SDF Libraries<a class="headerlink" href="#using-external-sdf-libraries" title="Link to this heading">¶</a></h1>
-<p>While <code class="docutils literal notranslate"><span class="pre">isoext</span></code> includes basic SDF primitives for convenience, you can use any SDF library to generate your scalar fields. One excellent option is <a class="reference external" href="https://github.com/fogleman/sdf"><code class="docutils literal notranslate"><span class="pre">sdf</span></code></a> by Michael Fogleman—a powerful Python library for constructing complex SDF.</p>
-<p>It can be installed by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/fogleman/sdf
-</pre></div>
-</div>
+          <section id="working-with-occupancy-grids">
+<h1>Working with Occupancy Grids<a class="headerlink" href="#working-with-occupancy-grids" title="Link to this heading">¶</a></h1>
+<p>While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from <strong>binary occupancy grids</strong>—voxel grids where each cell is either occupied (1) or empty (0).</p>
+<p>This is useful when:</p>
+<ul class="simple">
+<li><p>You have voxelized data from 3D scanning or segmentation</p></li>
+<li><p>Your data comes from a boolean CSG operation</p></li>
+<li><p>You want to convert a mesh to voxels and back</p></li>
+</ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sdf</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span>
 </pre></div>
 </div>
@@ -271,60 +273,70 @@
 </div>
 </div>
 </div>
-<section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
-<p>This example recreates the <a class="reference external" href="https://github.com/fogleman/sdf/blob/main/examples/weave.py">weave</a> demo from the <code class="docutils literal notranslate"><span class="pre">sdf</span></code> library.</p>
+<section id="creating-an-occupancy-grid">
+<h2>Creating an Occupancy Grid<a class="headerlink" href="#creating-an-occupancy-grid" title="Link to this heading">¶</a></h2>
+<p>Let’s create a binary occupancy grid from a sphere SDF. Values &gt; 0 are outside, so we threshold to get a binary mask:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The following example is taken from https://github.com/fogleman/sdf/blob/main/examples/weave.py</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a grid and compute sphere SDF</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+<span class="n">sdf_values</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
 
-<span class="n">f</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">rounded_box</span><span class="p">([</span><span class="mf">3.2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">((</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0625</span><span class="p">))</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">bend_linear</span><span class="p">(</span><span class="n">sdf</span><span class="o">.</span><span class="n">X</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">sdf</span><span class="o">.</span><span class="n">X</span> <span class="o">*</span> <span class="mf">2.25</span><span class="p">,</span> <span class="n">sdf</span><span class="o">.</span><span class="n">Z</span> <span class="o">*</span> <span class="o">-</span><span class="mf">0.1875</span><span class="p">,</span> <span class="n">sdf</span><span class="o">.</span><span class="n">ease</span><span class="o">.</span><span class="n">in_out_quad</span><span class="p">)</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">circular_array</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c1"># Convert to binary occupancy: 0 = outside, 1 = inside</span>
+<span class="n">occupancy</span> <span class="o">=</span> <span class="p">(</span><span class="n">sdf_values</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 
-<span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">repeat</span><span class="p">((</span><span class="mf">2.7</span><span class="p">,</span> <span class="mf">5.4</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">f</span> <span class="o">|=</span> <span class="n">f</span><span class="o">.</span><span class="n">translate</span><span class="p">((</span><span class="mf">2.7</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">2.7</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-
-<span class="n">f</span> <span class="o">&amp;=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">cylinder</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">f</span> <span class="o">|=</span> <span class="p">(</span><span class="n">sdf</span><span class="o">.</span><span class="n">cylinder</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span> <span class="o">-</span> <span class="n">sdf</span><span class="o">.</span><span class="n">cylinder</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">sdf</span><span class="o">.</span><span class="n">slab</span><span class="p">(</span><span class="n">z0</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">z1</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">k</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Sample the SDF on a grid. Since the sdf library operates on NumPy arrays, we convert between PyTorch and NumPy:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">]</span>
-<span class="n">aabb_min</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">13</span><span class="p">,</span> <span class="o">-</span><span class="mi">13</span><span class="p">]</span>
-<span class="n">aabb_max</span> <span class="o">=</span> <span class="p">[</span><span class="mi">13</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">aabb_min</span><span class="p">,</span> <span class="n">aabb_max</span><span class="p">)</span>
-<span class="n">points</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-<span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="n">values</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-<span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Extract the mesh with marching cubes:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        <span class="c1"># (M, 3) uint32</span>
-
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Occupancy values: </span><span class="si">{</span><span class="n">occupancy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Vertices: torch.Size([110818, 3])
-Faces: torch.Size([222000, 3])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Occupancy values: [0.0, 1.0]
 </pre></div>
 </div>
-<img alt="_images/688901cfaac9a30a804ee856b7febdad673d6f53983043278f55e9c580444303.png" src="_images/688901cfaac9a30a804ee856b7febdad673d6f53983043278f55e9c580444303.png" />
+</div>
+</div>
+</section>
+<section id="direct-extraction-jagged-result">
+<h2>Direct Extraction (Jagged Result)<a class="headerlink" href="#direct-extraction-jagged-result" title="Link to this heading">¶</a></h2>
+<p>You can run marching cubes directly on the binary grid using <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code> (the boundary between 0 and 1). However, the result will be <strong>jagged</strong> because there’s no gradient information—every surface point lands exactly on a voxel face:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">occupancy</span><span class="p">)</span>
+<span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jagged mesh: </span><span class="si">{</span><span class="n">v_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
+<span class="n">show_mesh</span><span class="p">(</span><span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span><span class="p">,</span> <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Jagged mesh: 9168 vertices, 18332 faces
+</pre></div>
+</div>
+<img alt="_images/bd24f9f9c698cc13aff5c45d446b57d21ac84f60ae9c7e9ce531f2984c6cb6af.png" src="_images/bd24f9f9c698cc13aff5c45d446b57d21ac84f60ae9c7e9ce531f2984c6cb6af.png" />
+</div>
+</div>
+</section>
+<section id="smoothed-extraction">
+<h2>Smoothed Extraction<a class="headerlink" href="#smoothed-extraction" title="Link to this heading">¶</a></h2>
+<p>To get a smoother result, apply <strong>Gaussian smoothing</strong> before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Smooth the occupancy grid</span>
+<span class="n">smoothed</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">occupancy</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">smoothed</span><span class="p">)</span>
+<span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smooth mesh: </span><span class="si">{</span><span class="n">v_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
+<span class="n">show_mesh</span><span class="p">(</span><span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smooth mesh: 8232 vertices, 16460 faces
+</pre></div>
+</div>
+<img alt="_images/f3d331ae5475c5a003bf8768cfcd015bad7368905e0158ced8dfbdbd29450ea2.png" src="_images/f3d331ae5475c5a003bf8768cfcd015bad7368905e0158ced8dfbdbd29450ea2.png" />
 </div>
 </div>
 </section>
@@ -335,23 +347,23 @@ Faces: torch.Size([222000, 3])
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="api.html">
+          <a class="next-page" href="more_sdf.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">API Reference</div>
+                <div class="title">Using External SDF Libraries</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="occupancy_grids.html">
+          <a class="prev-page" href="sdf_guide.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Working with Occupancy Grids</div>
+                <div class="title">SDF Utilities</div>
                 
               </div>
             </a>
@@ -385,8 +397,10 @@ Faces: torch.Size([222000, 3])
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Using External SDF Libraries</a><ul>
-<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#">Working with Occupancy Grids</a><ul>
+<li><a class="reference internal" href="#creating-an-occupancy-grid">Creating an Occupancy Grid</a></li>
+<li><a class="reference internal" href="#direct-extraction-jagged-result">Direct Extraction (Jagged Result)</a></li>
+<li><a class="reference internal" href="#smoothed-extraction">Smoothed Extraction</a></li>
 </ul>
 </li>
 </ul>
