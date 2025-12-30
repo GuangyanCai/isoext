@@ -1,6 +1,7 @@
 # isoext
 
 [![PyPI version](https://badge.fury.io/py/isoext.svg?)](https://badge.fury.io/py/isoext)
+[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://guangyancai.github.io/isoext/)
 
 **GPU-accelerated iso-surface extraction for PyTorch**
 
@@ -35,7 +36,7 @@ isoext.write_obj("sphere.obj", vertices, faces)
 
 ## Documentation
 
-See the [full documentation](https://github.com/GuangyanCai/isoext/wiki) for guides on grids, extraction methods, and the API reference.
+See the [full documentation](https://guangyancai.github.io/isoext/) for guides on grids, extraction methods, and the API reference.
 
 ## License
 
