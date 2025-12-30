@@ -354,7 +354,7 @@ NB_MODULE(isoext_ext, m) {
         "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor\n"
-        "    and faces is an (M, 4) uint32 tensor of quad indices.");
+        "    and faces is an (M, 3) int32 tensor of triangle indices.");
 
     m.doc() = "GPU-accelerated iso-surface extraction algorithms.\n\n"
               "This module provides implementations of Marching Cubes and Dual Contouring\n"
