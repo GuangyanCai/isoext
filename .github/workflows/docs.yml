@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - 'doc/_build/html/**'
+      - 'doc/_build/html/*'
   workflow_dispatch:
 
 permissions:

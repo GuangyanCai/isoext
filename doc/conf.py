@@ -25,6 +25,7 @@ nb_execution_mode = "off"  # Don't execute notebooks during build (requires GPU)
 # Autodoc settings
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
+autodoc_docstring_signature = True  # Extract signatures from nanobind docstrings
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

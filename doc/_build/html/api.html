@@ -352,43 +352,102 @@ points and normals using linear interpolation and central differences.</p>
 </section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
-<section id="grid-classes">
-<h3>Grid Classes<a class="headerlink" href="#grid-classes" title="Link to this heading">¶</a></h3>
+<section id="uniformgrid">
+<h3>UniformGrid<a class="headerlink" href="#uniformgrid" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="isoext.UniformGrid">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">UniformGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.UniformGrid" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">UniformGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-1,</span> <span class="pre">-1,</span> <span class="pre">-1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.UniformGrid" title="Link to this definition">¶</a></dt>
 <dd><p>A dense uniform grid for storing scalar values.</p>
 <p>The grid divides a 3D axis-aligned bounding box into a regular lattice of cells.
 Each cell has 8 corner points where scalar values are stored.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.UniformGrid.get_points">
-<span class="sig-name descname"><span class="pre">get_points</span></span><a class="headerlink" href="#isoext.UniformGrid.get_points" title="Link to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – The number of cells in each dimension (x, y, z).</p></li>
+<li><p><strong>aabb_min</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The minimum corner of the bounding box.</p></li>
+<li><p><strong>aabb_max</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The maximum corner of the bounding box.</p></li>
+<li><p><strong>default_value</strong> (<em>float</em>) – Initial scalar value for all points.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.UniformGrid.UniformGrid.get_points">
+<span class="sig-prename descclassname"><span class="pre">UniformGrid.</span></span><span class="sig-name descname"><span class="pre">get_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.UniformGrid.UniformGrid.get_points" title="Link to this definition">¶</a></dt>
 <dd><p>Return the 3D coordinates of all grid points as a (X, Y, Z, 3) float32 tensor.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.UniformGrid.get_values">
-<span class="sig-name descname"><span class="pre">get_values</span></span><a class="headerlink" href="#isoext.UniformGrid.get_values" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.UniformGrid.UniformGrid.get_values">
+<span class="sig-prename descclassname"><span class="pre">UniformGrid.</span></span><span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.UniformGrid.UniformGrid.get_values" title="Link to this definition">¶</a></dt>
 <dd><p>Return the scalar values as a (X, Y, Z) float32 tensor.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.UniformGrid.set_values">
-<span class="sig-name descname"><span class="pre">set_values</span></span><a class="headerlink" href="#isoext.UniformGrid.set_values" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.UniformGrid.UniformGrid.set_values">
+<span class="sig-prename descclassname"><span class="pre">UniformGrid.</span></span><span class="sig-name descname"><span class="pre">set_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self,</span> <span class="pre">new_values:</span> <span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">shape=(*,</span> <span class="pre">*,</span> <span class="pre">*),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#isoext.isoext.UniformGrid.UniformGrid.set_values" title="Link to this definition">¶</a></dt>
 <dd><p>Set the scalar values from a (X, Y, Z) float32 tensor.</p>
 </dd></dl>
 
 </dd></dl>
 
+</section>
+<section id="sparsegrid">
+<h3>SparseGrid<a class="headerlink" href="#sparsegrid" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="isoext.SparseGrid">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">SparseGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.SparseGrid" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">SparseGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-1,</span> <span class="pre">-1,</span> <span class="pre">-1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.SparseGrid" title="Link to this definition">¶</a></dt>
 <dd><p>A sparse adaptive grid for storing scalar values.</p>
 <p>Unlike UniformGrid, SparseGrid only allocates memory for cells that are explicitly added.
 This is useful for large domains where only a small region contains the iso-surface.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.add_cells">
-<span class="sig-name descname"><span class="pre">add_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.add_cells" title="Link to this definition">¶</a></dt>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – The maximum number of cells in each dimension (x, y, z).</p></li>
+<li><p><strong>aabb_min</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The minimum corner of the bounding box.</p></li>
+<li><p><strong>aabb_max</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The maximum corner of the bounding box.</p></li>
+<li><p><strong>default_value</strong> (<em>float</em>) – Default scalar value for unset points.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_num_cells">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_num_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_num_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Return the number of active cells in the grid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_num_points">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_num_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_num_points" title="Link to this definition">¶</a></dt>
+<dd><p>Return the number of points in active cells (num_cells * 8).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_points">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_points" title="Link to this definition">¶</a></dt>
+<dd><p>Return the 3D coordinates of points in active cells as an (N, 8, 3) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_values">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_values" title="Link to this definition">¶</a></dt>
+<dd><p>Return the scalar values at active cell corners as an (N, 8) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.set_values">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">set_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self,</span> <span class="pre">new_values:</span> <span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">shape=(*,</span> <span class="pre">8),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.set_values" title="Link to this definition">¶</a></dt>
+<dd><p>Set the scalar values from an (N, 8) float32 tensor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_cells">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=uint32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Return the cell connectivity as point indices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.add_cells">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">add_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self,</span> <span class="pre">new_cell_indices:</span> <span class="pre">torch.Tensor[dtype=int32,</span> <span class="pre">shape=(*),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.add_cells" title="Link to this definition">¶</a></dt>
 <dd><p>Add cells to the grid by their linear indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -397,9 +456,54 @@ This is useful for large domains where only a small region contains the iso-surf
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.filter_cell_indices">
-<span class="sig-name descname"><span class="pre">filter_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.filter_cell_indices" title="Link to this definition">¶</a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.remove_cells">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">remove_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self,</span> <span class="pre">new_cell_indices:</span> <span class="pre">torch.Tensor[dtype=int32,</span> <span class="pre">shape=(*),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.remove_cells" title="Link to this definition">¶</a></dt>
+<dd><p>Remove cells from the grid by their linear indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_cell_indices</strong> – 1D int32 tensor of cell indices to remove.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_cell_indices">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_cell_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=int32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Return the linear indices of all active cells as a 1D int32 tensor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_potential_cell_indices">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_potential_cell_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list[torch.Tensor[dtype=int32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']]</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_potential_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Get potential cell indices in chunks for memory-efficient processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chunk_size</strong> – Maximum number of cells per chunk.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of 1D int32 tensors, each containing cell indices for a chunk.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.get_points_by_cell_indices">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">get_points_by_cell_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self,</span> <span class="pre">cell_indices:</span> <span class="pre">torch.Tensor[dtype=int32,</span> <span class="pre">shape=(*),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.get_points_by_cell_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Get the corner points of specified cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cell_indices</strong> – 1D int32 tensor of cell indices.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An (N, 8, 3) float32 tensor of corner coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.isoext.SparseGrid.SparseGrid.filter_cell_indices">
+<span class="sig-prename descclassname"><span class="pre">SparseGrid.</span></span><span class="sig-name descname"><span class="pre">filter_cell_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">self,</span> <span class="pre">cell_indices:</span> <span class="pre">torch.Tensor[dtype=int32,</span> <span class="pre">shape=(*),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda'],</span> <span class="pre">values:</span> <span class="pre">torch.Tensor[dtype=float32,</span> <span class="pre">shape=(*,</span> <span class="pre">8),</span> <span class="pre">order='C',</span> <span class="pre">device='cuda'],</span> <span class="pre">level:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch.Tensor[dtype=int32,</span> <span class="pre">order='C',</span> <span class="pre">device='cuda']</span></span></span><a class="headerlink" href="#isoext.isoext.SparseGrid.SparseGrid.filter_cell_indices" title="Link to this definition">¶</a></dt>
 <dd><p>Filter cells to keep only those that cross the iso-surface.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -413,87 +517,6 @@ This is useful for large domains where only a small region contains the iso-surf
 <dd class="field-even"><p>A 1D int32 tensor of cell indices that cross the iso-surface.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_cell_indices">
-<span class="sig-name descname"><span class="pre">get_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.get_cell_indices" title="Link to this definition">¶</a></dt>
-<dd><p>Return the linear indices of all active cells as a 1D int32 tensor.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_cells">
-<span class="sig-name descname"><span class="pre">get_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.get_cells" title="Link to this definition">¶</a></dt>
-<dd><p>Return the cell connectivity as point indices.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_num_cells">
-<span class="sig-name descname"><span class="pre">get_num_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.get_num_cells" title="Link to this definition">¶</a></dt>
-<dd><p>Return the number of active cells in the grid.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_num_points">
-<span class="sig-name descname"><span class="pre">get_num_points</span></span><a class="headerlink" href="#isoext.SparseGrid.get_num_points" title="Link to this definition">¶</a></dt>
-<dd><p>Return the number of points in active cells (num_cells * 8).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_points">
-<span class="sig-name descname"><span class="pre">get_points</span></span><a class="headerlink" href="#isoext.SparseGrid.get_points" title="Link to this definition">¶</a></dt>
-<dd><p>Return the 3D coordinates of points in active cells as an (N, 8, 3) float32 tensor.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_points_by_cell_indices">
-<span class="sig-name descname"><span class="pre">get_points_by_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.get_points_by_cell_indices" title="Link to this definition">¶</a></dt>
-<dd><p>Get the corner points of specified cells.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cell_indices</strong> – 1D int32 tensor of cell indices.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>An (N, 8, 3) float32 tensor of corner coordinates.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_potential_cell_indices">
-<span class="sig-name descname"><span class="pre">get_potential_cell_indices</span></span><a class="headerlink" href="#isoext.SparseGrid.get_potential_cell_indices" title="Link to this definition">¶</a></dt>
-<dd><p>Get potential cell indices in chunks for memory-efficient processing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>chunk_size</strong> – Maximum number of cells per chunk.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of 1D int32 tensors, each containing cell indices for a chunk.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.get_values">
-<span class="sig-name descname"><span class="pre">get_values</span></span><a class="headerlink" href="#isoext.SparseGrid.get_values" title="Link to this definition">¶</a></dt>
-<dd><p>Return the scalar values at active cell corners as an (N, 8) float32 tensor.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.remove_cells">
-<span class="sig-name descname"><span class="pre">remove_cells</span></span><a class="headerlink" href="#isoext.SparseGrid.remove_cells" title="Link to this definition">¶</a></dt>
-<dd><p>Remove cells from the grid by their linear indices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>new_cell_indices</strong> – 1D int32 tensor of cell indices to remove.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isoext.SparseGrid.set_values">
-<span class="sig-name descname"><span class="pre">set_values</span></span><a class="headerlink" href="#isoext.SparseGrid.set_values" title="Link to this definition">¶</a></dt>
-<dd><p>Set the scalar values from an (N, 8) float32 tensor.</p>
 </dd></dl>
 
 </dd></dl>
@@ -593,26 +616,29 @@ You can modify the normals to control the surface reconstruction.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
-<li><a class="reference internal" href="#grid-classes">Grid Classes</a><ul>
-<li><a class="reference internal" href="#isoext.UniformGrid"><code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code></a><ul>
-<li><a class="reference internal" href="#isoext.UniformGrid.get_points"><code class="docutils literal notranslate"><span class="pre">UniformGrid.get_points</span></code></a></li>
-<li><a class="reference internal" href="#isoext.UniformGrid.get_values"><code class="docutils literal notranslate"><span class="pre">UniformGrid.get_values</span></code></a></li>
-<li><a class="reference internal" href="#isoext.UniformGrid.set_values"><code class="docutils literal notranslate"><span class="pre">UniformGrid.set_values</span></code></a></li>
+<li><a class="reference internal" href="#uniformgrid">UniformGrid</a><ul>
+<li><a class="reference internal" href="#isoext.UniformGrid"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.isoext.UniformGrid.UniformGrid.get_points"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid.UniformGrid.get_points()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.UniformGrid.UniformGrid.get_values"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid.UniformGrid.get_values()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.UniformGrid.UniformGrid.set_values"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid.UniformGrid.set_values()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#isoext.SparseGrid"><code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code></a><ul>
-<li><a class="reference internal" href="#isoext.SparseGrid.add_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.add_cells</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.filter_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.filter_cell_indices</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_cell_indices</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_cells</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_num_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_num_cells</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_num_points"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_num_points</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_points"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_points</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_points_by_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_points_by_cell_indices</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_potential_cell_indices"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_potential_cell_indices</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.get_values"><code class="docutils literal notranslate"><span class="pre">SparseGrid.get_values</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.remove_cells"><code class="docutils literal notranslate"><span class="pre">SparseGrid.remove_cells</span></code></a></li>
-<li><a class="reference internal" href="#isoext.SparseGrid.set_values"><code class="docutils literal notranslate"><span class="pre">SparseGrid.set_values</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sparsegrid">SparseGrid</a><ul>
+<li><a class="reference internal" href="#isoext.SparseGrid"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_num_cells"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_num_cells()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_num_points"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_num_points()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_points"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_points()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_values"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_values()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.set_values"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.set_values()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_cells"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_cells()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.add_cells"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.add_cells()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.remove_cells"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.remove_cells()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_cell_indices"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_cell_indices()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_potential_cell_indices"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_potential_cell_indices()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_points_by_cell_indices"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_points_by_cell_indices()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.filter_cell_indices"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.filter_cell_indices()</span></code></a></li>
 </ul>
 </li>
 </ul>
