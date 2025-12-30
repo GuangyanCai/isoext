@@ -1,5 +1,8 @@
 # isoext
 
+[![PyPI version](https://badge.fury.io/py/isoext.svg?)](https://badge.fury.io/py/isoext)
+[![GitHub](https://img.shields.io/badge/GitHub-isoext-blue?logo=github)](https://github.com/GuangyanCai/isoext)
+
 **GPU-accelerated iso-surface extraction for PyTorch**
 
 `isoext` is a high-performance library for extracting surfaces from scalar fields using CUDA. It provides implementations of Marching Cubes and Dual Contouring, optimized for GPU execution.
