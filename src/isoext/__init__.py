@@ -11,13 +11,14 @@ from .isoext_ext import (
     get_intersection,
     marching_cubes,
 )
-from .utils import make_grid, write_obj
+from .utils import gaussian_smooth, make_grid, write_obj
 
 __all__ = [
     "Intersection",
     "SparseGrid",
     "UniformGrid",
     "dual_contouring",
+    "gaussian_smooth",
     "get_intersection",
     "marching_cubes",
     "make_grid",
