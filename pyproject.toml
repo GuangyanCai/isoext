@@ -28,7 +28,8 @@ minimum-version = "0.4"
 build-dir = "build/{wheel_tag}"
 
 # Build stable ABI wheels for CPython 3.12+
-wheel.py-api = "cp312"
+[tool.scikit-build.wheel]
+py-api = "cp312"
 
 
 [tool.cibuildwheel]
@@ -44,9 +45,11 @@ channels = ["conda-forge"]
 platforms = ["linux-64"]
 
 [tool.pixi.pypi-dependencies]
-isoext = { path = ".", editable = true }
+nanobind = "*"
+scikit-build-core = { version = "*", extras = ["pyproject"] }
 
 [tool.pixi.tasks]
+compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -ve .", cwd = "." }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"
@@ -54,7 +57,7 @@ numpy = "*"
 pytest = "*"
 
 [tool.pixi.feature.dev.tasks]
-test = { cmd = "pytest tests/", cwd = "."}
+test = { cmd = "pytest tests/", cwd = ".", depends-on = ["compile"] }
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }
@@ -69,11 +72,11 @@ jupyterlab = "*"
 pyvista = { version = "*", extras = ["jupyter"] }
 
 [tool.pixi.feature.doc.tasks]
-doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc" }
-doc-serve = { cmd = "sphinx-autobuild . _build/html --open-browser --watch ../src", cwd = "doc" }
-doc-clean = { cmd = "rm -rf _build", cwd = "doc" }
-doc-rebuild = { cmd = "rm -rf _build && sphinx-build -b html . _build/html", cwd = "doc" }
-doc-lab = { cmd = "jupyter lab", cwd = "doc" }
+doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
+doc-serve = { cmd = "sphinx-autobuild . _build/html --open-browser --watch ../src", cwd = "doc", depends-on = ["compile"] }
+doc-clean = { cmd = "rm -rf _build", cwd = "doc", depends-on = ["compile"] }
+doc-rebuild = { cmd = "rm -rf _build && sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
+doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }
 
 [tool.pixi.environments]
 dev = { features = ["dev"] }
