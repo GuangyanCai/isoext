@@ -13,3 +13,7 @@ luts/*
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+# documentation
+doc/_build/
+doc/.ipynb_checkpoints/
+doc/*.obj
