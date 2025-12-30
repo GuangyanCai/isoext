@@ -47,6 +47,14 @@ sdf_guide
 
 ```{toctree}
 :maxdepth: 2
+:caption: Extras
+:hidden:
+
+more_sdf
+```
+
+```{toctree}
+:maxdepth: 2
 :caption: Reference
 :hidden:
 

@@ -70,6 +70,7 @@ myst-nb = "*"
 ipywidgets = "*"
 jupyterlab = "*"
 pyvista = { version = "*", extras = ["jupyter"] }
+sdf = { git = "git+https://github.com/fogleman/sdf" }
 
 [tool.pixi.feature.doc.tasks]
 doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
@@ -82,4 +83,3 @@ doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }
 dev = { features = ["dev"] }
 cu128 = { features = ["dev", "cu128"] }
 doc = { features = ["doc", "cu128"] }
-
