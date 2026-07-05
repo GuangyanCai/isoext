@@ -19,7 +19,7 @@ dependencies = ["viser"]
 
 [project.urls]
 Homepage = "https://github.com/GuangyanCai/isoext"
-Documentation = "https://github.com/GuangyanCai/isoext/wiki"
+Documentation = "https://guangyancai.github.io/isoext/"
 
 
 [tool.scikit-build]

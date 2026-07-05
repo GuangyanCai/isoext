@@ -120,7 +120,7 @@ NB_MODULE(isoext_ext, m) {
         "    method: The marching cubes variant to use. Options are 'nagae' (default) or 'lorensen'.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions\n"
-        "    and faces is an (M, 3) uint32 tensor of triangle indices.");
+        "    and faces is an (M, 3) int32 tensor of triangle indices.");
 
     nb::class_<Grid, PyGrid>(m, "Grid",
         "Abstract base class for all grid types.\n\n"

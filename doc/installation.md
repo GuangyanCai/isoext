@@ -6,7 +6,11 @@
 
 - **Python** 3.10 – 3.12
 - **PyTorch** with CUDA support
-- **CUDA Toolkit** matching your PyTorch version
+- **CUDA Toolkit** 12.4 or newer — 12.4 is the first release whose nvcc
+  supports GCC 13-era toolchains, and older releases fail on the fortified
+  glibc headers of recent Linux distributions (e.g. Ubuntu 24.04) with
+  errors like `"__builtin_dynamic_object_size" is undefined`. The build
+  stops with a clear message if an outdated nvcc is picked up.
 - A C++ compiler (GCC on Linux, Visual Studio on Windows)
 
 ## Install from PyPI
