@@ -130,7 +130,15 @@ struct edge_to_neighbor_idx_op {
             if (cell_idx.x < o.x || cell_idx.y < o.y || cell_idx.z < o.z) {
                 r[i] = -1;
             } else {
-                r[i] = idx_3d_to_1d(cell_idx - o, grid_shape - 1);
+                // The cell grid has grid_shape - 1 cells per dimension, so
+                // neighbors on the max boundary faces do not exist either.
+                uint3 c = cell_idx - o;
+                if (c.x >= grid_shape.x - 1 || c.y >= grid_shape.y - 1 ||
+                    c.z >= grid_shape.z - 1) {
+                    r[i] = -1;
+                } else {
+                    r[i] = idx_3d_to_1d(c, grid_shape - 1);
+                }
             }
         }
 

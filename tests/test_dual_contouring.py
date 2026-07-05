@@ -70,6 +70,37 @@ def test_dual_contouring_parameters(sphere_grid):
     assert f.shape[1] == 3
 
 
+def test_dual_contouring_surface_crossing_domain_boundary():
+    """Test dual contouring when the surface extends past the grid AABB.
+
+    Edges on the max boundary faces have fewer than 4 neighboring cells;
+    they must be skipped instead of producing out-of-range cell indices.
+    """
+    sphere = SphereSDF(radius=1.2)
+    grid = isoext.UniformGrid([32, 32, 32], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    grid.set_values(sphere(grid.get_points()))
+
+    v, f = isoext.dual_contouring(grid, level=0.0)
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert f.max().item() < len(v)
+
+    # Connectivity must only link dual vertices of adjacent cells, never
+    # distant vertices across the domain.
+    tri = v[f.long()]
+    edge_len = torch.cat(
+        [
+            (tri[:, 0] - tri[:, 1]).norm(dim=-1),
+            (tri[:, 1] - tri[:, 2]).norm(dim=-1),
+            (tri[:, 2] - tri[:, 0]).norm(dim=-1),
+        ]
+    )
+    cell_size = 2.0 / 31
+    assert edge_len.max().item() < 4 * cell_size
+
+
 def test_get_intersection(sphere_grid):
     """Test getting intersection points from grid."""
     its = isoext.get_intersection(sphere_grid, level=0.0)
