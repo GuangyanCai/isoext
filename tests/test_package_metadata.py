@@ -18,3 +18,7 @@ def test_requires_python_matches_source_syntax():
     assert not spec.contains("3.9")
     assert spec.contains("3.10")
     assert spec.contains("3.12")
+    # No upper bound: the extension targets the stable ABI and the test
+    # suite runs on 3.13.
+    assert spec.contains("3.13")
+    assert spec.contains("3.14")
