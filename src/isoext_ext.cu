@@ -338,6 +338,17 @@ NB_MODULE(isoext_ext, m) {
              [](Intersection &self) { return self.has_normals(); },
              "Return True if normals have been set or computed.")
         .def(
+            "set_points",
+            [](Intersection &self, Vector3 new_points) {
+                NDArray<float3> points = nb_to_ours(new_points);
+                self.set_points(points);
+            },
+            "new_points"_a,
+            "Set custom intersection points, e.g. after refining them\n"
+            "against the exact SDF.\n\n"
+            "Args:\n"
+            "    new_points: (N, 3) float32 tensor of point positions.")
+        .def(
             "set_normals",
             [](Intersection &self, Vector3 new_normals) {
                 NDArray<float3> normals = nb_to_ours(new_normals);
@@ -367,7 +378,7 @@ NB_MODULE(isoext_ext, m) {
     m.def(
         "dual_contouring",
         [](Grid *grid, float level, std::optional<Intersection> its_opt,
-           float reg, float svd_tol) {
+           float reg, float svd_tol, bool clamp) {
             Intersection its = its_opt.has_value()
                                    ? std::move(its_opt.value())
                                    : get_intersection(grid, level, true);
@@ -378,11 +389,11 @@ NB_MODULE(isoext_ext, m) {
                 its._has_normals = true;
             }
 
-            auto [v, f] = dual_contouring(grid, its, level, reg, svd_tol);
+            auto [v, f] = dual_contouring(grid, its, level, reg, svd_tol, clamp);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
         "grid"_a, "level"_a = 0.f, "intersection"_a = nb::none(),
-        "reg"_a = 1e-2f, "svd_tol"_a = 1e-6f,
+        "reg"_a = 1e-2f, "svd_tol"_a = 1e-6f, "clamp"_a = true,
         "Extract an iso-surface using the Dual Contouring algorithm.\n\n"
         "Dual Contouring produces meshes with better-placed vertices than Marching Cubes,\n"
         "especially for sharp features. It solves a QEF (Quadric Error Function) per cell\n"
@@ -394,7 +405,33 @@ NB_MODULE(isoext_ext, m) {
         "        If not provided, intersections are computed automatically.\n"
         "        If provided but normals not set, normals are computed automatically.\n"
         "    reg: Regularization weight for the QEF solver. Default is 0.01.\n"
-        "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n\n"
+        "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n"
+        "    clamp: Keep each vertex inside its cell. Disabling follows sharp\n"
+        "        features more closely but can produce self-intersections.\n\n"
+        "Returns:\n"
+        "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor\n"
+        "    and faces is an (M, 3) int32 tensor of triangle indices.");
+
+    m.def(
+        "surface_nets",
+        [](Grid *grid, float level, std::optional<Intersection> its_opt) {
+            Intersection its = its_opt.has_value()
+                                   ? std::move(its_opt.value())
+                                   : get_intersection(grid, level, false);
+            auto [v, f] = surface_nets(grid, its, level);
+            return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+        },
+        "grid"_a, "level"_a = 0.f, "intersection"_a = nb::none(),
+        "Extract an iso-surface using the surface nets algorithm.\n\n"
+        "Each cell crossed by the surface gets one vertex, placed at the\n"
+        "centroid of the cell's edge intersections. Compared to dual\n"
+        "contouring this needs no normals and no linear solves, at the cost\n"
+        "of less accurate vertex placement.\n\n"
+        "Args:\n"
+        "    grid: The input grid containing scalar values.\n"
+        "    level: The iso-value. Default is 0.0.\n"
+        "    intersection: Optional Intersection data from get_intersection().\n"
+        "        If not provided, intersections are computed automatically.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor\n"
         "    and faces is an (M, 3) int32 tensor of triangle indices.");

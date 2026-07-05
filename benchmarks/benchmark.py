@@ -72,6 +72,7 @@ def benchmark_grid(grid, label, iters, results):
         "mc_lorensen": lambda: isoext.marching_cubes(grid, method="lorensen"),
         "get_intersection": lambda: isoext.get_intersection(grid, compute_normals=True),
         "dual_contouring": lambda: isoext.dual_contouring(grid),
+        "surface_nets": lambda: isoext.surface_nets(grid),
     }
     for algo, fn in cases.items():
         try:

@@ -39,6 +39,26 @@ def get_sdf_grad(sdf: SDFProtocol, p: torch.Tensor) -> torch.Tensor:
     return sdf_grad
 
 
+def project_to_surface(sdf: SDFProtocol, p: torch.Tensor, iters: int = 2) -> torch.Tensor:
+    """Project points onto the zero level set of an SDF with Newton steps.
+
+    Useful for refining the linearly interpolated intersection points from
+    get_intersection before running dual contouring; more accurate points
+    give sharper features.
+
+    Args:
+        sdf: SDF function to evaluate
+        p: Points tensor with shape (..., 3)
+        iters: Number of Newton steps
+
+    Returns:
+        Projected points tensor with shape (..., 3)
+    """
+    for _ in range(iters):
+        p = p - sdf(p)[..., None] * get_sdf_normal(sdf, p)
+    return p
+
+
 def get_sdf_normal(sdf: SDFProtocol, p: torch.Tensor) -> torch.Tensor:
     """Compute normalized gradient (surface normal) of an SDF at given points.
 

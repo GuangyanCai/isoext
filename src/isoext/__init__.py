@@ -10,6 +10,7 @@ from .isoext_ext import (
     dual_contouring,
     get_intersection,
     marching_cubes,
+    surface_nets,
 )
 from .utils import gaussian_smooth, make_grid, write_obj
 
@@ -22,5 +23,6 @@ __all__ = [
     "get_intersection",
     "marching_cubes",
     "make_grid",
+    "surface_nets",
     "write_obj",
 ]

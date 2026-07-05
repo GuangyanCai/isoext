@@ -5,7 +5,13 @@ import gc
 import torch
 
 import isoext
-from isoext.sdf import SphereSDF, get_sdf_normal
+from isoext.sdf import (
+    CuboidSDF,
+    RotationOp,
+    SphereSDF,
+    get_sdf_normal,
+    project_to_surface,
+)
 
 from conftest import populate_sparse_grid
 
@@ -31,6 +37,34 @@ def test_dual_contouring_vertex_accuracy(sphere_grid):
     err = (v.norm(dim=-1) - 0.5).abs()
     cell_size = 2.0 / 31
     assert err.max().item() < cell_size / 4
+
+
+def test_dual_contouring_sharp_features_with_sdf_normals():
+    """Refined points and SDF normals must place vertices on sharp features.
+
+    A rotated cube stresses vertex placement. Almost all vertices must sit
+    on the surface; cells whose crease lies in a neighboring cell carry a
+    bounded error, since one vertex per cell cannot span two face strips.
+    """
+    sdf = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)
+    grid = isoext.UniformGrid([48, 48, 48], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    grid.set_values(sdf(grid.get_points()))
+    cell_size = 2.0 / 47
+
+    its = isoext.get_intersection(grid)
+    points = project_to_surface(sdf, its.get_points())
+    its.set_points(points)
+    its.set_normals(get_sdf_normal(sdf, points))
+    v, f = isoext.dual_contouring(grid, intersection=its)
+
+    err = sdf(v).abs()
+    assert err.quantile(0.99).item() < 0.08 * cell_size
+    assert err.max().item() < 0.25 * cell_size
+
+    # Unclamped vertices may leave their cells to sit on the features.
+    v, f = isoext.dual_contouring(grid, intersection=its, clamp=False)
+    err = sdf(v).abs()
+    assert err.max().item() < 0.05 * cell_size
 
 
 def test_dual_contouring_with_intersection_auto_normals(sphere_grid):

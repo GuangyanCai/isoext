@@ -68,10 +68,16 @@ sym_eigen_3x3(float A[3][3], float eigenvalues[3], float V[3][3]) {
 // pseudo-inverse: eigenvalues below tol times the largest one are treated
 // as zero, dropping the contribution of the corresponding directions.
 __host__ __device__ inline float3
-solve_sym_3x3(float A[3][3], float3 b, float tol) {
+solve_sym_3x3(const float A[3][3], float3 b, float tol) {
+    float M[3][3];
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++) {
+            M[r][c] = A[r][c];
+        }
+    }
     float eigenvalues[3];
     float V[3][3];
-    sym_eigen_3x3(A, eigenvalues, V);
+    sym_eigen_3x3(M, eigenvalues, V);
 
     float threshold = tol * fmaxf(eigenvalues[0],
                                   fmaxf(eigenvalues[1], eigenvalues[2]));
