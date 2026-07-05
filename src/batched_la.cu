@@ -2,11 +2,34 @@
 #include "ndarray.cuh"
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
+namespace {
+
+void
+check_cusolver(cusolverStatus_t status, const char *what) {
+    if (status != CUSOLVER_STATUS_SUCCESS) {
+        throw std::runtime_error(std::string(what) +
+                                 " failed with cusolver status " +
+                                 std::to_string(status));
+    }
+}
+
+void
+check_cublas(cublasStatus_t status, const char *what) {
+    if (status != CUBLAS_STATUS_SUCCESS) {
+        throw std::runtime_error(std::string(what) +
+                                 " failed with cublas status " +
+                                 std::to_string(status));
+    }
+}
+
+}   // anonymous namespace
+
 BatchedLASolver::BatchedLASolver() {
-    cusolverDnCreate(&cusolver_handle);
-    cublasCreate(&cublas_handle);
+    check_cusolver(cusolverDnCreate(&cusolver_handle), "cusolverDnCreate");
+    check_cublas(cublasCreate(&cublas_handle), "cublasCreate");
 }
 
 BatchedLASolver::~BatchedLASolver() {
@@ -29,28 +52,39 @@ BatchedLASolver::svd(const NDArray<float> &A) {
     NDArray<float> VT = NDArray<float>::zeros(batch, n, n);
     NDArray<float> S = NDArray<float>::zeros(batch, n);
 
+    // gesvdj overwrites the input matrices, so work on a copy.
+    NDArray<float> A_work = A;
+
     // Configure gesvdj parameters
     gesvdjInfo_t gesvdj_params;
-    cusolverDnCreateGesvdjInfo(&gesvdj_params);
+    check_cusolver(cusolverDnCreateGesvdjInfo(&gesvdj_params),
+                   "cusolverDnCreateGesvdjInfo");
 
     // Get workspace size needed
     int work_size = 0;
-    cusolverDnSgesvdj_bufferSize(cusolver_handle, CUSOLVER_EIG_MODE_VECTOR,
-                                 1,   // compute singular vectors
-                                 m, n, A.data(), lda, S.data(), U.data(), lda,
-                                 VT.data(), n, &work_size, gesvdj_params);
+    check_cusolver(cusolverDnSgesvdjBatched_bufferSize(
+                       cusolver_handle, CUSOLVER_EIG_MODE_VECTOR, m, n,
+                       A_work.data(), lda, S.data(), U.data(), ldu, VT.data(),
+                       ldv, &work_size, gesvdj_params, batch),
+                   "cusolverDnSgesvdjBatched_bufferSize");
 
     NDArray<float> work = NDArray<float>::zeros(work_size);
 
     NDArray<int> info = NDArray<int>::zeros(batch);
 
-    cusolverDnSgesvdjBatched(cusolver_handle, CUSOLVER_EIG_MODE_VECTOR, m, n,
-                             A.data(), lda, S.data(), U.data(), ldu, VT.data(),
-                             ldv, work.data(), work_size, info.data(),
-                             gesvdj_params, batch);
+    check_cusolver(cusolverDnSgesvdjBatched(
+                       cusolver_handle, CUSOLVER_EIG_MODE_VECTOR, m, n,
+                       A_work.data(), lda, S.data(), U.data(), ldu, VT.data(),
+                       ldv, work.data(), work_size, info.data(), gesvdj_params,
+                       batch),
+                   "cusolverDnSgesvdjBatched");
 
     cusolverDnDestroyGesvdjInfo(gesvdj_params);
 
+    // A nonzero info entry means the Jacobi sweep did not fully converge for
+    // that matrix; the result is still the best available approximation, and
+    // dual contouring clips the solution to the cell bounds afterwards, so it
+    // is returned to the caller instead of being treated as an error here.
     return {U, VT, S, info};
 }
 
@@ -91,12 +125,13 @@ BatchedLASolver::gemm(const NDArray<float> &A, const NDArray<float> &B,
     cublasOperation_t opB = transb ? CUBLAS_OP_T : CUBLAS_OP_N;
 
     // Perform batched matrix multiplication
-    cublasSgemmStridedBatched(
-        cublas_handle, opA, opB, m, n, k, &alpha, A.data(), lda,
-        lda * k,                         // A, leading dim, stride
-        B.data(), ldb, ldb * n,          // B, leading dim, stride
-        &beta, C.data(), ldc, ldc * n,   // C, leading dim, stride
-        batch);
+    check_cublas(cublasSgemmStridedBatched(
+                     cublas_handle, opA, opB, m, n, k, &alpha, A.data(), lda,
+                     lda * k,                         // A, leading dim, stride
+                     B.data(), ldb, ldb * n,          // B, leading dim, stride
+                     &beta, C.data(), ldc, ldc * n,   // C, leading dim, stride
+                     batch),
+                 "cublasSgemmStridedBatched");
 
     return C;
 }
@@ -137,13 +172,15 @@ BatchedLASolver::gemv(const NDArray<float> &A, const NDArray<float> &x,
     cublasOperation_t opA = transa ? CUBLAS_OP_T : CUBLAS_OP_N;
 
     // Perform batched matrix-vector multiplication
-    cublasSgemvStridedBatched(
-        cublas_handle, opA, A.shape[1],
-        A.shape[2],                                // m, n (original dimensions)
-        &alpha, A.data(), lda, lda * A.shape[2],   // A, leading dim, stride
-        x.data(), incx, n,                         // x, increment, stride
-        &beta, y.data(), incy, m,                  // y, increment, stride
-        batch);
+    check_cublas(
+        cublasSgemvStridedBatched(
+            cublas_handle, opA, A.shape[1],
+            A.shape[2],                                // m, n (original dims)
+            &alpha, A.data(), lda, lda * A.shape[2],   // A, leading dim, stride
+            x.data(), incx, n,                         // x, increment, stride
+            &beta, y.data(), incy, m,                  // y, increment, stride
+            batch),
+        "cublasSgemvStridedBatched");
 
     return y;
 }

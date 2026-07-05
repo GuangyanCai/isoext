@@ -20,6 +20,19 @@ def test_dual_contouring_simple(sphere_grid):
     assert len(f) > 0
 
 
+def test_dual_contouring_vertex_accuracy(sphere_grid):
+    """Dual vertices from the QEF solve must lie on the sphere surface.
+
+    Guards the batched SVD path: a silently failed solve would leave
+    vertices near cell corners instead (error on the order of a cell).
+    """
+    v, f = isoext.dual_contouring(sphere_grid, level=0.0)
+
+    err = (v.norm(dim=-1) - 0.5).abs()
+    cell_size = 2.0 / 31
+    assert err.max().item() < cell_size / 4
+
+
 def test_dual_contouring_with_intersection_auto_normals(sphere_grid):
     """Test dual contouring with intersection but normals computed automatically."""
     # Get intersection without computing normals
