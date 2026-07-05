@@ -219,6 +219,43 @@ def test_dual_contouring_sparse_grid_with_custom_normals(sphere):
     assert len(f) > 0
 
 
+def test_dual_contouring_sparse_grid_surface_crossing_domain_boundary():
+    """Test sparse-grid dual contouring when the surface extends past the AABB.
+
+    Boundary edges are marked with -1 (no neighbor cell); the sparse-to-uniform
+    index remap must preserve the markers instead of dereferencing them.
+    """
+    shape = [32, 32, 32]
+    sphere = SphereSDF(radius=1.2)
+    grid = isoext.SparseGrid(shape, aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    populate_sparse_grid(grid, sphere, shape, level=0.0)
+
+    v, f = isoext.dual_contouring(grid, level=0.0)
+
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
+    assert f.max().item() < len(v)
+
+    # Dual vertices are clipped to their cell AABB, so every vertex must lie
+    # inside the domain and within a cell diagonal of the sphere surface.
+    cell_size = 2.0 / 31
+    assert v.abs().max().item() <= 1.0 + 1e-5
+    err = (v.norm(dim=-1) - 1.2).abs()
+    assert err.max().item() < 2 * cell_size
+
+    # Connectivity must only link dual vertices of adjacent cells.
+    tri = v[f.long()]
+    edge_len = torch.cat(
+        [
+            (tri[:, 0] - tri[:, 1]).norm(dim=-1),
+            (tri[:, 1] - tri[:, 2]).norm(dim=-1),
+            (tri[:, 2] - tri[:, 0]).norm(dim=-1),
+        ]
+    )
+    assert edge_len.max().item() < 4 * cell_size
+
+
 def test_get_intersection_sparse_grid(sphere):
     """Test getting intersection points from SparseGrid."""
     shape = [32, 32, 32]
