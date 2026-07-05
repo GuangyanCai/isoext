@@ -4,7 +4,7 @@
 
 `isoext` requires:
 
-- **Python** 3.8 – 3.12
+- **Python** 3.10 – 3.12
 - **PyTorch** with CUDA support
 - **CUDA Toolkit** matching your PyTorch version
 - A C++ compiler (GCC on Linux, Visual Studio on Windows)
@@ -67,6 +67,13 @@ Ensure your CUDA toolkit version matches PyTorch's CUDA version. Check with:
 ```bash
 nvcc --version
 ```
+
+### Slow first call
+
+The prebuilt extension ships GPU code as PTX, which the CUDA driver
+JIT-compiles for your specific GPU the first time each algorithm runs
+(roughly a couple of seconds in total). The result is cached on disk by the
+driver, so this cost is only paid once per machine, not per process.
 
 ### Import errors
 
