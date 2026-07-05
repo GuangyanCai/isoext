@@ -7,7 +7,7 @@ name = "isoext"
 version = "0.5.1"
 description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
 readme = "README.md"
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.10,<3.13"
 authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
