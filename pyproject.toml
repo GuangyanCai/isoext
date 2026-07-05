@@ -61,6 +61,7 @@ pytest-xdist = "*"
 
 [tool.pixi.feature.dev.tasks]
 test = { cmd = "pytest tests/ -n 2", cwd = ".", depends-on = ["compile"] }
+bench = { cmd = "python benchmarks/benchmark.py", cwd = ".", depends-on = ["compile"] }
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }

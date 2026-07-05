@@ -24,3 +24,5 @@ doc/*.obj
 /*.obj
 /test.py
 /binary.py
+# machine-specific benchmark outputs
+/benchmarks/results/
