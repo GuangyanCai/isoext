@@ -1,66 +1,31 @@
+#include "extraction.cuh"
 #include "mc/mc.cuh"
-#include "utils.cuh"
-#include <memory>
-#include <stdexcept>
 
-#include <thrust/copy.h>
-#include <thrust/device_malloc.h>
 #include <thrust/device_vector.h>
 #include <thrust/fill.h>
-#include <thrust/host_vector.h>
-#include <thrust/remove.h>
-#include <thrust/sequence.h>
-#include <thrust/transform.h>
 
 namespace mc {
 
 std::tuple<NDArray<float3>, NDArray<int>>
 marching_cubes(Grid *grid, float level, std::string method) {
-    uint num_cells = grid->get_num_cells();
     GridView view = grid->get_view();
     auto mc_variant = MCBase::create(method);
 
-    // Get the case index of each cell.
-    thrust::device_vector<uint8_t> cases_dv(num_cells);
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_cells),
-                     get_case_num_op(cases_dv.data().get(), view, level));
+    thrust::device_vector<uint8_t> cases =
+        compute_cell_cases(view, grid->get_num_cells(), level);
+    thrust::device_vector<uint> cell_indices = compact_active_cells(cases);
+    uint num_cells = cell_indices.size();
 
-    // Remove empty cells.
-    thrust::device_vector<uint32_t> cell_indices_dv(num_cells);
-    thrust::sequence(cell_indices_dv.begin(), cell_indices_dv.end());
-    cell_indices_dv.erase(thrust::remove_if(cell_indices_dv.begin(),
-                                            cell_indices_dv.end(),
-                                            cases_dv.begin(), is_empty_pred()),
-                          cell_indices_dv.end());
-    cases_dv.erase(thrust::remove_if(cases_dv.begin(), cases_dv.end(),
-                                     is_empty_pred()),
-                   cases_dv.end());
-    num_cells = cell_indices_dv.size();
+    // Triangle soup with unused slots marked as NAN.
+    thrust::device_vector<float3> v(num_cells *
+                                    mc_variant->get_max_triangles() * 3);
+    thrust::fill(v.begin(), v.end(), make_float3(NAN, NAN, NAN));
 
-    // Allocate memory for the vertex array
-    thrust::device_vector<float3> v_dv(num_cells *
-                                       mc_variant->get_max_triangles() * 3);
-    thrust::fill(v_dv.begin(), v_dv.end(), make_float3(NAN, NAN, NAN));
+    mc_variant->run(v.data().get(), num_cells, cases.data().get(),
+                    cell_indices.data().get(), view, level);
 
-    // Run Marching Cubes on each cube.
-    mc_variant->run(v_dv.data().get(), num_cells, cases_dv.data().get(),
-                    cell_indices_dv.data().get(), view, level);
-
-    // Remove unused entries, which are marked as NAN.
-    v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
-               v_dv.end());
-
-    // Weld/merge vertices.
-    thrust::device_vector<int> f_dv(v_dv.size());
-    thrust::sequence(f_dv.begin(), f_dv.end());
-    vertex_welding(v_dv, f_dv);
-
-    NDArray<float3> v = NDArray<float3>::copy(v_dv.data().get(), {v_dv.size()});
-    NDArray<int> f =
-        NDArray<int>::copy(f_dv.data().get(), {f_dv.size() / 3, 3});
-
-    return {v, f};
+    auto [v_out, f_out] = soup_to_mesh(v);
+    return {v_out, f_out};
 }
 
 }   // namespace mc
