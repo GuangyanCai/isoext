@@ -138,6 +138,47 @@ class CuboidSDF(SDF):
 
 
 @dataclass
+class MandelbulbSDF(SDF):
+    """Distance estimator for the Mandelbulb fractal.
+
+    The values estimate the distance to the fractal surface; they are not an
+    exact SDF. Fewer iterations give a smoother, blobbier shape. The bulb
+    fits inside a sphere of radius about 1.2.
+
+    Args:
+        power: Exponent of the iteration; 8 is the classic Mandelbulb.
+        iterations: Number of fractal iterations.
+    """
+
+    power: float = 8.0
+    iterations: int = 10
+
+    def __call__(self, p: torch.Tensor) -> torch.Tensor:
+        points = p.reshape(-1, 3)
+        z = points.clone()
+        dr = torch.ones(points.shape[0], device=points.device)
+        r = z.norm(dim=-1)
+        for _ in range(self.iterations):
+            r = z.norm(dim=-1).clamp_min(1e-9)
+            escaped = r > 2.0
+            theta = torch.acos((z[:, 2] / r).clamp(-1.0, 1.0)) * self.power
+            phi = torch.atan2(z[:, 1], z[:, 0]) * self.power
+            zr = r**self.power
+            z_next = (
+                zr[:, None]
+                * torch.stack(
+                    [theta.sin() * phi.cos(), theta.sin() * phi.sin(), theta.cos()],
+                    dim=-1,
+                )
+                + points
+            )
+            dr = torch.where(escaped, dr, self.power * r ** (self.power - 1.0) * dr + 1.0)
+            z = torch.where(escaped[:, None], z, z_next)
+        de = 0.5 * torch.log(r) * r / dr
+        return de.reshape(p.shape[:-1])
+
+
+@dataclass
 class UnionOp(SDF):
     """Union operation combining multiple SDFs (minimum distance)."""
 

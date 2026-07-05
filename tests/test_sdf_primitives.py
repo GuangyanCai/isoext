@@ -1,9 +1,9 @@
-"""Tests for SDF primitives (Sphere, Torus, Cuboid)."""
+"""Tests for SDF primitives (Sphere, Torus, Cuboid, Mandelbulb)."""
 
 import torch
 
 import isoext
-from isoext.sdf import CuboidSDF
+from isoext.sdf import CuboidSDF, MandelbulbSDF
 
 
 def test_sphere_sdf(sphere):
@@ -19,6 +19,38 @@ def test_sphere_sdf(sphere):
 
     # Outside should be positive
     assert sdf_values[2] > 0
+
+
+def test_mandelbulb_sdf():
+    """Test MandelbulbSDF distance estimator."""
+    bulb = MandelbulbSDF()
+    points = torch.tensor(
+        [
+            [0.2, 0.0, 0.0],  # Inside the bulb
+            [2.0, 0.0, 0.0],  # Far outside
+        ],
+        device="cuda",
+    )
+    values = bulb(points)
+
+    assert values[0] < 0
+    assert values[1] > 0
+
+    # Batched input keeps its shape
+    batch = torch.randn(4, 5, 3, device="cuda")
+    assert bulb(batch).shape == (4, 5)
+
+
+def test_mandelbulb_marching_cubes():
+    """The Mandelbulb extracts to a non-empty mesh within its bounds."""
+    grid = isoext.UniformGrid([64, 64, 64], aabb_min=[-1.2, -1.2, -1.2], aabb_max=[1.2, 1.2, 1.2])
+    grid.set_values(MandelbulbSDF(iterations=6)(grid.get_points()))
+
+    v, f = isoext.marching_cubes(grid)
+
+    assert len(v) > 0
+    assert len(f) > 0
+    assert v.abs().max().item() <= 1.2
 
 
 def test_torus_sdf(torus):
