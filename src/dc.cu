@@ -82,18 +82,16 @@ get_qef(const Intersection &its, float reg) {
 struct fix_dual_v_op {
     float3 *dual_v;
     const uint *its_cell_indices;
-    const float3 *points;
-    const uint *cells;
+    const GridView view;
 
     fix_dual_v_op(float3 *dual_v, const uint *its_cell_indices,
-                  const float3 *points, const uint *cells)
-        : dual_v(dual_v), its_cell_indices(its_cell_indices), points(points),
-          cells(cells) {}
+                  const GridView &view)
+        : dual_v(dual_v), its_cell_indices(its_cell_indices), view(view) {}
 
     __host__ __device__ void operator()(uint idx) {
-        uint offset = its_cell_indices[idx] * 8;
-        float3 aabb_min = points[cells[offset]];
-        float3 aabb_max = points[cells[offset + 7]];
+        uint cell = its_cell_indices[idx];
+        float3 aabb_min = view.corner_position(cell, 0);
+        float3 aabb_max = view.corner_position(cell, 7);
         dual_v[idx] = clip(dual_v[idx], aabb_min, aabb_max);
     }
 };
@@ -178,16 +176,11 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
     auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
 
     // Clip dual vertices to the cell AABB
-    NDArray<uint> cells = grid->get_cells();
-    NDArray<float3> points = grid->get_points();
     uint num_active_cells = its.cell_indices.size();
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_active_cells),
                      fix_dual_v_op(reinterpret_cast<float3 *>(dual_v.data()),
-                                   its.cell_indices.data(), points.data(),
-                                   cells.data()));
-    cells.free();
-    points.free();
+                                   its.cell_indices.data(), grid->get_view()));
 
     // Create index map that maps cell indices to dual_v indices
     thrust::device_vector<int> idx_map(grid->get_num_cells(), -1);

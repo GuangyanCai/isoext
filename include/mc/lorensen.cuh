@@ -10,8 +10,7 @@ class Lorensen : public MCBase {
     static constexpr size_t max_len = max_triangles * 3;
 
     void run(float3 *v, const uint num_cells, const uint8_t *cases,
-             const uint *cell_indices, const float *values,
-             const float3 *points, const uint *cells,
+             const uint *cell_indices, const GridView &view,
              const float level) override;
 
     size_t get_max_triangles() const override { return max_triangles; }

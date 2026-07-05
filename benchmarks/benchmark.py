@@ -19,8 +19,17 @@ from isoext.sdf import SphereSDF
 
 
 def time_fn(fn, iters, warmup=10):
-    """Time a GPU function, returning millisecond percentiles."""
-    for _ in range(warmup):
+    """Time a GPU function, returning millisecond percentiles.
+
+    The very first invocation is reported separately: with PTX-only builds it
+    includes the driver's JIT compilation (cached on disk afterwards).
+    """
+    t0 = time.perf_counter()
+    fn()
+    torch.cuda.synchronize()
+    first_call = (time.perf_counter() - t0) * 1e3
+
+    for _ in range(warmup - 1):
         fn()
     torch.cuda.synchronize()
     times = []
@@ -34,6 +43,7 @@ def time_fn(fn, iters, warmup=10):
         "median_ms": statistics.median(times),
         "p10_ms": times[int(len(times) * 0.10)],
         "p90_ms": times[int(len(times) * 0.90)],
+        "first_call_ms": first_call,
         "iters": iters,
     }
 
@@ -66,12 +76,12 @@ def benchmark_grid(grid, label, iters, results):
     for algo, fn in cases.items():
         try:
             stats = time_fn(fn, iters)
-            status = f"{stats['median_ms']:9.3f}"
+            status = f"{stats['median_ms']:9.3f} ms   (first {stats['first_call_ms']:8.3f} ms)"
         except Exception as e:  # noqa: BLE001 - record and continue
             stats = {"error": f"{type(e).__name__}: {e}"}
             status = "   failed"
         results.append({"case": label, "algo": algo, **stats})
-        print(f"  {label:24s} {algo:18s} {status} ms")
+        print(f"  {label:24s} {algo:18s} {status}")
 
 
 def main():

@@ -13,36 +13,27 @@ struct process_cube_op {
     float3 *v;
     const uint8_t *cases;
     const uint *cell_indices;
-    const float *values;
-    const float3 *points;
-    const uint *cells;
+    const GridView view;
     const int *edges_table;
     const int *edge_status_table;
     const int *tri_table;
     const float level;
 
     process_cube_op(float3 *v, const uint8_t *cases, const uint *cell_indices,
-                    const float *values, const float3 *points,
-                    const uint *cells, const int *edges_table,
+                    const GridView &view, const int *edges_table,
                     const int *edge_status_table, const int *tri_table,
                     const float level)
-        : v(v), cases(cases), cell_indices(cell_indices), values(values),
-          points(points), cells(cells), edges_table(edges_table),
-          edge_status_table(edge_status_table), tri_table(tri_table),
-          level(level) {}
+        : v(v), cases(cases), cell_indices(cell_indices), view(view),
+          edges_table(edges_table), edge_status_table(edge_status_table),
+          tri_table(tri_table), level(level) {}
 
     __host__ __device__ void operator()(uint idx) {
         uint32_t case_num = cases[idx];
-        uint32_t cell_idx = cell_indices[idx];
 
         // Compute the location of each cube vertex.
         float3 c_p[8];
         float c_v[8];
-        uint offset = cell_idx * 8;
-        for (uint32_t i = 0; i < 8; i++) {
-            c_p[i] = points[cells[offset + i]];
-            c_v[i] = values[cells[offset + i]];
-        }
+        view.load_corners(cell_indices[idx], c_p, c_v);
 
         // Compute the intersection between the isosurface and each edge.
         int edge_status = edge_status_table[case_num];
@@ -83,8 +74,7 @@ struct process_cube_op {
 
 void
 Nagae::run(float3 *v, const uint num_cells, const uint8_t *cases,
-           const uint *cell_indices, const float *values, const float3 *points,
-           const uint *cells, const float level) {
+           const uint *cell_indices, const GridView &view, const float level) {
     // Move the LUTs to the device once; intentionally leaked so the buffers
     // are not freed after the CUDA context is gone at interpreter shutdown.
     static const thrust::device_vector<int> &edges_table_dv =
@@ -98,8 +88,8 @@ Nagae::run(float3 *v, const uint num_cells, const uint8_t *cases,
 
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
-                     process_cube_op(v, cases, cell_indices, values, points,
-                                     cells, edges_table_dv.data().get(),
+                     process_cube_op(v, cases, cell_indices, view,
+                                     edges_table_dv.data().get(),
                                      edge_status_table_dv.data().get(),
                                      tri_table_dv.data().get(), level));
 }

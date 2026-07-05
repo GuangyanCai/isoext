@@ -153,16 +153,15 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
                                 float level) const {
     uint num_cells = new_cell_indices.size();
 
-    // Convert cell indices to cells
-    thrust::device_vector<uint> cells_dv(num_cells * 8);
-    thrust::sequence(cells_dv.begin(), cells_dv.end());
+    // View the candidate cells and their corner values as a sparse grid.
+    GridView view = {shape, aabb_min, aabb_max, new_values.data(),
+                     new_cell_indices.data(), true};
 
     // Get the case index of each cell.
     thrust::device_vector<uint8_t> cases_dv(num_cells);
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
-                     get_case_num_op(cases_dv.data().get(), new_values.data(),
-                                     cells_dv.data().get(), level));
+                     get_case_num_op(cases_dv.data().get(), view, level));
     // Remove empty cells.
     thrust::device_vector<uint> cell_indices_dv(
         new_cell_indices.data_ptr, new_cell_indices.data_ptr + num_cells);

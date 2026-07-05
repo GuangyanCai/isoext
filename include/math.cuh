@@ -34,6 +34,11 @@ operator-(uint3 a, uint3 b) {
     return make_uint3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
+inline __host__ __device__ uint3
+operator+(uint3 a, uint3 b) {
+    return make_uint3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
 inline __host__ __device__ float3
 operator*(float3 a, float b) {
     return make_float3(a.x * b, a.y * b, a.z * b);

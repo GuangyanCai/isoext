@@ -23,11 +23,20 @@ host_to_device(const T *h_ptr, size_t size) {
     return d_ptr;
 }
 
-__host__ __device__ uint3 idx_1d_to_3d(uint idx, uint3 shape);
+inline __host__ __device__ uint3
+idx_1d_to_3d(uint idx, uint3 shape) {
+    uint z = idx % shape.z;
+    idx /= shape.z;
+    uint y = idx % shape.y;
+    idx /= shape.y;
+    uint x = idx;
+    return make_uint3(x, y, z);
+}
 
-__device__ __host__ uint idx_3d_to_1d(uint3 idx, uint3 shape);
-
-__device__ __host__ uint point_idx_to_cell_idx(uint idx, uint3 shape);
+inline __host__ __device__ uint
+idx_3d_to_1d(uint3 idx, uint3 shape) {
+    return idx.x * shape.y * shape.z + idx.y * shape.z + idx.z;
+}
 
 struct idx_to_cell_op {
     uint *cells;
@@ -64,8 +73,8 @@ struct get_vtx_pos_op {
     const float3 aabb_min;
     const float3 aabb_size;
 
-    get_vtx_pos_op(const uint3 res, const float3 aabb_min,
-                   const float3 aabb_max)
+    __host__ __device__ get_vtx_pos_op(const uint3 res, const float3 aabb_min,
+                                       const float3 aabb_max)
         : res(res), aabb_min(aabb_min), aabb_size(aabb_max - aabb_min) {}
 
     __host__ __device__ float3 operator()(uint idx) {
@@ -76,28 +85,6 @@ struct get_vtx_pos_op {
         pos.x = (idx / res.y) / (float) (res.x - 1);
         pos = aabb_min + pos * aabb_size;
         return pos;
-    }
-};
-
-struct get_case_num_op {
-    uint8_t *cases;
-    const float *values;
-    const uint *cells;
-    const float level;
-
-    get_case_num_op(uint8_t *cases, const float *values, const uint *cells,
-                    const float level)
-        : cases(cases), values(values), cells(cells), level(level) {}
-
-    __host__ __device__ void operator()(uint32_t cell_idx) {
-        // Compute the sign of each cube vertex and derive the case number
-        uint8_t case_num = 0;
-        uint offset = cell_idx * 8;
-        for (uint i = 0; i < 8; i++) {
-            float p_val = values[cells[offset + i]];
-            case_num |= (p_val - level < 0) << i;
-        }
-        cases[cell_idx] = case_num;
     }
 };
 
