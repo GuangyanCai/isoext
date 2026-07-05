@@ -45,3 +45,18 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'furo'
 html_static_path = ['_static']
+html_css_files = ['custom.css']
+
+html_theme_options = {
+    "light_css_variables": {
+        "color-brand-primary": "#d95f43",
+        "color-brand-content": "#d95f43",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#ff8a65",
+        "color-brand-content": "#ff8a65",
+    },
+    "source_repository": "https://github.com/GuangyanCai/isoext",
+    "source_branch": "master",
+    "source_directory": "doc/",
+}

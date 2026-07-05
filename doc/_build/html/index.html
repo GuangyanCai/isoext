@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=864da32f" />
     
     
 
@@ -19,18 +20,24 @@
   body {
     --color-code-background: #f2f2f2;
   --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #d95f43;
+  --color-brand-content: #d95f43;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
       }
     }
@@ -211,6 +218,7 @@
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
 </div>
@@ -231,12 +239,16 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/index.md.txt" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/index.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
-</div>
-<div class="theme-toggle-container theme-toggle-content">
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/index.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
@@ -254,26 +266,81 @@
 <p><a class="reference external" href="https://badge.fury.io/py/isoext"><img alt="PyPI version" src="https://badge.fury.io/py/isoext.svg?" /></a>
 <a class="reference external" href="https://github.com/GuangyanCai/isoext"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-isoext-blue?logo=github" /></a></p>
 <p><strong>GPU-accelerated iso-surface extraction for PyTorch</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> is a high-performance library for extracting surfaces from scalar fields using CUDA. It provides implementations of Marching Cubes and Dual Contouring, optimized for GPU execution.</p>
-<section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><strong>Marching Cubes</strong> — Fast triangular mesh extraction</p></li>
-<li><p><strong>Dual Contouring</strong> — Triangle mesh extraction with sharp feature preservation</p></li>
-<li><p><strong>Flexible Grids</strong> — Dense uniform grids and memory-efficient sparse grids</p></li>
-<li><p><strong>SDF Utilities</strong> — Optional primitives and CSG operations</p></li>
-</ul>
-</section>
-<section id="quick-example">
+<div class="hero-viewer">
+  <iframe src="_static/viser/index.html?playbackPath=../scenes/hero.viser&darkMode&initialCameraPosition=1.5,1.5,1.1&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
+          frameborder="0"></iframe>
+  <p class="hero-caption">
+    Power-8 Mandelbulb &mdash; a raw PyTorch tensor field meshed by
+    <code>isoext.marching_cubes</code>: 225k vertices in under 10&nbsp;ms.
+    Drag to orbit.
+  </p>
+</div><p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> turns scalar fields into meshes without leaving the GPU: feed it a
+PyTorch tensor of field values — from an analytic SDF, a neural network, or
+an occupancy volume — and get vertices and faces back as tensors.</p>
+<div class="feature-grid">
+  <div class="feature-card"><strong>Marching Cubes</strong>
+    Fast triangular mesh extraction from dense or sparse grids.</div>
+  <div class="feature-card"><strong>Dual Contouring</strong>
+    QEF-based vertex placement that preserves sharp features.</div>
+  <div class="feature-card"><strong>Sparse Grids</strong>
+    Track only surface-crossing cells; cost scales with area, not volume.</div>
+  <div class="feature-card"><strong>Interactive Viewer</strong>
+    One-line mesh inspection in the browser, built on viser.</div>
+</div><section id="quick-example">
 <h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 
 <span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">])</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># Sphere</span>
 
 <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>  <span class="c1"># interactive viewer in the browser</span>
+<span class="n">isoext</span><span class="o">.</span><span class="n">write_obj</span><span class="p">(</span><span class="s2">&quot;sphere.obj&quot;</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="sharp-features-side-by-side">
+<h2>Sharp features, side by side<a class="headerlink" href="#sharp-features-side-by-side" title="Link to this heading">¶</a></h2>
+<p>The same 81³ Menger sponge field, extracted by both algorithms. Marching
+cubes chamfers the edges; dual contouring keeps them crisp.</p>
+<div class="compare-grid">
+  <figure>
+    <iframe src="_static/viser/index.html?playbackPath=../scenes/menger_mc.viser&darkMode&initialCameraPosition=1.9,1.4,1.2&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
+            frameborder="0"></iframe>
+    <figcaption>marching_cubes</figcaption>
+  </figure>
+  <figure>
+    <iframe src="_static/viser/index.html?playbackPath=../scenes/menger_dc.viser&darkMode&initialCameraPosition=1.9,1.4,1.2&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
+            frameborder="0"></iframe>
+    <figcaption>dual_contouring</figcaption>
+  </figure>
+</div></section>
+<section id="performance">
+<h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h2>
+<p>Median extraction times for a sphere SDF on an RTX 5090:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Algorithm</p></th>
+<th class="head"><p>uniform 512³</p></th>
+<th class="head"><p>sparse 512³</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>marching_cubes</p></td>
+<td><p>4.8 ms</p></td>
+<td><p>1.4 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>dual_contouring</p></td>
+<td><p>7.0 ms</p></td>
+<td><p>2.3 ms</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>See <a class="reference internal" href="performance.html"><span class="doc">Performance</span></a> for the full table and how to reproduce it.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
@@ -331,8 +398,9 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">isoext</a><ul>
-<li><a class="reference internal" href="#features">Features</a></li>
-<li><a class="reference internal" href="#quick-example">Quick Example</a><ul>
+<li><a class="reference internal" href="#quick-example">Quick Example</a></li>
+<li><a class="reference internal" href="#sharp-features-side-by-side">Sharp features, side by side</a></li>
+<li><a class="reference internal" href="#performance">Performance</a><ul>
 </ul>
 </li>
 </ul>

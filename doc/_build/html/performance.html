@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Using External SDF Libraries" href="more_sdf.html"><link rel="prev" title="SDF Utilities" href="sdf_guide.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="API Reference" href="api.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Working with Occupancy Grids - isoext documentation</title>
+        <title>Performance - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -211,14 +211,14 @@
 <li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extras</span></p>
-<ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Working with Occupancy Grids</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Performance</a></li>
 </ul>
 
 </div>
@@ -239,12 +239,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/occupancy_grids.ipynb?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/performance.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/occupancy_grids.ipynb" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/performance.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -261,107 +261,87 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="working-with-occupancy-grids">
-<h1>Working with Occupancy Grids<a class="headerlink" href="#working-with-occupancy-grids" title="Link to this heading">¶</a></h1>
-<p>While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from <strong>binary occupancy grids</strong>—voxel grids where each cell is either occupied (1) or empty (0).</p>
-<p>This is useful when:</p>
+          <section id="performance">
+<h1>Performance<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h1>
+<p>All numbers are medians over repeated runs of <code class="docutils literal notranslate"><span class="pre">benchmarks/benchmark.py</span></code>,
+measured on an NVIDIA GeForce RTX 5090 with CUDA 12.8, extracting a sphere
+SDF at level 0. Timings include the full call from Python: case
+classification, extraction, and vertex welding.</p>
+<section id="extraction-time-median-ms">
+<h2>Extraction time (median, ms)<a class="headerlink" href="#extraction-time-median-ms" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Grid</p></th>
+<th class="head"><p>Algorithm</p></th>
+<th class="head"><p>128³</p></th>
+<th class="head"><p>512³</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uniform</p></td>
+<td><p>marching_cubes</p></td>
+<td><p>0.55</p></td>
+<td><p>4.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>uniform</p></td>
+<td><p>get_intersection</p></td>
+<td><p>0.30</p></td>
+<td><p>5.3</p></td>
+</tr>
+<tr class="row-even"><td><p>uniform</p></td>
+<td><p>dual_contouring</p></td>
+<td><p>0.82</p></td>
+<td><p>7.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sparse</p></td>
+<td><p>marching_cubes</p></td>
+<td><p>0.44</p></td>
+<td><p>1.4</p></td>
+</tr>
+<tr class="row-even"><td><p>sparse</p></td>
+<td><p>get_intersection</p></td>
+<td><p>0.17</p></td>
+<td><p>0.53</p></td>
+</tr>
+<tr class="row-odd"><td><p>sparse</p></td>
+<td><p>dual_contouring</p></td>
+<td><p>0.78</p></td>
+<td><p>2.3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Sparse grids only touch cells near the surface, so their cost scales with
+the surface area rather than the volume — at 512³ that is the difference
+between processing 134M cells and 300k cells.</p>
+</section>
+<section id="reproducing">
+<h2>Reproducing<a class="headerlink" href="#reproducing" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pixi<span class="w"> </span>run<span class="w"> </span>--environment<span class="w"> </span>cu128<span class="w"> </span>bench
+
+<span class="c1"># or directly, with options:</span>
+pixi<span class="w"> </span>run<span class="w"> </span>--environment<span class="w"> </span>cu128<span class="w"> </span>python<span class="w"> </span>benchmarks/benchmark.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--res<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="m">64</span><span class="w"> </span><span class="m">128</span><span class="w"> </span><span class="m">256</span><span class="w"> </span><span class="m">512</span><span class="w"> </span>--json<span class="w"> </span>results.json
+</pre></div>
+</div>
+<p>The harness reports the median, 10th and 90th percentiles, and the first
+call separately.</p>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>You have voxelized data from 3D scanning or segmentation</p></li>
-<li><p>Your data comes from a boolean CSG operation</p></li>
-<li><p>You want to convert a mesh to voxels and back</p></li>
+<li><p><strong>First call</strong>: the shipped extension contains PTX that the driver
+JIT-compiles for your GPU on first use (a couple of seconds, cached on
+disk afterwards). See <a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> for details. The benchmark
+excludes this by warming up before timing.</p></li>
+<li><p><strong>Memory</strong>: cell corner positions and indices are computed on the fly
+inside the kernels, so uniform-grid extraction allocates memory
+proportional to the extracted surface, not the grid volume — 1024³ dense
+grids fit comfortably on a consumer GPU.</p></li>
+<li><p>Timings vary with GPU, driver, and the surface complexity of your field;
+treat these as orders of magnitude, not guarantees.</p></li>
 </ul>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
-</pre></div>
-</div>
-</div>
-</div>
-<section id="creating-an-occupancy-grid">
-<h2>Creating an Occupancy Grid<a class="headerlink" href="#creating-an-occupancy-grid" title="Link to this heading">¶</a></h2>
-<p>Let’s create a binary occupancy grid from a sphere SDF. Values &gt; 0 are outside, so we threshold to get a binary mask:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a grid and compute sphere SDF</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
-<span class="n">sdf_values</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
-
-<span class="c1"># Convert to binary occupancy: 0 = outside, 1 = inside</span>
-<span class="n">occupancy</span> <span class="o">=</span> <span class="p">(</span><span class="n">sdf_values</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Occupancy values: </span><span class="si">{</span><span class="n">occupancy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Occupancy values: [0.0, 1.0]
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="direct-extraction-jagged-result">
-<h2>Direct Extraction (Jagged Result)<a class="headerlink" href="#direct-extraction-jagged-result" title="Link to this heading">¶</a></h2>
-<p>You can run marching cubes directly on the binary grid using <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code> (the boundary between 0 and 1). However, the result will be <strong>jagged</strong> because there’s no gradient information—every surface point lands exactly on a voxel face:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">occupancy</span><span class="p">)</span>
-<span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jagged mesh: </span><span class="si">{</span><span class="n">v_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Jagged mesh: 9168 vertices, 18332 faces
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/2e6f8a7a7566515e.viser"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-</section>
-<section id="smoothed-extraction">
-<h2>Smoothed Extraction<a class="headerlink" href="#smoothed-extraction" title="Link to this heading">¶</a></h2>
-<p>To get a smoother result, apply <strong>Gaussian smoothing</strong> before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Smooth the occupancy grid</span>
-<span class="n">smoothed</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">occupancy</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">smoothed</span><span class="p">)</span>
-<span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smooth mesh: </span><span class="si">{</span><span class="n">v_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smooth mesh: 8232 vertices, 16460 faces
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/cd6b06ad7f559c0a.viser"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
 </section>
 </section>
 
@@ -370,23 +350,15 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="more_sdf.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Using External SDF Libraries</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="sdf_guide.html">
+          
+          <a class="prev-page" href="api.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">SDF Utilities</div>
+                <div class="title">API Reference</div>
                 
               </div>
             </a>
@@ -420,10 +392,10 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Working with Occupancy Grids</a><ul>
-<li><a class="reference internal" href="#creating-an-occupancy-grid">Creating an Occupancy Grid</a></li>
-<li><a class="reference internal" href="#direct-extraction-jagged-result">Direct Extraction (Jagged Result)</a></li>
-<li><a class="reference internal" href="#smoothed-extraction">Smoothed Extraction</a></li>
+<li><a class="reference internal" href="#">Performance</a><ul>
+<li><a class="reference internal" href="#extraction-time-median-ms">Extraction time (median, ms)</a></li>
+<li><a class="reference internal" href="#reproducing">Reproducing</a></li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
 </ul>
 </li>
 </ul>

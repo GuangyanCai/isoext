@@ -9,14 +9,15 @@
 
 ## Features
 
-- **Marching Cubes** — Fast triangular mesh extraction
-- **Dual Contouring** — Triangle meshes with sharp feature preservation
-- **Flexible Grids** — Dense uniform grids and memory-efficient sparse grids
-- **SDF Utilities** — Optional primitives and CSG operations
+- **Marching Cubes** — Fast triangular mesh extraction (~5 ms for a 512³ grid on an RTX 5090)
+- **Dual Contouring** — QEF-based vertex placement that preserves sharp features
+- **Flexible Grids** — Dense uniform grids and sparse grids whose cost scales with surface area, not volume
+- **Interactive Viewer** — One-line mesh inspection in the browser, built on [viser](https://viser.studio)
+- **SDF Utilities** — Primitives and CSG operations for building test fields
 
 ## Installation
 
-Requires PyTorch with CUDA support, as well as the matching CUDA compiler.
+Requires PyTorch with CUDA support; building from source needs CUDA 12.4+.
 
 ```bash
 pip install isoext
@@ -26,11 +27,14 @@ pip install isoext
 
 ```python
 import isoext
+from isoext import viewer
 
 grid = isoext.UniformGrid([256, 256, 256])
 grid.set_values(grid.get_points().norm(dim=-1) - 0.8)  # Sphere
 
 vertices, faces = isoext.marching_cubes(grid)
+
+server = viewer.show(vertices, faces)  # interactive viewer in the browser
 isoext.write_obj("sphere.obj", vertices, faces)
 ```
 
