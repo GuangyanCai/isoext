@@ -307,10 +307,18 @@ NB_MODULE(isoext_ext, m) {
         "Created by get_intersection() and used as input to dual_contouring().\n"
         "You can modify the normals to control the surface reconstruction.")
         .def("get_points",
-             [](Intersection &self) { return ours_to_nb(self.points); },
+             [](Intersection &self) {
+                 // Copy: ours_to_nb hands ownership of the array to the
+                 // returned tensor, which must not happen to members.
+                 NDArray<float3> points = self.points;
+                 return ours_to_nb(points);
+             },
              "Return the intersection points as an (N, 3) float32 tensor.")
         .def("get_normals",
-             [](Intersection &self) { return ours_to_nb(self.normals); },
+             [](Intersection &self) {
+                 NDArray<float3> normals = self.normals;
+                 return ours_to_nb(normals);
+             },
              "Return the surface normals at intersection points as an (N, 3) float32 tensor.")
         .def("has_normals",
              [](Intersection &self) { return self.has_normals(); },

@@ -1,5 +1,7 @@
 """Tests for dual contouring algorithm."""
 
+import gc
+
 import torch
 
 import isoext
@@ -138,6 +140,41 @@ def test_intersection_set_normals(sphere, sphere_grid):
         retrieved_normals = its.get_normals()
         assert retrieved_normals.shape == normals.shape
         assert torch.allclose(retrieved_normals, normals, atol=1e-5)
+
+
+def test_intersection_getters_do_not_alias_internal_storage(sphere, sphere_grid):
+    """get_points/get_normals must return independent copies.
+
+    Regression test: the first call used to transfer ownership of the
+    internal buffer to the returned tensor, so set_normals silently
+    overwrote tensors held by the caller, and dropping a returned tensor
+    freed memory the Intersection still referenced (use-after-free).
+    """
+    its = isoext.get_intersection(sphere_grid, level=0.0, compute_normals=True)
+
+    # The returned tensor must not alias the internal normals storage.
+    n1 = its.get_normals()
+    snapshot = n1.clone()
+    its.set_normals(torch.full_like(n1, 0.5))
+    assert torch.equal(n1, snapshot)
+
+    # Dropping returned tensors must not free the intersection's storage.
+    p1 = its.get_points()
+    expected_points = p1.clone()
+    del p1, n1
+    gc.collect()
+    # Churn device memory to encourage reuse of any wrongly-freed block.
+    its2 = isoext.get_intersection(sphere_grid, level=0.1, compute_normals=True)
+    assert its2.get_points().shape[1] == 3
+    assert torch.equal(its.get_points(), expected_points)
+
+    # The intersection must still be fully usable for dual contouring.
+    normals = get_sdf_normal(sphere, expected_points)
+    its.set_normals(normals)
+    v, f = isoext.dual_contouring(sphere_grid, level=0.0, intersection=its)
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+    assert len(v) > 0
 
 
 def test_dual_contouring_non_uniform_resolution(sphere):
