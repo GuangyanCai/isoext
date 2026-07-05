@@ -51,9 +51,7 @@ nanobind = "*"
 scikit-build-core = { version = "*", extras = ["pyproject"] }
 
 [tool.pixi.tasks]
-# CUDACXX keeps CMake from picking up Ubuntu's /usr/bin/nvcc (CUDA 12.0),
-# which cannot compile against current glibc fortified headers.
-compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -ve .", cwd = ".", env = { CUDACXX = "/usr/local/cuda/bin/nvcc" } }
+compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -ve .", cwd = "." }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"
