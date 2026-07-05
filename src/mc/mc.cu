@@ -37,7 +37,7 @@ marching_cubes(Grid *grid, float level, std::string method) {
                                             cases_dv.begin(), is_empty_pred()),
                           cell_indices_dv.end());
     cases_dv.erase(thrust::remove_if(cases_dv.begin(), cases_dv.end(),
-                                     cases_dv.begin(), is_empty_pred()),
+                                     is_empty_pred()),
                    cases_dv.end());
     num_cells = cell_indices_dv.size();
 

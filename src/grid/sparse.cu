@@ -230,16 +230,16 @@ SparseGrid::get_dual_quads(const NDArray<uint2> &edges,
         });
 
     // Convert edge neighbors in a uniform grid to edge neighbors in a sparse
-    // grid
+    // grid. Neighbors marked -1 (outside the grid) must be preserved.
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(edge_neighbors_dv.size()),
                      [edge_neighbors = edge_neighbors_dv.data().get(),
                       idx_map = idx_map_dv.data().get()] __device__(uint idx) {
                          int4 &en = edge_neighbors[idx];
-                         en.x = idx_map[en.x];
-                         en.y = idx_map[en.y];
-                         en.z = idx_map[en.z];
-                         en.w = idx_map[en.w];
+                         en.x = en.x >= 0 ? idx_map[en.x] : -1;
+                         en.y = en.y >= 0 ? idx_map[en.y] : -1;
+                         en.z = en.z >= 0 ? idx_map[en.z] : -1;
+                         en.w = en.w >= 0 ? idx_map[en.w] : -1;
                      });
 
     return {edge_neighbors_dv, is_out_dv};

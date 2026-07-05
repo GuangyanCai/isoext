@@ -30,22 +30,10 @@ point_idx_to_cell_idx(uint idx, uint3 shape) {
 }
 
 void
-vertex_welding(thrust::device_vector<float3> &v, thrust::device_vector<int> &f,
-               bool skip_scatter) {
-
-    thrust::device_vector<float3> sorted_v;
-
-    if (skip_scatter) {
-        sorted_v = v;
-    } else {
-        // Scatter v to sorted_v based on f
-        thrust::scatter(v.begin(), v.end(), f.begin(), sorted_v.begin());
-        f.clear();
-        f.resize(v.size());
-        thrust::sequence(f.begin(), f.end());
-    }
-
+vertex_welding(thrust::device_vector<float3> &v,
+               thrust::device_vector<int> &f) {
     // Remove duplicated vertices
+    thrust::device_vector<float3> sorted_v = v;
     thrust::sort(sorted_v.begin(), sorted_v.end(), float3_less_pred());
     sorted_v.erase(
         thrust::unique(sorted_v.begin(), sorted_v.end(), float3_elem_eq_pred()),

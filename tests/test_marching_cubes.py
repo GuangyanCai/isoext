@@ -69,10 +69,13 @@ def test_marching_cubes_empty_result():
 
     v, f = isoext.marching_cubes(grid, level=0.0)
 
-    # Should return None or empty tensors when no surface is found
-    if v is not None:
-        assert v.shape[1] == 3
-        assert f.shape[1] == 3
+    # No surface must yield empty tensors, not None.
+    assert isinstance(v, torch.Tensor)
+    assert isinstance(f, torch.Tensor)
+    assert v.shape == (0, 3)
+    assert f.shape == (0, 3)
+    assert v.is_cuda
+    assert f.is_cuda
 
 
 def test_marching_cubes_with_make_grid():

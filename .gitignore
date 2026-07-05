@@ -20,3 +20,7 @@ doc/_build/*
 !doc/_build/html/
 doc/.ipynb_checkpoints/
 doc/*.obj
+# local experiment scratch at the repo root
+/*.obj
+/test.py
+/binary.py

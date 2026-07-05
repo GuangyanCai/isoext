@@ -85,13 +85,16 @@ void
 Nagae::run(float3 *v, const uint num_cells, const uint8_t *cases,
            const uint *cell_indices, const float *values, const float3 *points,
            const uint *cells, const float level) {
-    // Move the LUTs to the device.
-    thrust::device_vector<int> edges_table_dv(edges_table,
-                                              edges_table + edges_size);
-    thrust::device_vector<int> edge_status_table_dv(
-        edge_status_table, edge_status_table + edge_table_size);
-    thrust::device_vector<int> tri_table_dv(
-        Nagae::tri_table, Nagae::tri_table + Nagae::tri_table_size);
+    // Move the LUTs to the device once; intentionally leaked so the buffers
+    // are not freed after the CUDA context is gone at interpreter shutdown.
+    static const thrust::device_vector<int> &edges_table_dv =
+        *new thrust::device_vector<int>(edges_table, edges_table + edges_size);
+    static const thrust::device_vector<int> &edge_status_table_dv =
+        *new thrust::device_vector<int>(edge_status_table,
+                                        edge_status_table + edge_table_size);
+    static const thrust::device_vector<int> &tri_table_dv =
+        *new thrust::device_vector<int>(Nagae::tri_table,
+                                        Nagae::tri_table + Nagae::tri_table_size);
 
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),

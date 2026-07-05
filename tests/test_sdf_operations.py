@@ -151,6 +151,31 @@ def test_smooth_union_op():
     assert all(sdf_values < 0)
 
 
+def test_smooth_union_op_numerically_stable():
+    """SmoothUnion must stay finite when |d| is much larger than k.
+
+    Regression test: the naive exp formulation underflows far from the
+    surface (log(0) -> +inf) and overflows deep inside (log(inf) -> -inf).
+    """
+    sphere1 = SphereSDF(radius=1.0)
+    sphere2 = TranslationOp(SphereSDF(radius=1.0), offset=[0.5, 0.0, 0.0])
+    smooth_union = SmoothUnionOp([sphere1, sphere2], k=0.01)
+
+    points = torch.tensor(
+        [
+            [0.0, 0.0, 0.0],  # deep inside: |d| / k = 100
+            [5.0, 0.0, 0.0],  # far outside: |d| / k = 400
+        ],
+        device="cuda",
+    )
+    values = smooth_union(points)
+
+    assert torch.isfinite(values).all()
+    # With a small k the smooth union is close to the hard union.
+    expected = torch.minimum(sphere1(points), sphere2(points))
+    assert torch.allclose(values, expected, atol=0.01)
+
+
 def test_composite_shape_marching_cubes():
     """Test marching cubes on a composite shape."""
     sphere = SphereSDF(radius=0.5)

@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 3.15...3.26)
 
 project(isoext LANGUAGES CXX CUDA)
 
+# Fail early with a clear message when an outdated nvcc is picked up (e.g.
+# a distro-packaged /usr/bin/nvcc); nvcc older than 12.4 cannot compile
+# against the glibc fortified headers of recent Linux distributions.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.4)
+    message(FATAL_ERROR
+        "CUDA 12.4 or newer is required; found ${CMAKE_CUDA_COMPILER_VERSION} "
+        "at ${CMAKE_CUDA_COMPILER}. Set the CUDACXX environment variable to a "
+        "newer nvcc.")
+endif()
+
 if(NOT SKBUILD)
     message(WARNING "\
     This CMake file is meant to be executed using 'scikit-build'. Running
@@ -26,7 +36,7 @@ if(NOT SKBUILD)
 endif()
 
 # Try to import all Python components potentially needed by nanobind
-find_package(Python 3.8
+find_package(Python 3.10
     REQUIRED COMPONENTS Interpreter Development.Module
     OPTIONAL_COMPONENTS Development.SABIModule)
 

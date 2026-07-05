@@ -81,6 +81,28 @@ def test_get_sdf_normal_cuboid():
     assert torch.allclose(norms, torch.ones_like(norms), atol=1e-5)
 
 
+def test_get_sdf_grad_does_not_mutate_input(sphere):
+    """get_sdf_grad must not flip requires_grad on the caller's tensor."""
+    points = torch.randn(100, 3, device="cuda")
+    assert not points.requires_grad
+
+    get_sdf_grad(sphere, points)
+
+    assert not points.requires_grad
+
+
+def test_get_sdf_grad_under_no_grad(sphere):
+    """get_sdf_grad must work inside a torch.no_grad() block."""
+    points = torch.randn(100, 3, device="cuda") * 2
+
+    with torch.no_grad():
+        grad = get_sdf_grad(sphere, points)
+
+    # For a sphere SDF the gradient is the unit direction from the origin.
+    expected = torch.nn.functional.normalize(points, dim=-1)
+    assert torch.allclose(grad, expected, atol=1e-5)
+
+
 def test_get_sdf_normal_batch(sphere):
     """Test normal computation with batched points."""
     # Create a batch of points with shape (2, 3, 3)

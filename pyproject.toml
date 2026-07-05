@@ -4,10 +4,10 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "isoext"
-version = "0.5.1"
+version = "0.6.0"
 description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
 readme = "README.md"
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.10,<3.13"
 authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -36,9 +36,11 @@ py-api = "cp312"
 # Necessary to see build output from the actual compilation
 build-verbosity = 1
 
-# Run pytest to ensure that the package was correctly built
-test-command = "pytest {project}/tests"
-test-requires = "pytest"
+# Run pytest to ensure that the package was correctly built. pytest-xdist runs
+# tests in worker processes so a CUDA crash is reported as a test failure
+# instead of aborting the whole session.
+test-command = "pytest -n 2 {project}/tests"
+test-requires = ["pytest", "pytest-xdist"]
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
@@ -55,9 +57,10 @@ compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true 
 ruff = "*"
 numpy = "*"
 pytest = "*"
+pytest-xdist = "*"
 
 [tool.pixi.feature.dev.tasks]
-test = { cmd = "pytest tests/", cwd = ".", depends-on = ["compile"] }
+test = { cmd = "pytest tests/ -n 2", cwd = ".", depends-on = ["compile"] }
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }

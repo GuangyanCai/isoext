@@ -97,10 +97,13 @@ get_intersection(Grid *grid, float level, bool compute_normals) {
     NDArray<float> values = grid->get_values();
     NDArray<float3> points = grid->get_points();
     NDArray<uint> cells = grid->get_cells();
-    thrust::device_vector<int> edges_table_dv(edges_table,
-                                              edges_table + edges_size);
-    thrust::device_vector<int> edge_status_table_dv(
-        edge_status_table, edge_status_table + edge_table_size);
+    // Uploaded once and intentionally leaked so the buffers are not freed
+    // after the CUDA context is gone at interpreter shutdown.
+    static const thrust::device_vector<int> &edges_table_dv =
+        *new thrust::device_vector<int>(edges_table, edges_table + edges_size);
+    static const thrust::device_vector<int> &edge_status_table_dv =
+        *new thrust::device_vector<int>(edge_status_table,
+                                        edge_status_table + edge_table_size);
 
     // Get the case index of each cell.
     thrust::device_vector<int> edge_status(num_cells);

@@ -41,11 +41,25 @@ nb_to_ours(const PyTorchCuda<DTYPE, Ts...> &arr) {
                           {arr.shape_ptr(), arr.shape_ptr() + arr.ndim()});
 }
 
+// Build a zero-sized tensor with the given shape. A default-constructed
+// ndarray would show up as None on the Python side, so allocate a dummy
+// element to keep the data pointer valid for the capsule.
+template <typename DTYPE, typename... Ts>
+PyTorchCuda<DTYPE, Ts...>
+empty_to_nb(const std::vector<size_t> &shape) {
+    DTYPE *data_ptr;
+    if (cudaMalloc((void **) &data_ptr, sizeof(DTYPE)) != cudaSuccess) {
+        throw std::runtime_error("cudaMalloc failed");
+    }
+    return PyTorchCuda<DTYPE, Ts...>(data_ptr, shape.size(), shape.data(),
+                                     create_device_capsule(data_ptr));
+}
+
 template <typename DTYPE, typename... Ts>
 PyTorchCuda<DTYPE, Ts...>
 ours_to_nb(NDArray<DTYPE> &arr) {
     if (arr.size() == 0) {
-        return PyTorchCuda<DTYPE, Ts...>();
+        return empty_to_nb<DTYPE, Ts...>(arr.shape);
     }
     NDArray<DTYPE> new_arr =
         arr.read_only ? arr : std::move(arr);   // Ensure new_arr owns the data
@@ -307,10 +321,18 @@ NB_MODULE(isoext_ext, m) {
         "Created by get_intersection() and used as input to dual_contouring().\n"
         "You can modify the normals to control the surface reconstruction.")
         .def("get_points",
-             [](Intersection &self) { return ours_to_nb(self.points); },
+             [](Intersection &self) {
+                 // Copy: ours_to_nb hands ownership of the array to the
+                 // returned tensor, which must not happen to members.
+                 NDArray<float3> points = self.points;
+                 return ours_to_nb(points);
+             },
              "Return the intersection points as an (N, 3) float32 tensor.")
         .def("get_normals",
-             [](Intersection &self) { return ours_to_nb(self.normals); },
+             [](Intersection &self) {
+                 NDArray<float3> normals = self.normals;
+                 return ours_to_nb(normals);
+             },
              "Return the surface normals at intersection points as an (N, 3) float32 tensor.")
         .def("has_normals",
              [](Intersection &self) { return self.has_normals(); },

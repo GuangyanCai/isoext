@@ -161,11 +161,20 @@ struct get_triangles_op {
 std::pair<NDArray<float3>, NDArray<int>>
 dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
                 float svd_tol) {
+    // No cell intersects the surface: return an empty mesh instead of
+    // running the QEF solver on an empty batch.
+    if (its.cell_indices.size() == 0) {
+        return {NDArray<float3>({0}), NDArray<int>({0, 3})};
+    }
+
     auto [dual_quads_dv, is_out_dv] =
         grid->get_dual_quads(its.edges, its.is_out);
 
     auto [ATA, ATb] = get_qef(its, reg);
-    BatchedLASolver solver;
+    // Reused across calls since creating cusolver/cublas handles is
+    // expensive. Intentionally leaked so the handles are not destroyed after
+    // the CUDA context is gone at interpreter shutdown.
+    static BatchedLASolver &solver = *new BatchedLASolver();
     auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
 
     // Clip dual vertices to the cell AABB
