@@ -257,7 +257,7 @@
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 
 <span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
 </pre></div>
@@ -276,16 +276,21 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sphere</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">sphere</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Yellow">2025-12-30 01:10:13.373 (   0.446s) [    7676C8F11740]vtkXOpenGLRenderWindow.:1458  WARN| bad X server connection. DISPLAY=</span>
-</pre></div>
-</div>
-<img alt="_images/e069eab6179d4867d076f101d49befa808e913fa50a9be6c2520b6c72fd4ce62.png" src="_images/e069eab6179d4867d076f101d49befa808e913fa50a9be6c2520b6c72fd4ce62.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/73da1675db599904.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="torussdf">
@@ -298,13 +303,21 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torus</span> <span class="o">=</span> <span class="n">TorusSDF</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torus</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/0cd26d040416cb9cbf6b71e2400c061f015dcf0a36fb6346e1a464aea7dd57b7.png" src="_images/0cd26d040416cb9cbf6b71e2400c061f015dcf0a36fb6346e1a464aea7dd57b7.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/dd32093f47db847d.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="cuboidsdf">
@@ -317,13 +330,21 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/a55cf9bc759b928696ac63f68746e8bea976a8beb020f9327cb422deb64eafa0.png" src="_images/a55cf9bc759b928696ac63f68746e8bea976a8beb020f9327cb422deb64eafa0.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/16f2853e6bc0c7c7.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>
@@ -362,13 +383,21 @@
 
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">drilled</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/570fa72df1c0dc938d7340f291a0ff412ce615463834463a465e8073e0658542.png" src="_images/570fa72df1c0dc938d7340f291a0ff412ce615463834463a465e8073e0658542.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/f00cb923e2f106ed.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="transformations">
@@ -399,13 +428,21 @@
 
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">blended</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/ddb3cca37e7ed11160ffc936aa7f2fd82e4fc75ee2975458e2ac56789fcec8bc.png" src="_images/ddb3cca37e7ed11160ffc936aa7f2fd82e4fc75ee2975458e2ac56789fcec8bc.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/ffc9c5be9010a4df.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>

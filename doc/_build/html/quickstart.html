@@ -301,6 +301,19 @@
         ></iframe>
         </div></div>
 </div>
+<section id="interactive-viewing">
+<h2>Interactive viewing<a class="headerlink" href="#interactive-viewing" title="Link to this heading">¶</a></h2>
+<p>Outside of these docs, <code class="docutils literal notranslate"><span class="pre">isoext.viewer</span></code> can also open a live viewer in your browser:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>  <span class="c1"># prints the URL it serves on</span>
+<span class="c1"># ... inspect the mesh in the browser ...</span>
+<span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">viewer.embed</span></code>, used above, instead records the scene to a static file next to the
+notebook, so the rendered page stays interactive without a running server.</p>
+</section>
 <section id="what-just-happened">
 <h2>What just happened?<a class="headerlink" href="#what-just-happened" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
@@ -376,6 +389,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Quick Start</a><ul>
+<li><a class="reference internal" href="#interactive-viewing">Interactive viewing</a></li>
 <li><a class="reference internal" href="#what-just-happened">What just happened?</a></li>
 <li><a class="reference internal" href="#learn-more">Learn more</a></li>
 </ul>

@@ -14,10 +14,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T03:56:36.052434Z",
-     "iopub.status.busy": "2026-07-05T03:56:36.052329Z",
-     "iopub.status.idle": "2026-07-05T03:56:37.201086Z",
-     "shell.execute_reply": "2026-07-05T03:56:37.200697Z"
+     "iopub.execute_input": "2026-07-05T04:06:16.922815Z",
+     "iopub.status.busy": "2026-07-05T04:06:16.922730Z",
+     "iopub.status.idle": "2026-07-05T04:06:18.071216Z",
+     "shell.execute_reply": "2026-07-05T04:06:18.070779Z"
     }
    },
    "outputs": [
@@ -43,7 +43,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x70ceddb5d6d0>"
+       "<IPython.lib.display.IFrame at 0x75c488b7e780>"
       ]
      },
      "execution_count": 1,
@@ -81,6 +81,26 @@
     "\n",
     "print(f\"Extracted {vertices.shape[0]:,} vertices, {faces.shape[0]:,} triangles\")\n",
     "viewer.embed(vertices, faces, color=\"coral\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Interactive viewing\n",
+    "\n",
+    "Outside of these docs, `isoext.viewer` can also open a live viewer in your browser:\n",
+    "\n",
+    "```python\n",
+    "from isoext import viewer\n",
+    "\n",
+    "server = viewer.show(vertices, faces)  # prints the URL it serves on\n",
+    "# ... inspect the mesh in the browser ...\n",
+    "server.stop()\n",
+    "```\n",
+    "\n",
+    "`viewer.embed`, used above, instead records the scene to a static file next to the\n",
+    "notebook, so the rendered page stays interactive without a running server.\n"
    ]
   },
   {

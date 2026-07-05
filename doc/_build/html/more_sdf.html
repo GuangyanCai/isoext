@@ -261,12 +261,7 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sdf</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running cmake --build &amp; --install in /home/gcnick/Documents/code/isoext/build/cp312-abi3-linux_x86_64
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 </pre></div>
 </div>
 </div>
@@ -315,7 +310,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        <span class="c1"># (M, 3) uint32</span>
 
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -324,8 +319,16 @@
 Faces: torch.Size([222000, 3])
 </pre></div>
 </div>
-<img alt="_images/688901cfaac9a30a804ee856b7febdad673d6f53983043278f55e9c580444303.png" src="_images/688901cfaac9a30a804ee856b7febdad673d6f53983043278f55e9c580444303.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/7f9a18f64439d275.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>

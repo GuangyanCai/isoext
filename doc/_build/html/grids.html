@@ -261,7 +261,7 @@
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 </pre></div>
 </div>
 </div>
@@ -344,7 +344,7 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sphere: </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -352,11 +352,16 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sphere: 9,168 vertices
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Yellow">2025-12-30 01:16:08.799 (   0.585s) [    78D204087740]vtkXOpenGLRenderWindow.:1458  WARN| bad X server connection. DISPLAY=</span>
-</pre></div>
-</div>
-<img alt="_images/cad25d7a33bd7e55238d5b718999f9ff9fa4a098accc12874f1e8e14c7b8be99.png" src="_images/cad25d7a33bd7e55238d5b718999f9ff9fa4a098accc12874f1e8e14c7b8be99.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/a2ce8dd973f21c15.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -374,7 +379,7 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">gyroid</span><span class="p">)</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Gyroid: </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -382,8 +387,16 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Gyroid: 38,760 vertices
 </pre></div>
 </div>
-<img alt="_images/2ad3d3a2899baa8045864ad70d67b29dd63a2c3d9f68d1ae8040983b1d28ebae.png" src="_images/2ad3d3a2899baa8045864ad70d67b29dd63a2c3d9f68d1ae8040983b1d28ebae.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/fa78756a8cc02f13.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="using-neural-networks">
@@ -491,18 +504,34 @@ After adding: 1000 active cells
 
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">sparse_grid</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted: </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">)</span>
+
+<span class="c1"># Embed a coarser preview: the full-resolution mesh would weigh ~30 MB as a</span>
+<span class="c1"># static scene file, which is too heavy for a documentation page.</span>
+<span class="n">preview</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
+<span class="n">preview</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">preview</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="n">v_lo</span><span class="p">,</span> <span class="n">f_lo</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">preview</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_lo</span><span class="p">,</span> <span class="n">f_lo</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing 10738 chunks
-Active cells: 2416778
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Active cells: 2416778
 Extracted: 2,416,776 vertices
 </pre></div>
 </div>
-<img alt="_images/c6bf3cd2fe6f7c17badd1bca8be2bc7587cb2f4d3c45dc8f2002e240f0e1fff8.png" src="_images/c6bf3cd2fe6f7c17badd1bca8be2bc7587cb2f4d3c45dc8f2002e240f0e1fff8.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/db1dbb3f795d929f.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>
