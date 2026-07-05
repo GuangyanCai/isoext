@@ -77,6 +77,20 @@ def test_dual_contouring_different_levels(sphere_grid):
             assert f.shape[1] == 3
 
 
+def test_dual_contouring_empty_result():
+    """Test dual contouring when no surface is found."""
+    grid = isoext.UniformGrid([8, 8, 8], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    grid.set_values(torch.ones((8, 8, 8), device="cuda"))
+
+    v, f = isoext.dual_contouring(grid, level=0.0)
+
+    # No surface must yield empty tensors, not None.
+    assert isinstance(v, torch.Tensor)
+    assert isinstance(f, torch.Tensor)
+    assert v.shape == (0, 3)
+    assert f.shape == (0, 3)
+
+
 def test_dual_contouring_parameters(sphere_grid):
     """Test dual contouring with different regularization parameters."""
     v, f = isoext.dual_contouring(sphere_grid, level=0.0, reg=0.01)

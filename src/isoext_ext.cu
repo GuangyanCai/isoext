@@ -41,11 +41,25 @@ nb_to_ours(const PyTorchCuda<DTYPE, Ts...> &arr) {
                           {arr.shape_ptr(), arr.shape_ptr() + arr.ndim()});
 }
 
+// Build a zero-sized tensor with the given shape. A default-constructed
+// ndarray would show up as None on the Python side, so allocate a dummy
+// element to keep the data pointer valid for the capsule.
+template <typename DTYPE, typename... Ts>
+PyTorchCuda<DTYPE, Ts...>
+empty_to_nb(const std::vector<size_t> &shape) {
+    DTYPE *data_ptr;
+    if (cudaMalloc((void **) &data_ptr, sizeof(DTYPE)) != cudaSuccess) {
+        throw std::runtime_error("cudaMalloc failed");
+    }
+    return PyTorchCuda<DTYPE, Ts...>(data_ptr, shape.size(), shape.data(),
+                                     create_device_capsule(data_ptr));
+}
+
 template <typename DTYPE, typename... Ts>
 PyTorchCuda<DTYPE, Ts...>
 ours_to_nb(NDArray<DTYPE> &arr) {
     if (arr.size() == 0) {
-        return PyTorchCuda<DTYPE, Ts...>();
+        return empty_to_nb<DTYPE, Ts...>(arr.shape);
     }
     NDArray<DTYPE> new_arr =
         arr.read_only ? arr : std::move(arr);   // Ensure new_arr owns the data
