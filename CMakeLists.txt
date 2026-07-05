@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.15...3.26)
 project(isoext LANGUAGES CXX CUDA)
 
 # Fail early with a clear message when an outdated nvcc is picked up (e.g.
-# a distro-packaged /usr/bin/nvcc); older nvcc cannot compile against recent
-# glibc fortified headers.
-if(CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.4)
+# a distro-packaged /usr/bin/nvcc); nvcc older than 12.4 cannot compile
+# against the glibc fortified headers of recent Linux distributions.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 12.4)
     message(FATAL_ERROR
         "CUDA 12.4 or newer is required; found ${CMAKE_CUDA_COMPILER_VERSION} "
         "at ${CMAKE_CUDA_COMPILER}. Set the CUDACXX environment variable to a "
