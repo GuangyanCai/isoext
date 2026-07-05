@@ -1,5 +1,6 @@
 #pragma once
 
+#include "grid/grid.cuh"
 #include "math.cuh"
 #include <memory>
 #include <string>
@@ -14,8 +15,7 @@ class MCBase {
     virtual ~MCBase() = default;
 
     virtual void run(float3 *v, const uint num_cells, const uint8_t *cases,
-                     const uint *cell_indices, const float *values,
-                     const float3 *points, const uint *cells,
+                     const uint *cell_indices, const GridView &view,
                      const float level) = 0;
 
     virtual size_t get_max_triangles() const = 0;

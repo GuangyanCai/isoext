@@ -22,6 +22,14 @@ extensions = [
 # MyST-NB settings
 nb_execution_mode = "off"  # Don't execute notebooks during build (requires GPU)
 
+# Copy viser's static client into _static so the interactive scene embeds in
+# the executed notebooks keep working in the built documentation.
+from pathlib import Path
+
+from isoext.viewer import copy_client
+
+copy_client(Path(__file__).parent / "_static" / "viser")
+
 # Autodoc settings
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
@@ -37,3 +45,18 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'furo'
 html_static_path = ['_static']
+html_css_files = ['custom.css']
+
+html_theme_options = {
+    "light_css_variables": {
+        "color-brand-primary": "#d95f43",
+        "color-brand-content": "#d95f43",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#ff8a65",
+        "color-brand-content": "#ff8a65",
+    },
+    "source_repository": "https://github.com/GuangyanCai/isoext",
+    "source_branch": "master",
+    "source_directory": "doc/",
+}

@@ -4,9 +4,12 @@
 
 `isoext` requires:
 
-- **Python** 3.8 – 3.12
+- **Python** 3.10 – 3.12
 - **PyTorch** with CUDA support
-- **CUDA Toolkit** matching your PyTorch version
+- **CUDA Toolkit** 12.4 or newer. Older nvcc versions fail on the glibc
+  headers of recent Linux distributions (Ubuntu 24.04 and later) with
+  errors like `"__builtin_dynamic_object_size" is undefined`. The build
+  checks for this and stops with instructions if it finds an old nvcc.
 - A C++ compiler (GCC on Linux, Visual Studio on Windows)
 
 ## Install from PyPI
@@ -67,6 +70,12 @@ Ensure your CUDA toolkit version matches PyTorch's CUDA version. Check with:
 ```bash
 nvcc --version
 ```
+
+### Slow first call
+
+The extension ships GPU code as PTX. The driver compiles it for your GPU
+the first time each algorithm runs, which takes a few seconds in total.
+The result is cached on disk, so this happens once per machine.
 
 ### Import errors
 

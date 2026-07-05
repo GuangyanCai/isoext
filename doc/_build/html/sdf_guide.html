@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Working with Occupancy Grids" href="occupancy_grids.html"><link rel="prev" title="Dual Contouring" href="dual_contouring.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Working with Occupancy Grids" href="occupancy_grids.html"><link rel="prev" title="Working with Grids" href="grids.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>SDF Utilities - isoext documentation</title>
@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
     
 
@@ -19,18 +20,24 @@
   body {
     --color-code-background: #f2f2f2;
   --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #d95f43;
+  --color-brand-content: #d95f43;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
       }
     }
@@ -196,21 +203,22 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">SDF Utilities</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
-<ul>
+<p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
 </div>
@@ -231,12 +239,16 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/sdf_guide.ipynb.txt" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/sdf_guide.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
-</div>
-<div class="theme-toggle-container theme-toggle-content">
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/sdf_guide.ipynb" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
@@ -257,7 +269,7 @@
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 
 <span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
 </pre></div>
@@ -276,16 +288,21 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sphere</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">sphere</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Yellow">2025-12-30 01:10:13.373 (   0.446s) [    7676C8F11740]vtkXOpenGLRenderWindow.:1458  WARN| bad X server connection. DISPLAY=</span>
-</pre></div>
-</div>
-<img alt="_images/e069eab6179d4867d076f101d49befa808e913fa50a9be6c2520b6c72fd4ce62.png" src="_images/e069eab6179d4867d076f101d49befa808e913fa50a9be6c2520b6c72fd4ce62.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/73da1675db599904.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="torussdf">
@@ -298,13 +315,21 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torus</span> <span class="o">=</span> <span class="n">TorusSDF</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torus</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/0cd26d040416cb9cbf6b71e2400c061f015dcf0a36fb6346e1a464aea7dd57b7.png" src="_images/0cd26d040416cb9cbf6b71e2400c061f015dcf0a36fb6346e1a464aea7dd57b7.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/dd32093f47db847d.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="cuboidsdf">
@@ -317,13 +342,21 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/a55cf9bc759b928696ac63f68746e8bea976a8beb020f9327cb422deb64eafa0.png" src="_images/a55cf9bc759b928696ac63f68746e8bea976a8beb020f9327cb422deb64eafa0.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/16f2853e6bc0c7c7.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>
@@ -362,13 +395,21 @@
 
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">drilled</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/570fa72df1c0dc938d7340f291a0ff412ce615463834463a465e8073e0658542.png" src="_images/570fa72df1c0dc938d7340f291a0ff412ce615463834463a465e8073e0658542.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/f00cb923e2f106ed.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="transformations">
@@ -399,13 +440,21 @@
 
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">blended</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/ddb3cca37e7ed11160ffc936aa7f2fd82e4fc75ee2975458e2ac56789fcec8bc.png" src="_images/ddb3cca37e7ed11160ffc936aa7f2fd82e4fc75ee2975458e2ac56789fcec8bc.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/ffc9c5be9010a4df.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>
@@ -424,14 +473,14 @@
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="dual_contouring.html">
+          <a class="prev-page" href="grids.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Dual Contouring</div>
+                <div class="title">Working with Grids</div>
                 
               </div>
             </a>

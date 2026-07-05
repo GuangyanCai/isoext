@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Working with Grids" href="grids.html"><link rel="prev" title="Installation" href="installation.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Cubes" href="marching_cubes.html"><link rel="prev" title="Installation" href="installation.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Quick Start - isoext documentation</title>
@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
     
 
@@ -19,18 +20,24 @@
   body {
     --color-code-background: #f2f2f2;
   --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #d95f43;
+  --color-brand-content: #d95f43;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
       }
     }
@@ -196,21 +203,22 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
+<p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
 </div>
@@ -231,12 +239,16 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/quickstart.ipynb.txt" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/quickstart.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
-</div>
-<div class="theme-toggle-container theme-toggle-content">
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/quickstart.ipynb" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
@@ -259,7 +271,7 @@
     <span class="n">SphereSDF</span><span class="p">,</span> <span class="n">TorusSDF</span><span class="p">,</span> 
     <span class="n">UnionOp</span><span class="p">,</span> <span class="n">IntersectionOp</span><span class="p">,</span> <span class="n">NegationOp</span><span class="p">,</span> <span class="n">RotationOp</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span> <span class="c1"># PyVista renderer, not part of the library</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 
 <span class="c1"># Create a high-resolution grid</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">])</span>
@@ -282,7 +294,7 @@
 <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;coral&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;coral&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -290,12 +302,30 @@
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Extracted 196,176 vertices, 392,348 triangles
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Yellow">2025-12-30 01:10:03.374 (   0.729s) [    7F20291AB740]vtkXOpenGLRenderWindow.:1458  WARN| bad X server connection. DISPLAY=</span>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/db27569071b48c17.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<section id="interactive-viewing">
+<h2>Interactive viewing<a class="headerlink" href="#interactive-viewing" title="Link to this heading">¶</a></h2>
+<p>Outside of these docs, <code class="docutils literal notranslate"><span class="pre">isoext.viewer</span></code> can also open a live viewer in your browser:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
+
+<span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>  <span class="c1"># prints the URL it serves on</span>
+<span class="c1"># ... inspect the mesh in the browser ...</span>
+<span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="_images/fe63f6e50791d5a6a617da61439c74ff74d185be810e96bcf2db99525cc94eb5.png" src="_images/fe63f6e50791d5a6a617da61439c74ff74d185be810e96bcf2db99525cc94eb5.png" />
-</div>
-</div>
+<p><code class="docutils literal notranslate"><span class="pre">viewer.embed</span></code>, used above, instead records the scene to a static file next to the
+notebook, so the rendered page stays interactive without a running server.</p>
+</section>
 <section id="what-just-happened">
 <h2>What just happened?<a class="headerlink" href="#what-just-happened" title="Link to this heading">¶</a></h2>
 <ol class="arabic simple">
@@ -320,12 +350,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="grids.html">
+          <a class="next-page" href="marching_cubes.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Working with Grids</div>
+                <div class="title">Marching Cubes</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -371,6 +401,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Quick Start</a><ul>
+<li><a class="reference internal" href="#interactive-viewing">Interactive viewing</a></li>
 <li><a class="reference internal" href="#what-just-happened">What just happened?</a></li>
 <li><a class="reference internal" href="#learn-more">Learn more</a></li>
 </ul>

@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="Using External SDF Libraries" href="more_sdf.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Performance" href="performance.html"><link rel="prev" title="Using External SDF Libraries" href="more_sdf.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>API Reference - isoext documentation</title>
@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
     
 
@@ -19,18 +20,24 @@
   body {
     --color-code-background: #f2f2f2;
   --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #d95f43;
+  --color-brand-content: #d95f43;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
       }
     }
@@ -196,21 +203,22 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
+<p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
 </div>
@@ -231,12 +239,16 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/api.md.txt" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/api.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
-</div>
-<div class="theme-toggle-container theme-toggle-content">
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/api.md" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
@@ -267,7 +279,7 @@
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions
-and faces is an (M, 3) uint32 tensor of triangle indices.</p>
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -358,13 +370,149 @@ points using linear interpolation.</p>
 </dd></dl>
 
 </section>
+<section id="viewer">
+<h2>Viewer<a class="headerlink" href="#viewer" title="Link to this heading">¶</a></h2>
+<p>Interactive visualization built on <a class="reference external" href="https://viser.studio">viser</a>.</p>
+<p id="module-isoext.viewer">Interactive mesh viewing and scene export built on viser.</p>
+<p>Typical use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>   <span class="c1"># open an interactive viewer in the browser</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>           <span class="c1"># inline scene for (statically hosted) notebooks</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_mesh">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.71,</span> <span class="pre">0.8,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_mesh" title="Link to this definition">¶</a></dt>
+<dd><p>Add a mesh from isoext output tensors to a viser scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>vertices</strong> (<em>Tensor</em>) – (N, 3) tensor of vertex positions.</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Scene tree name of the mesh.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>flat_shading</strong> (<em>bool</em>) – Shade each triangle with a constant normal.</p></li>
+<li><p><strong>wireframe</strong> (<em>bool</em>) – Render the mesh as a wireframe.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The viser mesh handle.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.show">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.show" title="Link to this definition">¶</a></dt>
+<dd><p>Open an interactive viewer serving the given mesh.</p>
+<p>The server keeps running until it is stopped or the process exits; the
+printed URL can be opened in any browser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> (<em>Tensor</em>) – (N, 3) tensor of vertex positions.</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – Port to serve on (the next free port is used if taken).</p></li>
+<li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The running viser.ViserServer; call .stop() to shut it down.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.serialize_scene">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">serialize_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.serialize_scene" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize a scene containing the given mesh to .viser bytes.</p>
+<p>The bytes can be written to a <code class="docutils literal notranslate"><span class="pre">.viser</span></code> file and played back offline by
+viser’s static client, e.g. embedded in a web page. See save_scene and
+embed for convenience wrappers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.save_scene">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">save_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.save_scene" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize a scene with the given mesh and write it to a .viser file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.copy_client">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">copy_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.copy_client" title="Link to this definition">¶</a></dt>
+<dd><p>Copy viser’s single-file static web client into a directory.</p>
+<p>The client is a self-contained index.html that plays back .viser scene
+files passed via its <code class="docutils literal notranslate"><span class="pre">?playbackPath=</span></code> URL parameter. The copy is
+refreshed whenever the installed viser ships a different build.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The path of the copied index.html.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.embed">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_static'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">420</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.embed" title="Link to this definition">¶</a></dt>
+<dd><p>Display a mesh as a self-contained interactive scene in a notebook.</p>
+<p>Unlike show, which starts a live server, this writes static assets –
+the viser client to root/viser/ and the serialized scene to
+root/scenes/ – and returns an IFrame referencing them with relative
+URLs. Rendered notebooks therefore stay interactive when hosted
+statically, for example on documentation pages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> (<em>Tensor</em>) – (N, 3) tensor of vertex positions.</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
+<li><p><strong>root</strong> – Directory for the static assets, relative to the notebook.</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – Height of the embedded viewer in pixels.</p></li>
+<li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An IPython IFrame displaying the scene.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <section id="uniformgrid">
 <h3>UniformGrid<a class="headerlink" href="#uniformgrid" title="Link to this heading">¶</a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="isoext.UniformGrid">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">UniformGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-1,</span> <span class="pre">-1,</span> <span class="pre">-1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.UniformGrid" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="isoext.viewer.isoext.UniformGrid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">UniformGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-1,</span> <span class="pre">-1,</span> <span class="pre">-1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.isoext.UniformGrid" title="Link to this definition">¶</a></dt>
 <dd><p>A dense uniform grid for storing scalar values.</p>
 <p>The grid divides a 3D axis-aligned bounding box into a regular lattice of cells.
 Each cell has 8 corner points where scalar values are stored.</p>
@@ -402,8 +550,8 @@ Each cell has 8 corner points where scalar values are stored.</p>
 <section id="sparsegrid">
 <h3>SparseGrid<a class="headerlink" href="#sparsegrid" title="Link to this heading">¶</a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="isoext.SparseGrid">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">SparseGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-1,</span> <span class="pre">-1,</span> <span class="pre">-1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.SparseGrid" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="isoext.viewer.isoext.SparseGrid">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">SparseGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-1,</span> <span class="pre">-1,</span> <span class="pre">-1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aabb_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">1,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">float_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.isoext.SparseGrid" title="Link to this definition">¶</a></dt>
 <dd><p>A sparse adaptive grid for storing scalar values.</p>
 <p>Unlike UniformGrid, SparseGrid only allocates memory for cells that are explicitly added.
 This is useful for large domains where only a small region contains the iso-surface.</p>
@@ -578,7 +726,15 @@ You can modify the normals to control the surface reconstruction.</p>
       <footer>
         
         <div class="related-pages">
-          
+          <a class="next-page" href="performance.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Performance</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
           <a class="prev-page" href="more_sdf.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
@@ -629,9 +785,18 @@ You can modify the normals to control the surface reconstruction.</p>
 <li><a class="reference internal" href="#isoext.write_obj"><code class="docutils literal notranslate"><span class="pre">write_obj()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#viewer">Viewer</a><ul>
+<li><a class="reference internal" href="#isoext.viewer.add_mesh"><code class="docutils literal notranslate"><span class="pre">add_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.serialize_scene"><code class="docutils literal notranslate"><span class="pre">serialize_scene()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.save_scene"><code class="docutils literal notranslate"><span class="pre">save_scene()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.copy_client"><code class="docutils literal notranslate"><span class="pre">copy_client()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.embed"><code class="docutils literal notranslate"><span class="pre">embed()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
 <li><a class="reference internal" href="#uniformgrid">UniformGrid</a><ul>
-<li><a class="reference internal" href="#isoext.UniformGrid"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.viewer.isoext.UniformGrid"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid</span></code></a><ul>
 <li><a class="reference internal" href="#isoext.isoext.UniformGrid.UniformGrid.get_points"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid.UniformGrid.get_points()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.isoext.UniformGrid.UniformGrid.get_values"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid.UniformGrid.get_values()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.isoext.UniformGrid.UniformGrid.set_values"><code class="docutils literal notranslate"><span class="pre">isoext.UniformGrid.UniformGrid.set_values()</span></code></a></li>
@@ -640,7 +805,7 @@ You can modify the normals to control the surface reconstruction.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#sparsegrid">SparseGrid</a><ul>
-<li><a class="reference internal" href="#isoext.SparseGrid"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.viewer.isoext.SparseGrid"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid</span></code></a><ul>
 <li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_num_cells"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_num_cells()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_num_points"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_num_points()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.isoext.SparseGrid.SparseGrid.get_points"><code class="docutils literal notranslate"><span class="pre">isoext.SparseGrid.SparseGrid.get_points()</span></code></a></li>

@@ -12,23 +12,20 @@
 namespace {
 struct get_edge_status_op {
     int *edge_status;
-    const float *values;
-    const uint *cells;
+    const GridView view;
     const int *edge_table;
     const float level;
 
-    get_edge_status_op(int *edge_status, const float *values, const uint *cells,
+    get_edge_status_op(int *edge_status, const GridView &view,
                        const int *edge_table, const float level)
-        : edge_status(edge_status), values(values), cells(cells),
-          edge_table(edge_table), level(level) {}
+        : edge_status(edge_status), view(view), edge_table(edge_table),
+          level(level) {}
 
     __host__ __device__ void operator()(uint cell_idx) {
         // Compute the sign of each cube vertex and derive the case number
         uint8_t case_num = 0;
-        uint offset = cell_idx * 8;
         for (uint i = 0; i < 8; i++) {
-            float p_val = values[cells[offset + i]];
-            case_num |= (p_val - level < 0) << i;
+            case_num |= (view.corner_value(cell_idx, i) - level < 0) << i;
         }
         edge_status[cell_idx] = edge_table[case_num];
     }
@@ -41,42 +38,36 @@ struct get_its_op {
     const uint *cell_offsets;
     const uint *cell_indices;
     const int *edge_status;
-    const float *values;
-    const float3 *points;
-    const uint *cells;
+    const GridView view;
     const int *edges_table;
     const float level;
 
     get_its_op(float3 *its_points, uint2 *its_edges, bool *its_is_out,
                const uint *cell_offsets, const uint *cell_indices,
-               const int *edge_status, const float *values,
-               const float3 *points, const uint *cells, const int *edges_table,
-               const float level)
+               const int *edge_status, const GridView &view,
+               const int *edges_table, const float level)
         : its_points(its_points), its_edges(its_edges), its_is_out(its_is_out),
           cell_offsets(cell_offsets), cell_indices(cell_indices),
-          edge_status(edge_status), values(values), points(points),
-          cells(cells), edges_table(edges_table), level(level) {}
+          edge_status(edge_status), view(view), edges_table(edges_table),
+          level(level) {}
 
     __host__ __device__ void operator()(uint idx) {
         int status = edge_status[idx];
         int offset = cell_offsets[idx];
 
         // Compute the location of each cube vertex.
+        uint cell = cell_indices[idx];
         float3 c_p[8];
         float c_v[8];
-        uint c_offset = cell_indices[idx] * 8;
-        for (uint32_t i = 0; i < 8; i++) {
-            c_p[i] = points[cells[c_offset + i]];
-            c_v[i] = values[cells[c_offset + i]];
-        }
+        view.load_corners(cell, c_p, c_v);
 
         for (int i = 0; i < 12; i++) {
             if (status & (1 << i)) {
                 // Get the two vertices that form the edge.
                 int p_0 = edges_table[i * 2];
                 int p_1 = edges_table[i * 2 + 1];
-                its_edges[offset] =
-                    make_uint2(cells[c_offset + p_0], cells[c_offset + p_1]);
+                its_edges[offset] = make_uint2(view.corner_point_id(cell, p_0),
+                                               view.corner_point_id(cell, p_1));
                 its_is_out[offset] = c_v[p_0] <= c_v[p_1];
 
                 // Compute the intersection point.
@@ -93,10 +84,7 @@ struct get_its_op {
 Intersection
 get_intersection(Grid *grid, float level, bool compute_normals) {
     uint num_cells = grid->get_num_cells();
-    uint3 shape = grid->get_shape();
-    NDArray<float> values = grid->get_values();
-    NDArray<float3> points = grid->get_points();
-    NDArray<uint> cells = grid->get_cells();
+    GridView view = grid->get_view();
     // Uploaded once and intentionally leaked so the buffers are not freed
     // after the CUDA context is gone at interpreter shutdown.
     static const thrust::device_vector<int> &edges_table_dv =
@@ -109,9 +97,9 @@ get_intersection(Grid *grid, float level, bool compute_normals) {
     thrust::device_vector<int> edge_status(num_cells);
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
-                     get_edge_status_op(
-                         edge_status.data().get(), values.data(), cells.data(),
-                         edge_status_table_dv.data().get(), level));
+                     get_edge_status_op(edge_status.data().get(), view,
+                                        edge_status_table_dv.data().get(),
+                                        level));
 
     // Remove empty cells.
     thrust::device_vector<uint> cell_indices_dv(num_cells);
@@ -149,8 +137,8 @@ get_intersection(Grid *grid, float level, bool compute_normals) {
         thrust::counting_iterator<uint>(num_cells),
         get_its_op(its.points.data(), its.edges.data(), its.is_out.data(),
                    its.cell_offsets.data(), cell_indices_dv.data().get(),
-                   edge_status.data().get(), values.data(), points.data(),
-                   cells.data(), edges_table_dv.data().get(), level));
+                   edge_status.data().get(), view,
+                   edges_table_dv.data().get(), level));
 
     // Optionally compute normals
     if (compute_normals) {
@@ -191,30 +179,22 @@ struct compute_normals_op {
     const float3 *its_points;
     const uint *cell_offsets;
     const uint *cell_indices;
-    const float *values;
-    const float3 *grid_points;
-    const uint *cells;
+    const GridView view;
 
     compute_normals_op(float3 *normals, const float3 *its_points,
                        const uint *cell_offsets, const uint *cell_indices,
-                       const float *values, const float3 *grid_points,
-                       const uint *cells)
+                       const GridView &view)
         : normals(normals), its_points(its_points), cell_offsets(cell_offsets),
-          cell_indices(cell_indices), values(values), grid_points(grid_points),
-          cells(cells) {}
+          cell_indices(cell_indices), view(view) {}
 
     __host__ __device__ void operator()(uint cell_idx) {
         uint offset = cell_offsets[cell_idx];
         uint next_offset = cell_offsets[cell_idx + 1];
 
         // Get the 8 corner values and positions
-        uint c_offset = cell_indices[cell_idx] * 8;
         float c_v[8];
         float3 c_p[8];
-        for (uint i = 0; i < 8; i++) {
-            c_p[i] = grid_points[cells[c_offset + i]];
-            c_v[i] = values[cells[c_offset + i]];
-        }
+        view.load_corners(cell_indices[cell_idx], c_p, c_v);
 
         // Cell origin and size
         // Corner 0 is at (min_x, min_y, min_z), corner 7 is at (max_x, max_y, max_z)
@@ -273,15 +253,11 @@ struct compute_normals_op {
 
 void
 compute_intersection_normals(Intersection &its, Grid *grid) {
-    NDArray<float> values = grid->get_values();
-    NDArray<float3> grid_points = grid->get_points();
-    NDArray<uint> cells = grid->get_cells();
-
     uint num_cells = its.cell_indices.size();
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
         thrust::counting_iterator<uint>(num_cells),
         compute_normals_op(its.normals.data(), its.points.data(),
                            its.cell_offsets.data(), its.cell_indices.data(),
-                           values.data(), grid_points.data(), cells.data()));
+                           grid->get_view()));
 }

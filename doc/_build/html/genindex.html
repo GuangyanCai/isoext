@@ -7,8 +7,9 @@
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 --><title>Index - isoext documentation</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
     
 
@@ -17,18 +18,24 @@
   body {
     --color-code-background: #f2f2f2;
   --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #d95f43;
+  --color-brand-content: #d95f43;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
       }
     }
@@ -194,21 +201,22 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
+<p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
 </div>
@@ -244,13 +252,27 @@
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#W"><strong>W</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#W"><strong>W</strong></a></div>
 </section>
 <section id="A" class="genindex-section">
   <h2>A</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.add_cells">add_cells() (isoext.isoext.SparseGrid.SparseGrid method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.add_mesh">add_mesh() (in module isoext.viewer)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.copy_client">copy_client() (in module isoext.viewer)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -261,6 +283,16 @@
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.dual_contouring">dual_contouring() (in module isoext)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.embed">embed() (in module isoext.viewer)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -332,12 +364,19 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.Intersection">Intersection (class in isoext)</a>
 </li>
+        <li><a href="api.html#isoext.viewer.isoext.SparseGrid">isoext.SparseGrid (class in isoext.viewer)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="api.html#isoext.SparseGrid">isoext.SparseGrid (built-in class)</a>
+        <li><a href="api.html#isoext.viewer.isoext.UniformGrid">isoext.UniformGrid (class in isoext.viewer)</a>
 </li>
-        <li><a href="api.html#isoext.UniformGrid">isoext.UniformGrid (built-in class)</a>
+        <li>
+    isoext.viewer
+
+        <ul>
+          <li><a href="api.html#module-isoext.viewer">module</a>
 </li>
+        </ul></li>
     </ul></td>
   </tr></table>
 </section>
@@ -348,10 +387,17 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.make_grid">make_grid() (in module isoext)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.marching_cubes">marching_cubes() (in module isoext)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    module
+
+        <ul>
+          <li><a href="api.html#module-isoext.viewer">isoext.viewer</a>
+</li>
+        </ul></li>
     </ul></td>
   </tr></table>
 </section>
@@ -370,6 +416,10 @@
   <h2>S</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.save_scene">save_scene() (in module isoext.viewer)</a>
+</li>
+        <li><a href="api.html#isoext.viewer.serialize_scene">serialize_scene() (in module isoext.viewer)</a>
+</li>
         <li><a href="api.html#isoext.Intersection.set_normals">set_normals (isoext.Intersection attribute)</a>
 </li>
     </ul></td>
@@ -380,6 +430,8 @@
           <li><a href="api.html#isoext.isoext.UniformGrid.UniformGrid.set_values">(isoext.isoext.UniformGrid.UniformGrid method)</a>
 </li>
         </ul></li>
+        <li><a href="api.html#isoext.viewer.show">show() (in module isoext.viewer)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>

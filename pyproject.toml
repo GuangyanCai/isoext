@@ -4,10 +4,10 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "isoext"
-version = "0.6.0"
+version = "0.7.0"
 description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10"
 authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -15,9 +15,11 @@ classifiers = [
     "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]
 
+dependencies = ["viser"]
+
 [project.urls]
 Homepage = "https://github.com/GuangyanCai/isoext"
-Documentation = "https://github.com/GuangyanCai/isoext/wiki"
+Documentation = "https://guangyancai.github.io/isoext/"
 
 
 [tool.scikit-build]
@@ -51,7 +53,7 @@ nanobind = "*"
 scikit-build-core = { version = "*", extras = ["pyproject"] }
 
 [tool.pixi.tasks]
-compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -ve .", cwd = "." }
+compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -C editable.verbose=false -ve .", cwd = "." }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"
@@ -61,6 +63,7 @@ pytest-xdist = "*"
 
 [tool.pixi.feature.dev.tasks]
 test = { cmd = "pytest tests/ -n 2", cwd = ".", depends-on = ["compile"] }
+bench = { cmd = "python benchmarks/benchmark.py", cwd = ".", depends-on = ["compile"] }
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }
@@ -72,12 +75,11 @@ furo = "*"
 myst-nb = "*"
 ipywidgets = "*"
 jupyterlab = "*"
-pyvista = { version = "*", extras = ["jupyter"] }
 sdf = { git = "git+https://github.com/fogleman/sdf" }
 
 [tool.pixi.feature.doc.tasks]
 doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
-doc-serve = { cmd = "sphinx-autobuild . _build/html --open-browser --watch ../src", cwd = "doc", depends-on = ["compile"] }
+doc-serve = { cmd = "sphinx-autobuild . _build/html --host 0.0.0.0 --watch ../src", cwd = "doc", depends-on = ["compile"] }
 doc-clean = { cmd = "rm -rf _build", cwd = "doc", depends-on = ["compile"] }
 doc-rebuild = { cmd = "rm -rf _build && sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
 doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }

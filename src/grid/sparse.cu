@@ -1,6 +1,8 @@
 #include "grid/sparse.cuh"
 #include "utils.cuh"
 
+#include <thrust/binary_search.h>
+#include <thrust/execution_policy.h>
 #include <thrust/remove.h>
 #include <thrust/set_operations.h>
 #include <thrust/sort.h>
@@ -153,16 +155,15 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
                                 float level) const {
     uint num_cells = new_cell_indices.size();
 
-    // Convert cell indices to cells
-    thrust::device_vector<uint> cells_dv(num_cells * 8);
-    thrust::sequence(cells_dv.begin(), cells_dv.end());
+    // View the candidate cells and their corner values as a sparse grid.
+    GridView view = {shape, aabb_min, aabb_max, new_values.data(),
+                     new_cell_indices.data(), true};
 
     // Get the case index of each cell.
     thrust::device_vector<uint8_t> cases_dv(num_cells);
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),
-                     get_case_num_op(cases_dv.data().get(), new_values.data(),
-                                     cells_dv.data().get(), level));
+                     get_case_num_op(cases_dv.data().get(), view, level));
     // Remove empty cells.
     thrust::device_vector<uint> cell_indices_dv(
         new_cell_indices.data_ptr, new_cell_indices.data_ptr + num_cells);
@@ -219,28 +220,31 @@ SparseGrid::get_dual_quads(const NDArray<uint2> &edges,
     thrust::device_vector<int4> edge_neighbors_dv =
         get_edge_neighbors(edges_dv, shape);
 
-    // Create a map from uniform grid cell indices to sparse grid cell indices
-    thrust::device_vector<int> idx_map_dv(shape.x * shape.y * shape.z, -1);
+    // Convert edge neighbors from dense cell indices to positions in the
+    // active cell list by binary searching the sorted cell_indices array.
+    // Neighbors marked -1 (outside the grid) and inactive cells map to -1.
     thrust::for_each(
         thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(cell_indices.size()),
-        [idx_map = idx_map_dv.data().get(),
-         cell_indices = cell_indices.data().get()] __device__(uint idx) {
-            idx_map[cell_indices[idx]] = idx;
+        thrust::counting_iterator<uint>(edge_neighbors_dv.size()),
+        [edge_neighbors = edge_neighbors_dv.data().get(),
+         active = cell_indices.data().get(),
+         num_active = uint(cell_indices.size())] __device__(uint idx) {
+            auto to_active = [&](int dense_idx) -> int {
+                if (dense_idx < 0) {
+                    return -1;
+                }
+                const uint *end = active + num_active;
+                const uint *it = thrust::lower_bound(thrust::seq, active, end,
+                                                     uint(dense_idx));
+                return (it != end && *it == uint(dense_idx)) ? int(it - active)
+                                                             : -1;
+            };
+            int4 &en = edge_neighbors[idx];
+            en.x = to_active(en.x);
+            en.y = to_active(en.y);
+            en.z = to_active(en.z);
+            en.w = to_active(en.w);
         });
-
-    // Convert edge neighbors in a uniform grid to edge neighbors in a sparse
-    // grid. Neighbors marked -1 (outside the grid) must be preserved.
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(edge_neighbors_dv.size()),
-                     [edge_neighbors = edge_neighbors_dv.data().get(),
-                      idx_map = idx_map_dv.data().get()] __device__(uint idx) {
-                         int4 &en = edge_neighbors[idx];
-                         en.x = en.x >= 0 ? idx_map[en.x] : -1;
-                         en.y = en.y >= 0 ? idx_map[en.y] : -1;
-                         en.z = en.z >= 0 ? idx_map[en.z] : -1;
-                         en.w = en.w >= 0 ? idx_map[en.w] : -1;
-                     });
 
     return {edge_neighbors_dv, is_out_dv};
 }

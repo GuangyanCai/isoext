@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="SDF Utilities" href="sdf_guide.html"><link rel="prev" title="Marching Cubes" href="marching_cubes.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Working with Grids" href="grids.html"><link rel="prev" title="Marching Cubes" href="marching_cubes.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Dual Contouring - isoext documentation</title>
@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
     
 
@@ -19,18 +20,24 @@
   body {
     --color-code-background: #f2f2f2;
   --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #d95f43;
+  --color-brand-content: #d95f43;
   
   }
   @media not print {
     body[data-theme="dark"] {
       --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
     }
     @media (prefers-color-scheme: dark) {
       body:not([data-theme="light"]) {
         --color-code-background: #202020;
   --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #ff8a65;
+  --color-brand-content: #ff8a65;
   
       }
     }
@@ -196,21 +203,22 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
+<p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 </ul>
 
 </div>
@@ -231,12 +239,16 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/dual_contouring.ipynb.txt" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/dual_contouring.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
-</div>
-<div class="theme-toggle-container theme-toggle-content">
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/dual_contouring.ipynb" rel="edit" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
@@ -264,12 +276,7 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">get_sdf_normal</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">_viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_mesh</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Running cmake --build &amp; --install in /home/gcnick/Documents/code/isoext/build/cp312-abi3-linux_x86_64
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 </pre></div>
 </div>
 </div>
@@ -287,7 +294,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -296,8 +303,16 @@
 Faces: torch.Size([12288, 3])
 </pre></div>
 </div>
-<img alt="_images/f6824002caec5341565488f112638e6f94f93442be38a7ef249b0f11b9e83250.png" src="_images/f6824002caec5341565488f112638e6f94f93442be38a7ef249b0f11b9e83250.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/12fca5502d9cf198.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 <section id="custom-normals-for-sharp-features">
@@ -347,7 +362,7 @@ Faces: torch.Size([12288, 3])
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        <span class="c1"># (M, 3) int32</span>
 
-<span class="n">show_mesh</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">,</span> <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -356,8 +371,16 @@ Faces: torch.Size([12288, 3])
 Faces: torch.Size([12288, 3])
 </pre></div>
 </div>
-<img alt="_images/1299278a4fcb88ca592a223f577116075ea6bb1ddbfc986a73d466a029b98fdc.png" src="_images/1299278a4fcb88ca592a223f577116075ea6bb1ddbfc986a73d466a029b98fdc.png" />
-</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/addd76f03945e2c6.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
 </div>
 </section>
 </section>
@@ -367,12 +390,12 @@ Faces: torch.Size([12288, 3])
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="sdf_guide.html">
+          <a class="next-page" href="grids.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">SDF Utilities</div>
+                <div class="title">Working with Grids</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
