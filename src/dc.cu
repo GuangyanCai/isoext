@@ -3,7 +3,9 @@
 #include "math.cuh"
 #include "utils.cuh"
 
+#include <thrust/binary_search.h>
 #include <thrust/device_vector.h>
+#include <thrust/execution_policy.h>
 #include <thrust/remove.h>
 #include <thrust/sequence.h>
 
@@ -101,12 +103,25 @@ struct get_triangles_op {
     const float3 *dual_v;
     const int4 *quad_indices;
     const bool *its_is_out;
-    const int *idx_map;
+    const uint *its_cell_indices;   // sorted cell indices with intersections
+    const uint num_cells;
 
     get_triangles_op(float3 *v, const float3 *dual_v, const int4 *quad_indices,
-                     const bool *its_is_out, const int *idx_map)
+                     const bool *its_is_out, const uint *its_cell_indices,
+                     const uint num_cells)
         : v(v), dual_v(dual_v), quad_indices(quad_indices),
-          its_is_out(its_is_out), idx_map(idx_map) {}
+          its_is_out(its_is_out), its_cell_indices(its_cell_indices),
+          num_cells(num_cells) {}
+
+    // Position of a cell in its_cell_indices (which is the index of its dual
+    // vertex), or -1 if the cell has no intersections.
+    __host__ __device__ int cell_to_dual_idx(int cell) const {
+        const uint *end = its_cell_indices + num_cells;
+        const uint *it = thrust::lower_bound(thrust::seq, its_cell_indices,
+                                             end, uint(cell));
+        return (it != end && *it == uint(cell)) ? int(it - its_cell_indices)
+                                                : -1;
+    }
 
     __host__ __device__ void operator()(uint idx) {
         int4 quad_idx = quad_indices[idx];
@@ -115,10 +130,18 @@ struct get_triangles_op {
             return;
         }
 
-        quad_idx.x = idx_map[quad_idx.x];
-        quad_idx.y = idx_map[quad_idx.y];
-        quad_idx.z = idx_map[quad_idx.z];
-        quad_idx.w = idx_map[quad_idx.w];
+        quad_idx.x = cell_to_dual_idx(quad_idx.x);
+        quad_idx.y = cell_to_dual_idx(quad_idx.y);
+        quad_idx.z = cell_to_dual_idx(quad_idx.z);
+        quad_idx.w = cell_to_dual_idx(quad_idx.w);
+
+        // Every cell around an intersected edge is normally intersected
+        // itself; a miss can only come from inconsistent sparse grid values,
+        // so skip the quad instead of indexing out of bounds.
+        if (quad_idx.x < 0 || quad_idx.y < 0 || quad_idx.z < 0 ||
+            quad_idx.w < 0) {
+            return;
+        }
 
         // If the edge is pointing inward, swap the quad indices.
         if (!its_is_out[idx]) {
@@ -182,16 +205,6 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
                      fix_dual_v_op(reinterpret_cast<float3 *>(dual_v.data()),
                                    its.cell_indices.data(), grid->get_view()));
 
-    // Create index map that maps cell indices to dual_v indices
-    thrust::device_vector<int> idx_map(grid->get_num_cells(), -1);
-    thrust::for_each(
-        thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(its.cell_indices.size()),
-        [idx_map = idx_map.data(),
-         its_cell_indices = its.cell_indices.data()] __device__(uint i) {
-            idx_map[its_cell_indices[i]] = i;
-        });
-
     uint num_quads = dual_quads_dv.size();
     thrust::device_vector<float3> v_dv(num_quads * 6,
                                        make_float3(NAN, NAN, NAN));
@@ -201,7 +214,8 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
                                       reinterpret_cast<float3 *>(dual_v.data()),
                                       dual_quads_dv.data().get(),
                                       is_out_dv.data().get(),
-                                      idx_map.data().get()));
+                                      its.cell_indices.data(),
+                                      its.cell_indices.size()));
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
