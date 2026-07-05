@@ -30,9 +30,12 @@ def get_sdf_grad(sdf: SDFProtocol, p: torch.Tensor) -> torch.Tensor:
     Returns:
         Gradient tensor with shape (..., 3)
     """
-    p = p.requires_grad_()
-    sdf_v = sdf(p)
-    sdf_grad = torch.autograd.grad(sdf_v, p, grad_outputs=torch.ones_like(sdf_v))[0]
+    # Detach into a fresh leaf so the caller's tensor is not modified, and
+    # enable grad mode so this also works inside torch.no_grad() blocks.
+    p = p.detach().requires_grad_(True)
+    with torch.enable_grad():
+        sdf_v = sdf(p)
+        sdf_grad = torch.autograd.grad(sdf_v, p, grad_outputs=torch.ones_like(sdf_v))[0]
     return sdf_grad
 
 
