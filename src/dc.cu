@@ -171,7 +171,10 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
         grid->get_dual_quads(its.edges, its.is_out);
 
     auto [ATA, ATb] = get_qef(its, reg);
-    BatchedLASolver solver;
+    // Reused across calls since creating cusolver/cublas handles is
+    // expensive. Intentionally leaked so the handles are not destroyed after
+    // the CUDA context is gone at interpreter shutdown.
+    static BatchedLASolver &solver = *new BatchedLASolver();
     auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
 
     // Clip dual vertices to the cell AABB
