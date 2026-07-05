@@ -10,18 +10,16 @@
   <iframe src="_static/viser/index.html?playbackPath=../scenes/hero.viser&darkMode&initialCameraPosition=1.5,1.5,1.1&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
           frameborder="0"></iframe>
   <p class="hero-caption">
-    Power-8 Mandelbulb &mdash; a raw PyTorch tensor field meshed by
-    <code>isoext.marching_cubes</code>: 219k vertices in ~4&nbsp;ms.
-    Drag to orbit.
+    A power-8 Mandelbulb, extracted with <code>isoext.marching_cubes</code>:
+    219k vertices in about 4&nbsp;ms. Drag to rotate.
   </p>
 </div>
 ```
 
-`isoext` turns scalar fields into meshes without leaving the GPU: feed it a
-PyTorch tensor of field values — from an analytic SDF, a neural network, or
-an occupancy volume — and get vertices and faces back as tensors. Extraction
-methods include marching cubes and dual contouring, on both dense and
-sparse grids, with an interactive browser viewer built in.
+`isoext` extracts iso-surfaces from scalar fields on the GPU. The field
+values come in as a PyTorch tensor and the mesh comes back as tensors, so
+it fits directly into training loops and other GPU pipelines. Marching
+cubes and dual contouring are implemented, on both dense and sparse grids.
 
 ## Quick Example
 
@@ -34,7 +32,7 @@ grid.set_values(grid.get_points().norm(dim=-1) - 0.8)  # Sphere
 
 vertices, faces = isoext.marching_cubes(grid)
 
-server = viewer.show(vertices, faces)  # interactive viewer in the browser
+server = viewer.show(vertices, faces)  # opens the mesh in the browser
 isoext.write_obj("sphere.obj", vertices, faces)
 ```
 

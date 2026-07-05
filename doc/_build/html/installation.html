@@ -269,11 +269,10 @@
 <ul class="simple">
 <li><p><strong>Python</strong> 3.10 – 3.12</p></li>
 <li><p><strong>PyTorch</strong> with CUDA support</p></li>
-<li><p><strong>CUDA Toolkit</strong> 12.4 or newer — 12.4 is the first release whose nvcc
-supports GCC 13-era toolchains, and older releases fail on the fortified
-glibc headers of recent Linux distributions (e.g. Ubuntu 24.04) with
+<li><p><strong>CUDA Toolkit</strong> 12.4 or newer. Older nvcc versions fail on the glibc
+headers of recent Linux distributions (Ubuntu 24.04 and later) with
 errors like <code class="docutils literal notranslate"><span class="pre">&quot;__builtin_dynamic_object_size&quot;</span> <span class="pre">is</span> <span class="pre">undefined</span></code>. The build
-stops with a clear message if an outdated nvcc is picked up.</p></li>
+checks for this and stops with instructions if it finds an old nvcc.</p></li>
 <li><p>A C++ compiler (GCC on Linux, Visual Studio on Windows)</p></li>
 </ul>
 </section>
@@ -333,10 +332,9 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 </section>
 <section id="slow-first-call">
 <h3>Slow first call<a class="headerlink" href="#slow-first-call" title="Link to this heading">¶</a></h3>
-<p>The prebuilt extension ships GPU code as PTX, which the CUDA driver
-JIT-compiles for your specific GPU the first time each algorithm runs
-(roughly a couple of seconds in total). The result is cached on disk by the
-driver, so this cost is only paid once per machine, not per process.</p>
+<p>The extension ships GPU code as PTX. The driver compiles it for your GPU
+the first time each algorithm runs, which takes a few seconds in total.
+The result is cached on disk, so this happens once per machine.</p>
 </section>
 <section id="import-errors">
 <h3>Import errors<a class="headerlink" href="#import-errors" title="Link to this heading">¶</a></h3>

@@ -17,8 +17,8 @@ classification, extraction, and vertex welding.
 | sparse  | dual_contouring  | 0.78  | 2.3   |
 
 Sparse grids only touch cells near the surface, so their cost scales with
-the surface area rather than the volume — at 512³ that is the difference
-between processing 134M cells and 300k cells.
+the surface area rather than the volume. At 512³ that is 300k cells
+instead of 134M.
 
 ## Reproducing
 
@@ -35,13 +35,12 @@ call separately.
 
 ## Notes
 
-- **First call**: the shipped extension contains PTX that the driver
-  JIT-compiles for your GPU on first use (a couple of seconds, cached on
-  disk afterwards). See {doc}`installation` for details. The benchmark
-  excludes this by warming up before timing.
-- **Memory**: cell corner positions and indices are computed on the fly
-  inside the kernels, so uniform-grid extraction allocates memory
-  proportional to the extracted surface, not the grid volume — 1024³ dense
-  grids fit comfortably on a consumer GPU.
-- Timings vary with GPU, driver, and the surface complexity of your field;
-  treat these as orders of magnitude, not guarantees.
+- The first call after installation is slow (a few seconds): the driver
+  compiles the shipped PTX for your GPU and caches the result. See
+  {doc}`installation`. The benchmark warms up before timing, so the table
+  excludes this.
+- The kernels compute cell corners on the fly instead of storing them, so
+  memory use grows with the extracted surface, not the grid volume. A
+  dense 1024³ grid fits on a consumer GPU.
+- Numbers depend on the GPU, driver, and field. Expect different results
+  on other machines.

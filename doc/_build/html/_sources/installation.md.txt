@@ -6,11 +6,10 @@
 
 - **Python** 3.10 – 3.12
 - **PyTorch** with CUDA support
-- **CUDA Toolkit** 12.4 or newer — 12.4 is the first release whose nvcc
-  supports GCC 13-era toolchains, and older releases fail on the fortified
-  glibc headers of recent Linux distributions (e.g. Ubuntu 24.04) with
+- **CUDA Toolkit** 12.4 or newer. Older nvcc versions fail on the glibc
+  headers of recent Linux distributions (Ubuntu 24.04 and later) with
   errors like `"__builtin_dynamic_object_size" is undefined`. The build
-  stops with a clear message if an outdated nvcc is picked up.
+  checks for this and stops with instructions if it finds an old nvcc.
 - A C++ compiler (GCC on Linux, Visual Studio on Windows)
 
 ## Install from PyPI
@@ -74,10 +73,9 @@ nvcc --version
 
 ### Slow first call
 
-The prebuilt extension ships GPU code as PTX, which the CUDA driver
-JIT-compiles for your specific GPU the first time each algorithm runs
-(roughly a couple of seconds in total). The result is cached on disk by the
-driver, so this cost is only paid once per machine, not per process.
+The extension ships GPU code as PTX. The driver compiles it for your GPU
+the first time each algorithm runs, which takes a few seconds in total.
+The result is cached on disk, so this happens once per machine.
 
 ### Import errors
 

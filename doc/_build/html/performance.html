@@ -313,8 +313,8 @@ classification, extraction, and vertex welding.</p>
 </table>
 </div>
 <p>Sparse grids only touch cells near the surface, so their cost scales with
-the surface area rather than the volume — at 512³ that is the difference
-between processing 134M cells and 300k cells.</p>
+the surface area rather than the volume. At 512³ that is 300k cells
+instead of 134M.</p>
 </section>
 <section id="reproducing">
 <h2>Reproducing<a class="headerlink" href="#reproducing" title="Link to this heading">¶</a></h2>
@@ -331,16 +331,15 @@ call separately.</p>
 <section id="notes">
 <h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>First call</strong>: the shipped extension contains PTX that the driver
-JIT-compiles for your GPU on first use (a couple of seconds, cached on
-disk afterwards). See <a class="reference internal" href="installation.html"><span class="doc">Installation</span></a> for details. The benchmark
-excludes this by warming up before timing.</p></li>
-<li><p><strong>Memory</strong>: cell corner positions and indices are computed on the fly
-inside the kernels, so uniform-grid extraction allocates memory
-proportional to the extracted surface, not the grid volume — 1024³ dense
-grids fit comfortably on a consumer GPU.</p></li>
-<li><p>Timings vary with GPU, driver, and the surface complexity of your field;
-treat these as orders of magnitude, not guarantees.</p></li>
+<li><p>The first call after installation is slow (a few seconds): the driver
+compiles the shipped PTX for your GPU and caches the result. See
+<a class="reference internal" href="installation.html"><span class="doc">Installation</span></a>. The benchmark warms up before timing, so the table
+excludes this.</p></li>
+<li><p>The kernels compute cell corners on the fly instead of storing them, so
+memory use grows with the extracted surface, not the grid volume. A
+dense 1024³ grid fits on a consumer GPU.</p></li>
+<li><p>Numbers depend on the GPU, driver, and field. Expect different results
+on other machines.</p></li>
 </ul>
 </section>
 </section>
