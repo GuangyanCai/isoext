@@ -15,8 +15,7 @@ classifiers = [
     "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]
 
-[project.optional-dependencies]
-viewer = ["viser"]
+dependencies = ["viser"]
 
 [project.urls]
 Homepage = "https://github.com/GuangyanCai/isoext"
@@ -70,14 +69,12 @@ bench = { cmd = "python benchmarks/benchmark.py", cwd = ".", depends-on = ["comp
 torch = { index = "https://download.pytorch.org/whl/cu128" }
 
 [tool.pixi.feature.doc.pypi-dependencies]
-viser = "*"
 sphinx = "*"
 sphinx-autobuild = "*"
 furo = "*"
 myst-nb = "*"
 ipywidgets = "*"
 jupyterlab = "*"
-pyvista = { version = "*", extras = ["jupyter"] }
 sdf = { git = "git+https://github.com/fogleman/sdf" }
 
 [tool.pixi.feature.doc.tasks]

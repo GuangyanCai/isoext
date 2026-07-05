@@ -1,9 +1,5 @@
 """Interactive mesh viewing and scene export built on viser.
 
-Requires the optional viser dependency::
-
-    pip install isoext[viewer]
-
 Typical use::
 
     import isoext
@@ -28,7 +24,7 @@ def _import_viser():
         import viser
     except ImportError as e:
         raise ImportError(
-            "The isoext viewer requires viser. Install it with: pip install isoext[viewer]"
+            "The isoext viewer requires viser. Install it with: pip install viser"
         ) from e
     return viser
 
