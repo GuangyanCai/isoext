@@ -24,10 +24,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:23.328082Z",
-     "iopub.status.busy": "2026-07-05T04:06:23.327997Z",
-     "iopub.status.idle": "2026-07-05T04:06:23.956373Z",
-     "shell.execute_reply": "2026-07-05T04:06:23.955624Z"
+     "iopub.execute_input": "2026-07-05T06:20:13.767600Z",
+     "iopub.status.busy": "2026-07-05T06:20:13.767513Z",
+     "iopub.status.idle": "2026-07-05T06:20:14.359931Z",
+     "shell.execute_reply": "2026-07-05T06:20:14.359621Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:23.958005Z",
-     "iopub.status.busy": "2026-07-05T04:06:23.957883Z",
-     "iopub.status.idle": "2026-07-05T04:06:24.266261Z",
-     "shell.execute_reply": "2026-07-05T04:06:24.265723Z"
+     "iopub.execute_input": "2026-07-05T06:20:14.362187Z",
+     "iopub.status.busy": "2026-07-05T06:20:14.362071Z",
+     "iopub.status.idle": "2026-07-05T06:20:14.661469Z",
+     "shell.execute_reply": "2026-07-05T06:20:14.661116Z"
     }
    },
    "outputs": [
@@ -73,7 +73,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x78358d395f70>"
+       "<IPython.lib.display.IFrame at 0x7e5f485ca4b0>"
       ]
      },
      "execution_count": 2,
@@ -104,9 +104,9 @@
     "\n",
     "For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:\n",
     "\n",
-    "1. **Get intersections** — Call `get_intersection()` to get intersection points\n",
-    "2. **Compute normals** — Use SDF gradient for accurate surface normals\n",
-    "3. **Run dual contouring** — Pass the intersection with custom normals\n"
+    "1. **Get intersections** \u2014 Call `get_intersection()` to get intersection points\n",
+    "2. **Compute normals** \u2014 Use SDF gradient for accurate surface normals\n",
+    "3. **Run dual contouring** \u2014 Pass the intersection with custom normals\n"
    ]
   },
   {
@@ -114,10 +114,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:24.282380Z",
-     "iopub.status.busy": "2026-07-05T04:06:24.282229Z",
-     "iopub.status.idle": "2026-07-05T04:06:24.284407Z",
-     "shell.execute_reply": "2026-07-05T04:06:24.284207Z"
+     "iopub.execute_input": "2026-07-05T06:20:14.678313Z",
+     "iopub.status.busy": "2026-07-05T06:20:14.678180Z",
+     "iopub.status.idle": "2026-07-05T06:20:14.681276Z",
+     "shell.execute_reply": "2026-07-05T06:20:14.680405Z"
     }
    },
    "outputs": [
@@ -141,10 +141,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:24.285693Z",
-     "iopub.status.busy": "2026-07-05T04:06:24.285624Z",
-     "iopub.status.idle": "2026-07-05T04:06:24.520765Z",
-     "shell.execute_reply": "2026-07-05T04:06:24.519681Z"
+     "iopub.execute_input": "2026-07-05T06:20:14.682518Z",
+     "iopub.status.busy": "2026-07-05T06:20:14.682435Z",
+     "iopub.status.idle": "2026-07-05T06:20:14.977457Z",
+     "shell.execute_reply": "2026-07-05T06:20:14.976686Z"
     }
    },
    "outputs": [
@@ -169,10 +169,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:24.522482Z",
-     "iopub.status.busy": "2026-07-05T04:06:24.522332Z",
-     "iopub.status.idle": "2026-07-05T04:06:24.532114Z",
-     "shell.execute_reply": "2026-07-05T04:06:24.531948Z"
+     "iopub.execute_input": "2026-07-05T06:20:14.979189Z",
+     "iopub.status.busy": "2026-07-05T06:20:14.979037Z",
+     "iopub.status.idle": "2026-07-05T06:20:14.989380Z",
+     "shell.execute_reply": "2026-07-05T06:20:14.988986Z"
     }
    },
    "outputs": [
@@ -199,7 +199,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x78358c205f70>"
+       "<IPython.lib.display.IFrame at 0x7e5f43c53200>"
       ]
      },
      "execution_count": 5,
@@ -223,6 +223,82 @@
    "metadata": {},
    "outputs": [],
    "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Refined Points and Unclamped Vertices\n",
+    "\n",
+    "Two more steps make the edges exact:\n",
+    "\n",
+    "1. `project_to_surface` moves the intersection points from their linear\n",
+    "   interpolation estimate onto the actual surface.\n",
+    "2. `clamp=False` lets a vertex leave its cell to sit on a sharp feature.\n",
+    "   By default vertices are kept inside their cells, which is safer but\n",
+    "   rounds edges whose feature line passes through a neighboring cell.\n",
+    "   Unclamped vertices can produce self-intersections on noisy data.\n",
+    "\n",
+    "The recipe works with any field that can be evaluated at arbitrary\n",
+    "points, whether an analytic SDF or a neural network. For purely sampled\n",
+    "volumes, keep the defaults: the samples carry no sub-cell feature\n",
+    "information for the refinement to recover.\n",
+    "\n",
+    "The vertex placement follows Ju et al., \"Dual Contouring of Hermite Data\"\n",
+    "(SIGGRAPH 2002).\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T06:20:14.991002Z",
+     "iopub.status.busy": "2026-07-05T06:20:14.990933Z",
+     "iopub.status.idle": "2026-07-05T06:20:15.073125Z",
+     "shell.execute_reply": "2026-07-05T06:20:15.072800Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/78d62cc830e7ee21.viser\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7e5f436d5f70>"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "from isoext.sdf import RotationOp, project_to_surface\n",
+    "\n",
+    "# A rotated cube, so its edges do not align with the grid\n",
+    "cube = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)\n",
+    "grid = isoext.UniformGrid([48, 48, 48])\n",
+    "grid.set_values(cube(grid.get_points()))\n",
+    "\n",
+    "its = isoext.get_intersection(grid)\n",
+    "points = project_to_surface(cube, its.get_points())\n",
+    "its.set_points(points)\n",
+    "its.set_normals(get_sdf_normal(cube, points))\n",
+    "\n",
+    "vertices, faces = isoext.dual_contouring(grid, intersection=its, clamp=False)\n",
+    "viewer.embed(vertices, faces, color=\"gold\", flat_shading=True)\n"
+   ]
   }
  ],
  "metadata": {
