@@ -359,6 +359,36 @@
         </div></div>
 </div>
 </section>
+<section id="mandelbulbsdf">
+<h3>MandelbulbSDF<a class="headerlink" href="#mandelbulbsdf" title="Link to this heading">¶</a></h3>
+<p>A distance estimator for the Mandelbulb fractal. The values approximate
+the distance to the surface rather than being an exact SDF; fewer
+iterations give a smoother shape.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bulb</span> <span class="o">=</span> <span class="n">MandelbulbSDF</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="c1"># The bulb needs slightly larger bounds than the shared grid above</span>
+<span class="n">bulb_grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2</span><span class="p">],</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">])</span>
+<span class="n">bulb_grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">bulb</span><span class="p">(</span><span class="n">bulb_grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">bulb_grid</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;coral&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/e44c3ef29dba9c8f.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
 </section>
 <section id="csg-operations">
 <h2>CSG Operations<a class="headerlink" href="#csg-operations" title="Link to this heading">¶</a></h2>
@@ -519,6 +549,7 @@
 <li><a class="reference internal" href="#spheresdf">SphereSDF</a></li>
 <li><a class="reference internal" href="#torussdf">TorusSDF</a></li>
 <li><a class="reference internal" href="#cuboidsdf">CuboidSDF</a></li>
+<li><a class="reference internal" href="#mandelbulbsdf">MandelbulbSDF</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#csg-operations">CSG Operations</a></li>

@@ -16,10 +16,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:36.218257Z",
-     "iopub.status.busy": "2026-07-05T04:06:36.218168Z",
-     "iopub.status.idle": "2026-07-05T04:06:36.970296Z",
-     "shell.execute_reply": "2026-07-05T04:06:36.969795Z"
+     "iopub.execute_input": "2026-07-05T06:52:43.814376Z",
+     "iopub.status.busy": "2026-07-05T06:52:43.814294Z",
+     "iopub.status.idle": "2026-07-05T06:52:44.581600Z",
+     "shell.execute_reply": "2026-07-05T06:52:44.581126Z"
     }
    },
    "outputs": [],
@@ -48,10 +48,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:36.971867Z",
-     "iopub.status.busy": "2026-07-05T04:06:36.971741Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.126576Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.125962Z"
+     "iopub.execute_input": "2026-07-05T06:52:44.583213Z",
+     "iopub.status.busy": "2026-07-05T06:52:44.583089Z",
+     "iopub.status.idle": "2026-07-05T06:52:44.733900Z",
+     "shell.execute_reply": "2026-07-05T06:52:44.733696Z"
     }
    },
    "outputs": [
@@ -70,7 +70,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x773b30956f30>"
+       "<IPython.lib.display.IFrame at 0x7465e5169610>"
       ]
      },
      "execution_count": 2,
@@ -100,10 +100,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.141423Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.141273Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.214995Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.214611Z"
+     "iopub.execute_input": "2026-07-05T06:52:44.750722Z",
+     "iopub.status.busy": "2026-07-05T06:52:44.750584Z",
+     "iopub.status.idle": "2026-07-05T06:52:44.819348Z",
+     "shell.execute_reply": "2026-07-05T06:52:44.818998Z"
     }
    },
    "outputs": [
@@ -122,7 +122,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738f65173b0>"
+       "<IPython.lib.display.IFrame at 0x7467f1d19610>"
       ]
      },
      "execution_count": 3,
@@ -152,10 +152,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.216335Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.216207Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.261344Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.261025Z"
+     "iopub.execute_input": "2026-07-05T06:52:44.820730Z",
+     "iopub.status.busy": "2026-07-05T06:52:44.820616Z",
+     "iopub.status.idle": "2026-07-05T06:52:44.863402Z",
+     "shell.execute_reply": "2026-07-05T06:52:44.862916Z"
     }
    },
    "outputs": [
@@ -174,7 +174,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738f6555820>"
+       "<IPython.lib.display.IFrame at 0x7469683de5a0>"
       ]
      },
      "execution_count": 4,
@@ -187,6 +187,62 @@
     "grid.set_values(cube(grid.get_points()))\n",
     "v, f = isoext.marching_cubes(grid)\n",
     "viewer.embed(v, f, color=\"salmon\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### MandelbulbSDF\n",
+    "\n",
+    "A distance estimator for the Mandelbulb fractal. The values approximate\n",
+    "the distance to the surface rather than being an exact SDF; fewer\n",
+    "iterations give a smoother shape.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-05T06:52:44.864665Z",
+     "iopub.status.busy": "2026-07-05T06:52:44.864584Z",
+     "iopub.status.idle": "2026-07-05T06:52:45.020497Z",
+     "shell.execute_reply": "2026-07-05T06:52:45.020083Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/e44c3ef29dba9c8f.viser\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7465e51a8b30>"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bulb = MandelbulbSDF(iterations=6)\n",
+    "\n",
+    "# The bulb needs slightly larger bounds than the shared grid above\n",
+    "bulb_grid = isoext.UniformGrid([128, 128, 128], aabb_min=[-1.2, -1.2, -1.2], aabb_max=[1.2, 1.2, 1.2])\n",
+    "bulb_grid.set_values(bulb(bulb_grid.get_points()))\n",
+    "v, f = isoext.marching_cubes(bulb_grid)\n",
+    "viewer.embed(v, f, color=\"coral\")\n"
    ]
   },
   {
@@ -207,13 +263,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.262659Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.262583Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.298129Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.297795Z"
+     "iopub.execute_input": "2026-07-05T06:52:45.022020Z",
+     "iopub.status.busy": "2026-07-05T06:52:45.021946Z",
+     "iopub.status.idle": "2026-07-05T06:52:45.056113Z",
+     "shell.execute_reply": "2026-07-05T06:52:45.055866Z"
     }
    },
    "outputs": [
@@ -232,10 +288,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738f65547a0>"
+       "<IPython.lib.display.IFrame at 0x7465b6d63590>"
       ]
      },
-     "execution_count": 5,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -265,13 +321,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.299528Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.299451Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.389830Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.389484Z"
+     "iopub.execute_input": "2026-07-05T06:52:45.057803Z",
+     "iopub.status.busy": "2026-07-05T06:52:45.057730Z",
+     "iopub.status.idle": "2026-07-05T06:52:45.138842Z",
+     "shell.execute_reply": "2026-07-05T06:52:45.138561Z"
     }
    },
    "outputs": [
@@ -290,10 +346,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738d375be00>"
+       "<IPython.lib.display.IFrame at 0x7465b6d62cc0>"
       ]
      },
-     "execution_count": 6,
+     "execution_count": 7,
      "metadata": {},
      "output_type": "execute_result"
     }
