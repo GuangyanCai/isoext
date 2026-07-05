@@ -255,7 +255,7 @@
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> requires:</p>
 <ul class="simple">
-<li><p><strong>Python</strong> 3.8 – 3.12</p></li>
+<li><p><strong>Python</strong> 3.10 – 3.12</p></li>
 <li><p><strong>PyTorch</strong> with CUDA support</p></li>
 <li><p><strong>CUDA Toolkit</strong> matching your PyTorch version</p></li>
 <li><p>A C++ compiler (GCC on Linux, Visual Studio on Windows)</p></li>
@@ -314,6 +314,13 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nvcc<span class="w"> </span>--version
 </pre></div>
 </div>
+</section>
+<section id="slow-first-call">
+<h3>Slow first call<a class="headerlink" href="#slow-first-call" title="Link to this heading">¶</a></h3>
+<p>The prebuilt extension ships GPU code as PTX, which the CUDA driver
+JIT-compiles for your specific GPU the first time each algorithm runs
+(roughly a couple of seconds in total). The result is cached on disk by the
+driver, so this cost is only paid once per machine, not per process.</p>
 </section>
 <section id="import-errors">
 <h3>Import errors<a class="headerlink" href="#import-errors" title="Link to this heading">¶</a></h3>
@@ -389,6 +396,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
 <li><a class="reference internal" href="#cuda-not-found">CUDA not found</a></li>
 <li><a class="reference internal" href="#compilation-errors">Compilation errors</a></li>
+<li><a class="reference internal" href="#slow-first-call">Slow first call</a></li>
 <li><a class="reference internal" href="#import-errors">Import errors</a></li>
 </ul>
 </li>

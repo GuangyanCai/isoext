@@ -26,3 +26,5 @@ doc/*.obj
 /binary.py
 # machine-specific benchmark outputs
 /benchmarks/results/
+# viser static client copied from the installed package
+doc/_static/viser/

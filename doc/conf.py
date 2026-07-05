@@ -22,6 +22,17 @@ extensions = [
 # MyST-NB settings
 nb_execution_mode = "off"  # Don't execute notebooks during build (requires GPU)
 
+# Copy viser's static client into _static so the interactive scene embeds in
+# the executed notebooks keep working in the built documentation.
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+
+import _viz  # noqa: E402
+
+_viz.ensure_client()
+
 # Autodoc settings
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"

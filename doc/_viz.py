@@ -1,53 +1,70 @@
-"""Visualization utilities for isoext documentation."""
+"""Visualization utilities for isoext documentation.
 
-import numpy as np
-import pyvista as pv
+Meshes are rendered with viser through isoext.viewer: each show_mesh call
+serializes the scene to a .viser file under _static/scenes/ and embeds
+viser's static client in an iframe. Since both the client and the scene
+files are plain static assets, the interactive viewer keeps working in the
+statically hosted documentation.
+"""
 
-# Use static backend for documentation (creates inline images)
-# This works in static HTML without a live kernel
-pv.set_jupyter_backend("static")
-pv.global_theme.window_size = [600, 400]
-pv.global_theme.anti_aliasing = "ssaa"
+import hashlib
+import shutil
+from pathlib import Path
+
+import viser
+from IPython.display import HTML
+from matplotlib.colors import to_rgb
+
+from isoext.viewer import serialize_scene
+
+_STATIC_DIR = Path(__file__).parent / "_static"
+_CLIENT_FILE = _STATIC_DIR / "viser" / "index.html"
+_SCENES_DIR = _STATIC_DIR / "scenes"
+
+_IFRAME_STYLE = (
+    "width: 100%; height: 420px; border: 1px solid #8888; border-radius: 4px;"
+)
 
 
-def show_mesh(vertices, faces, **kwargs):
-    """Display a mesh from isoext output.
+def ensure_client() -> None:
+    """Copy viser's single-file static client into _static/viser/.
+
+    The copy is refreshed whenever the installed viser version ships a
+    different build. It is gitignored; sphinx bundles it into the built
+    documentation together with the rest of _static.
+    """
+    src = Path(viser.__file__).parent / "client" / "build" / "index.html"
+    if not _CLIENT_FILE.exists() or _CLIENT_FILE.stat().st_size != src.stat().st_size:
+        _CLIENT_FILE.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(src, _CLIENT_FILE)
+
+
+def show_mesh(vertices, faces, color="lightblue", smooth_shading=True, **kwargs):
+    """Display a mesh from isoext output in an interactive viewer.
 
     Args:
         vertices: (N, 3) tensor of vertex positions
-        faces: (M, 3) or (M, 4) tensor of face indices
-        **kwargs: Additional arguments passed to pv.Plotter.add_mesh
+        faces: (M, 3) tensor of face indices
+        color: Color name or RGB tuple
+        smooth_shading: Interpolate normals instead of flat triangle shading
+        **kwargs: Additional arguments passed to isoext.viewer.add_mesh
 
     Returns:
-        PyVista Plotter object
+        An HTML iframe embedding the viser client with the recorded scene.
     """
-    # Convert tensors to numpy
-    verts = vertices.cpu().numpy()
-    face_indices = faces.cpu().numpy()
+    ensure_client()
 
-    # Build PyVista-compatible face array
-    # PyVista expects [n_verts, v0, v1, v2, ...] format
-    n_verts_per_face = face_indices.shape[1]
-    n_faces = face_indices.shape[0]
-    
-    # Vectorized construction of face array
-    prefix = np.full((n_faces, 1), n_verts_per_face, dtype=np.int32)
-    pv_faces = np.hstack([prefix, face_indices]).ravel()
+    data = serialize_scene(
+        vertices, faces, color=to_rgb(color), flat_shading=not smooth_shading, **kwargs
+    )
 
-    mesh = pv.PolyData(verts, pv_faces)
+    # Content-addressed file names keep re-runs idempotent and let unchanged
+    # cells keep referencing the same scene file.
+    _SCENES_DIR.mkdir(parents=True, exist_ok=True)
+    scene_name = hashlib.sha1(data).hexdigest()[:16] + ".viser"
+    (_SCENES_DIR / scene_name).write_bytes(data)
 
-    # Default styling
-    plot_kwargs = {
-        "show_edges": False,
-        "color": "lightblue",
-        "smooth_shading": True,
-    }
-    plot_kwargs.update(kwargs)
-
-    pl = pv.Plotter(off_screen=True)
-    pl.add_mesh(mesh, **plot_kwargs)
-    pl.background_color = "white"
-    pl.camera_position = "iso"
-    pl.enable_anti_aliasing("ssaa")
-    
-    return pl.show(jupyter_backend="static")
+    # Both paths are relative: the iframe src is resolved against the built
+    # page (at the doc root) and playbackPath against the client's URL.
+    src = f"_static/viser/index.html?playbackPath=../scenes/{scene_name}"
+    return HTML(f'<iframe src="{src}" style="{_IFRAME_STYLE}"></iframe>')
