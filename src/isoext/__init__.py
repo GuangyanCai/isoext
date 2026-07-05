@@ -10,6 +10,7 @@ from .isoext_ext import (
     dual_contouring,
     get_intersection,
     marching_cubes,
+    marching_tetrahedra,
     surface_nets,
 )
 from .utils import gaussian_smooth, make_grid, write_obj
@@ -22,6 +23,7 @@ __all__ = [
     "gaussian_smooth",
     "get_intersection",
     "marching_cubes",
+    "marching_tetrahedra",
     "make_grid",
     "surface_nets",
     "write_obj",

@@ -3,6 +3,7 @@
 #include "grid/uniform.cuh"
 #include "its.cuh"
 #include "mc/mc.cuh"
+#include "mt.cuh"
 #include "ndarray.cuh"
 
 #include <nanobind/nanobind.h>
@@ -120,6 +121,25 @@ NB_MODULE(isoext_ext, m) {
         "    method: The marching cubes variant to use. Options are 'nagae' (default) or 'lorensen'.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions\n"
+        "    and faces is an (M, 3) int32 tensor of triangle indices.");
+
+    m.def(
+        "marching_tetrahedra",
+        [](Grid *grid, float level) {
+            auto [v, f] = marching_tetrahedra(grid, level);
+            return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+        },
+        "grid"_a, "level"_a = 0.f,
+        "Extract an iso-surface using the marching tetrahedra algorithm.\n\n"
+        "Each cell is split into 6 tetrahedra, which have no ambiguous sign\n"
+        "configurations, so the mesh is watertight and consistent by\n"
+        "construction. Produces roughly 2-3x more triangles than marching\n"
+        "cubes on the same grid.\n\n"
+        "Args:\n"
+        "    grid: The input grid containing scalar values.\n"
+        "    level: The iso-value. Default is 0.0.\n\n"
+        "Returns:\n"
+        "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor\n"
         "    and faces is an (M, 3) int32 tensor of triangle indices.");
 
     nb::class_<Grid, PyGrid>(m, "Grid",
