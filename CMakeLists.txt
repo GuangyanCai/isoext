@@ -43,9 +43,6 @@ find_package(Python 3.10
 # Import nanobind through CMake's find_package mechanism
 find_package(nanobind CONFIG REQUIRED)
 
-# Import CUDA through CMake's find_package mechanism
-find_package(CUDAToolkit REQUIRED)
-
 file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/include/*.cuh")
 file(GLOB_RECURSE SOURCE_LIST CONFIGURE_DEPENDS "${isoext_SOURCE_DIR}/src/*.cu")
 
@@ -83,7 +80,6 @@ nanobind_add_module(
 )
 
 target_compile_options(isoext_ext PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Wno-deprecated-gpu-targets>)
-target_link_libraries(isoext_ext PRIVATE CUDA::cusolver CUDA::cublas)
 target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
 
 set(ISOEXT_PYTHON_PACKAGE_DIR

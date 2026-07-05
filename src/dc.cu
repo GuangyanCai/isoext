@@ -1,6 +1,6 @@
-#include "batched_la.cuh"
 #include "dc.cuh"
 #include "math.cuh"
+#include "sym3x3.cuh"
 #include "utils.cuh"
 
 #include <thrust/binary_search.h>
@@ -13,88 +13,66 @@
 
 namespace {
 
-struct get_qef_op {
-    float *ATA;
-    float *ATb;
+// Accumulate the QEF of one cell from its intersection points and normals,
+// solve it, and clip the resulting dual vertex to the cell bounds.
+struct place_dual_vertex_op {
+    float3 *dual_v;
     const float3 *its_points;
     const float3 *its_normals;
     const uint *its_cell_offsets;
-    const float reg;
-
-    get_qef_op(float *ATA, float *ATb, const float3 *its_points,
-               const float3 *its_normals, const uint *cell_offsets, float reg)
-        : ATA(ATA), ATb(ATb), its_points(its_points), its_normals(its_normals),
-          its_cell_offsets(cell_offsets), reg(reg) {}
-
-    __host__ __device__ void operator()(uint idx) {
-        uint ATA_offset = idx * 9;
-        uint ATb_offset = idx * 3;
-        float3 p_avg = make_float3(0.0f, 0.0f, 0.0f);
-        for (uint i = its_cell_offsets[idx]; i < its_cell_offsets[idx + 1];
-             i++) {
-            float3 n = its_normals[i];
-            float3 p = its_points[i];
-            float3 nnp = n * dot(n, p);
-            p_avg = p_avg + p;
-
-            // ATA
-            ATA[ATA_offset + 0] += n.x * n.x;
-            ATA[ATA_offset + 1] += n.x * n.y;
-            ATA[ATA_offset + 2] += n.x * n.z;
-            ATA[ATA_offset + 3] += n.y * n.x;
-            ATA[ATA_offset + 4] += n.y * n.y;
-            ATA[ATA_offset + 5] += n.y * n.z;
-            ATA[ATA_offset + 6] += n.z * n.x;
-            ATA[ATA_offset + 7] += n.z * n.y;
-            ATA[ATA_offset + 8] += n.z * n.z;
-
-            // ATb
-            ATb[ATb_offset + 0] += nnp.x;
-            ATb[ATb_offset + 1] += nnp.y;
-            ATb[ATb_offset + 2] += nnp.z;
-        }
-        p_avg = p_avg / (its_cell_offsets[idx + 1] - its_cell_offsets[idx]);
-
-        // Add λI to ATA
-        ATA[ATA_offset + 0] += reg;
-        ATA[ATA_offset + 4] += reg;
-        ATA[ATA_offset + 8] += reg;
-
-        ATb[ATb_offset + 0] += reg * p_avg.x;
-        ATb[ATb_offset + 1] += reg * p_avg.y;
-        ATb[ATb_offset + 2] += reg * p_avg.z;
-    }
-};
-
-std::tuple<NDArray<float>, NDArray<float>>
-get_qef(const Intersection &its, float reg) {
-    uint num_cells = its.cell_indices.size();
-    NDArray<float> ATA = NDArray<float>::zeros(num_cells, 3, 3);
-    NDArray<float> ATb = NDArray<float>::zeros(num_cells, 3);
-
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_cells),
-                     get_qef_op(ATA.data(), ATb.data(), its.points.data(),
-                                its.normals.data(), its.cell_offsets.data(),
-                                reg));
-
-    return {ATA, ATb};
-}
-
-struct fix_dual_v_op {
-    float3 *dual_v;
     const uint *its_cell_indices;
     const GridView view;
+    const float reg;
+    const float tol;
 
-    fix_dual_v_op(float3 *dual_v, const uint *its_cell_indices,
-                  const GridView &view)
-        : dual_v(dual_v), its_cell_indices(its_cell_indices), view(view) {}
+    place_dual_vertex_op(float3 *dual_v, const float3 *its_points,
+                         const float3 *its_normals,
+                         const uint *its_cell_offsets,
+                         const uint *its_cell_indices, const GridView &view,
+                         float reg, float tol)
+        : dual_v(dual_v), its_points(its_points), its_normals(its_normals),
+          its_cell_offsets(its_cell_offsets), its_cell_indices(its_cell_indices),
+          view(view), reg(reg), tol(tol) {}
 
     __host__ __device__ void operator()(uint idx) {
+        // The QEF minimizes sum_i (n_i . (x - p_i))^2, accumulated as the
+        // normal equations A^T A x = A^T b with rows n_i and b_i = n_i . p_i.
+        float ATA[3][3] = {};
+        float3 ATb = make_float3(0.0f, 0.0f, 0.0f);
+        float3 p_avg = make_float3(0.0f, 0.0f, 0.0f);
+
+        uint begin = its_cell_offsets[idx];
+        uint end = its_cell_offsets[idx + 1];
+        for (uint i = begin; i < end; i++) {
+            float3 n = its_normals[i];
+            float3 p = its_points[i];
+            ATA[0][0] += n.x * n.x;
+            ATA[0][1] += n.x * n.y;
+            ATA[0][2] += n.x * n.z;
+            ATA[1][1] += n.y * n.y;
+            ATA[1][2] += n.y * n.z;
+            ATA[2][2] += n.z * n.z;
+            ATb = ATb + n * dot(n, p);
+            p_avg = p_avg + p;
+        }
+        ATA[1][0] = ATA[0][1];
+        ATA[2][0] = ATA[0][2];
+        ATA[2][1] = ATA[1][2];
+        p_avg = p_avg / float(end - begin);
+
+        // Tikhonov regularization (λI, λ * centroid) pulls the solution
+        // toward the centroid of the intersection points.
+        ATA[0][0] += reg;
+        ATA[1][1] += reg;
+        ATA[2][2] += reg;
+        ATb = ATb + reg * p_avg;
+
+        float3 x = solve_sym_3x3(ATA, ATb, tol);
+
+        // Keep the vertex inside its cell.
         uint cell = its_cell_indices[idx];
-        float3 aabb_min = view.corner_position(cell, 0);
-        float3 aabb_max = view.corner_position(cell, 7);
-        dual_v[idx] = clip(dual_v[idx], aabb_min, aabb_max);
+        dual_v[idx] = clip(x, view.corner_position(cell, 0),
+                           view.corner_position(cell, 7));
     }
 };
 
@@ -191,19 +169,16 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
     auto [dual_quads_dv, is_out_dv] =
         grid->get_dual_quads(its.edges, its.is_out);
 
-    auto [ATA, ATb] = get_qef(its, reg);
-    // Reused across calls since creating cusolver/cublas handles is
-    // expensive. Intentionally leaked so the handles are not destroyed after
-    // the CUDA context is gone at interpreter shutdown.
-    static BatchedLASolver &solver = *new BatchedLASolver();
-    auto [dual_v, info] = solver.lsq_svd(ATA, ATb, svd_tol);
-
-    // Clip dual vertices to the cell AABB
+    // Place one dual vertex in every cell crossed by the surface.
     uint num_active_cells = its.cell_indices.size();
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_active_cells),
-                     fix_dual_v_op(reinterpret_cast<float3 *>(dual_v.data()),
-                                   its.cell_indices.data(), grid->get_view()));
+    thrust::device_vector<float3> dual_v(num_active_cells);
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_active_cells),
+        place_dual_vertex_op(dual_v.data().get(), its.points.data(),
+                             its.normals.data(), its.cell_offsets.data(),
+                             its.cell_indices.data(), grid->get_view(), reg,
+                             svd_tol));
 
     uint num_quads = dual_quads_dv.size();
     thrust::device_vector<float3> v_dv(num_quads * 6,
@@ -211,7 +186,7 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_quads),
                      get_triangles_op(v_dv.data().get(),
-                                      reinterpret_cast<float3 *>(dual_v.data()),
+                                      dual_v.data().get(),
                                       dual_quads_dv.data().get(),
                                       is_out_dv.data().get(),
                                       its.cell_indices.data(),
