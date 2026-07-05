@@ -11,7 +11,7 @@
           frameborder="0"></iframe>
   <p class="hero-caption">
     Power-8 Mandelbulb &mdash; a raw PyTorch tensor field meshed by
-    <code>isoext.marching_cubes</code>: 225k vertices in under 10&nbsp;ms.
+    <code>isoext.marching_cubes</code>: 219k vertices in ~4&nbsp;ms.
     Drag to orbit.
   </p>
 </div>
@@ -19,20 +19,9 @@
 
 `isoext` turns scalar fields into meshes without leaving the GPU: feed it a
 PyTorch tensor of field values — from an analytic SDF, a neural network, or
-an occupancy volume — and get vertices and faces back as tensors.
-
-```{raw} html
-<div class="feature-grid">
-  <div class="feature-card"><strong>Marching Cubes</strong>
-    Fast triangular mesh extraction from dense or sparse grids.</div>
-  <div class="feature-card"><strong>Dual Contouring</strong>
-    QEF-based vertex placement that preserves sharp features.</div>
-  <div class="feature-card"><strong>Sparse Grids</strong>
-    Track only surface-crossing cells; cost scales with area, not volume.</div>
-  <div class="feature-card"><strong>Interactive Viewer</strong>
-    One-line mesh inspection in the browser, built on viser.</div>
-</div>
-```
+an occupancy volume — and get vertices and faces back as tensors. Extraction
+methods include marching cubes and dual contouring, on both dense and
+sparse grids, with an interactive browser viewer built in.
 
 ## Quick Example
 
@@ -47,26 +36,6 @@ vertices, faces = isoext.marching_cubes(grid)
 
 server = viewer.show(vertices, faces)  # interactive viewer in the browser
 isoext.write_obj("sphere.obj", vertices, faces)
-```
-
-## Sharp features, side by side
-
-The same 81³ Menger sponge field, extracted by both algorithms. Marching
-cubes chamfers the edges; dual contouring keeps them crisp.
-
-```{raw} html
-<div class="compare-grid">
-  <figure>
-    <iframe src="_static/viser/index.html?playbackPath=../scenes/menger_mc.viser&darkMode&initialCameraPosition=1.9,1.4,1.2&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
-            frameborder="0"></iframe>
-    <figcaption>marching_cubes</figcaption>
-  </figure>
-  <figure>
-    <iframe src="_static/viser/index.html?playbackPath=../scenes/menger_dc.viser&darkMode&initialCameraPosition=1.9,1.4,1.2&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
-            frameborder="0"></iframe>
-    <figcaption>dual_contouring</figcaption>
-  </figure>
-</div>
 ```
 
 ## Performance
@@ -91,20 +60,20 @@ quickstart
 
 ```{toctree}
 :maxdepth: 2
-:caption: User Guide
+:caption: Extraction Methods
 :hidden:
 
-grids
 marching_cubes
 dual_contouring
-sdf_guide
 ```
 
 ```{toctree}
 :maxdepth: 2
-:caption: Extras
+:caption: Working with Fields
 :hidden:
 
+grids
+sdf_guide
 occupancy_grids
 more_sdf
 ```

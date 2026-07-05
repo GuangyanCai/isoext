@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
-    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=864da32f" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
     
 
@@ -203,15 +203,15 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
+<p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
@@ -271,22 +271,15 @@
           frameborder="0"></iframe>
   <p class="hero-caption">
     Power-8 Mandelbulb &mdash; a raw PyTorch tensor field meshed by
-    <code>isoext.marching_cubes</code>: 225k vertices in under 10&nbsp;ms.
+    <code>isoext.marching_cubes</code>: 219k vertices in ~4&nbsp;ms.
     Drag to orbit.
   </p>
 </div><p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> turns scalar fields into meshes without leaving the GPU: feed it a
 PyTorch tensor of field values — from an analytic SDF, a neural network, or
-an occupancy volume — and get vertices and faces back as tensors.</p>
-<div class="feature-grid">
-  <div class="feature-card"><strong>Marching Cubes</strong>
-    Fast triangular mesh extraction from dense or sparse grids.</div>
-  <div class="feature-card"><strong>Dual Contouring</strong>
-    QEF-based vertex placement that preserves sharp features.</div>
-  <div class="feature-card"><strong>Sparse Grids</strong>
-    Track only surface-crossing cells; cost scales with area, not volume.</div>
-  <div class="feature-card"><strong>Interactive Viewer</strong>
-    One-line mesh inspection in the browser, built on viser.</div>
-</div><section id="quick-example">
+an occupancy volume — and get vertices and faces back as tensors. Extraction
+methods include marching cubes and dual contouring, on both dense and
+sparse grids, with an interactive browser viewer built in.</p>
+<section id="quick-example">
 <h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
@@ -301,22 +294,6 @@ an occupancy volume — and get vertices and faces back as tensors.</p>
 </pre></div>
 </div>
 </section>
-<section id="sharp-features-side-by-side">
-<h2>Sharp features, side by side<a class="headerlink" href="#sharp-features-side-by-side" title="Link to this heading">¶</a></h2>
-<p>The same 81³ Menger sponge field, extracted by both algorithms. Marching
-cubes chamfers the edges; dual contouring keeps them crisp.</p>
-<div class="compare-grid">
-  <figure>
-    <iframe src="_static/viser/index.html?playbackPath=../scenes/menger_mc.viser&darkMode&initialCameraPosition=1.9,1.4,1.2&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
-            frameborder="0"></iframe>
-    <figcaption>marching_cubes</figcaption>
-  </figure>
-  <figure>
-    <iframe src="_static/viser/index.html?playbackPath=../scenes/menger_dc.viser&darkMode&initialCameraPosition=1.9,1.4,1.2&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
-            frameborder="0"></iframe>
-    <figcaption>dual_contouring</figcaption>
-  </figure>
-</div></section>
 <section id="performance">
 <h2>Performance<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h2>
 <p>Median extraction times for a sphere SDF on an RTX 5090:</p>
@@ -399,7 +376,6 @@ cubes chamfers the edges; dual contouring keeps them crisp.</p>
             <ul>
 <li><a class="reference internal" href="#">isoext</a><ul>
 <li><a class="reference internal" href="#quick-example">Quick Example</a></li>
-<li><a class="reference internal" href="#sharp-features-side-by-side">Sharp features, side by side</a></li>
 <li><a class="reference internal" href="#performance">Performance</a><ul>
 </ul>
 </li>
