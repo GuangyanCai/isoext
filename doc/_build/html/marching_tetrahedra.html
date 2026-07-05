@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Using External SDF Libraries" href="more_sdf.html"><link rel="prev" title="SDF Utilities" href="sdf_guide.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Dual Contouring" href="dual_contouring.html"><link rel="prev" title="Marching Cubes" href="marching_cubes.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Working with Occupancy Grids - isoext documentation</title>
+        <title>Marching Tetrahedra - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -204,16 +204,16 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Working with Occupancy Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -240,12 +240,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/occupancy_grids.ipynb?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/marching_tetrahedra.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/occupancy_grids.ipynb" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/marching_tetrahedra.ipynb" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -262,70 +262,52 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="working-with-occupancy-grids">
-<h1>Working with Occupancy Grids<a class="headerlink" href="#working-with-occupancy-grids" title="Link to this heading">¶</a></h1>
-<p>While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from <strong>binary occupancy grids</strong>—voxel grids where each cell is either occupied (1) or empty (0).</p>
-<p>This is useful when:</p>
-<ul class="simple">
-<li><p>You have voxelized data from 3D scanning or segmentation</p></li>
-<li><p>Your data comes from a boolean CSG operation</p></li>
-<li><p>You want to convert a mesh to voxels and back</p></li>
-</ul>
+          <section id="marching-tetrahedra">
+<h1>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">¶</a></h1>
+<p>Marching tetrahedra splits every cell into six tetrahedra and extracts
+the surface per tetrahedron. A tetrahedron has no ambiguous sign
+configurations, so the mesh is watertight and consistent by
+construction. The price is roughly 2-3x more triangles than marching
+cubes, with worse triangle shapes and a slight directional grain from
+the cell split. The method goes back to Doi and Koide (1991).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
 </pre></div>
 </div>
 </div>
 </div>
-<section id="creating-an-occupancy-grid">
-<h2>Creating an Occupancy Grid<a class="headerlink" href="#creating-an-occupancy-grid" title="Link to this heading">¶</a></h2>
-<p>Let’s create a binary occupancy grid from a sphere SDF. Values &gt; 0 are outside, so we threshold to get a binary mask:</p>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
+<p>The interface matches the other extraction methods: a grid with scalar
+values in, vertex and face tensors out.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a grid and compute sphere SDF</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
-<span class="n">sdf_values</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="c1"># Convert to binary occupancy: 0 = outside, 1 = inside</span>
-<span class="n">occupancy</span> <span class="o">=</span> <span class="p">(</span><span class="n">sdf_values</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;marching_tetrahedra: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Occupancy values: </span><span class="si">{</span><span class="n">occupancy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">v_mc</span><span class="p">,</span> <span class="n">f_mc</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;marching_cubes:      </span><span class="si">{</span><span class="n">f_mc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Occupancy values: [0.0, 1.0]
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="direct-extraction-jagged-result">
-<h2>Direct Extraction (Jagged Result)<a class="headerlink" href="#direct-extraction-jagged-result" title="Link to this heading">¶</a></h2>
-<p>You can run marching cubes directly on the binary grid using <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code> (the boundary between 0 and 1). However, the result will be <strong>jagged</strong> because there’s no gradient information—every surface point lands exactly on a voxel face:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">occupancy</span><span class="p">)</span>
-<span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jagged mesh: </span><span class="si">{</span><span class="n">v_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Jagged mesh: 9168 vertices, 18332 faces
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>marching_tetrahedra: 13,416 triangles
+marching_cubes:      4,508 triangles
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/2e6f8a7a7566515e.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/0aa6cc85cc83b61e.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -333,36 +315,59 @@
         </div></div>
 </div>
 </section>
-<section id="smoothed-extraction">
-<h2>Smoothed Extraction<a class="headerlink" href="#smoothed-extraction" title="Link to this heading">¶</a></h2>
-<p>To get a smoother result, apply <strong>Gaussian smoothing</strong> before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:</p>
+<section id="tessellation">
+<h2>Tessellation<a class="headerlink" href="#tessellation" title="Link to this heading">¶</a></h2>
+<p>The wireframes on a coarse grid show where the extra triangles go and
+the diagonal grain left by the six-tetrahedra split. Marching cubes
+first, marching tetrahedra second.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Smooth the occupancy grid</span>
-<span class="n">smoothed</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">occupancy</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">smoothed</span><span class="p">)</span>
-<span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coarse</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">])</span>
+<span class="n">coarse</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">coarse</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smooth mesh: </span><span class="si">{</span><span class="n">v_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span><span class="p">)</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smooth mesh: 8232 vertices, 16460 faces
-</pre></div>
-</div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/cd6b06ad7f559c0a.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/e3cb845f29ce0fc8.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
         ></iframe>
         </div></div>
 </div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/df2fc4b01bd96805.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="when-to-use-it">
+<h2>When to Use It<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Pick marching tetrahedra when guaranteed topology matters more than
+triangle count, for example as input to solvers or simplification
+passes that assume a closed manifold. For visual quality at the same
+budget, marching cubes gives cleaner triangles.</p>
 </section>
 </section>
 
@@ -371,23 +376,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="more_sdf.html">
+          <a class="next-page" href="dual_contouring.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Using External SDF Libraries</div>
+                <div class="title">Dual Contouring</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="sdf_guide.html">
+          <a class="prev-page" href="marching_cubes.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">SDF Utilities</div>
+                <div class="title">Marching Cubes</div>
                 
               </div>
             </a>
@@ -421,10 +426,10 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Working with Occupancy Grids</a><ul>
-<li><a class="reference internal" href="#creating-an-occupancy-grid">Creating an Occupancy Grid</a></li>
-<li><a class="reference internal" href="#direct-extraction-jagged-result">Direct Extraction (Jagged Result)</a></li>
-<li><a class="reference internal" href="#smoothed-extraction">Smoothed Extraction</a></li>
+<li><a class="reference internal" href="#">Marching Tetrahedra</a><ul>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#tessellation">Tessellation</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to Use It</a></li>
 </ul>
 </li>
 </ul>

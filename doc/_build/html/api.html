@@ -206,6 +206,7 @@
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
@@ -285,6 +286,28 @@ and faces is an (M, 3) int32 tensor of triangle indices.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="isoext.marching_tetrahedra">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">marching_tetrahedra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.marching_tetrahedra" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using the marching tetrahedra algorithm.</p>
+<p>Each cell is split into 6 tetrahedra, which have no ambiguous sign
+configurations, so the mesh is watertight and consistent by
+construction. Produces roughly 2-3x more triangles than marching
+cubes on the same grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="isoext.dual_contouring">
 <span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svd_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
 <dd><p>Extract an iso-surface using the Dual Contouring algorithm.</p>
@@ -303,6 +326,30 @@ If provided but normals not set, normals are computed automatically.</p></li>
 <li><p><strong>svd_tol</strong> – SVD tolerance for the QEF solver. Default is 1e-6.</p></li>
 <li><p><strong>clamp</strong> – Keep each vertex inside its cell. Disabling follows sharp
 features more closely but can produce self-intersections.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.surface_nets">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">surface_nets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.surface_nets" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using the surface nets algorithm.</p>
+<p>Each cell crossed by the surface gets one vertex, placed at the
+centroid of the cell’s edge intersections. Compared to dual
+contouring this needs no normals and no linear solves, at the cost
+of less accurate vertex placement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
+If not provided, intersections are computed automatically.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -346,6 +393,27 @@ points using linear interpolation.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Grid tensor with shape (x_res, y_res, z_res, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.gaussian_smooth">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">gaussian_smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.gaussian_smooth" title="Link to this definition">¶</a></dt>
+<dd><p>Smooth a 3D scalar field using a Gaussian filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field</strong> (<em>Tensor</em>) – Input scalar field with shape (X, Y, Z)</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – Standard deviation of the Gaussian kernel (default: 1.0)</p></li>
+<li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of the kernel. If None, uses ceil(6 * sigma) | 1 to ensure odd size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Smoothed scalar field with the same shape as input</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>Tensor</em></p>
@@ -793,9 +861,12 @@ against the exact SDF.</p>
 <li><a class="reference internal" href="#">API Reference</a><ul>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
 <li><a class="reference internal" href="#isoext.marching_cubes"><code class="docutils literal notranslate"><span class="pre">marching_cubes()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.marching_tetrahedra"><code class="docutils literal notranslate"><span class="pre">marching_tetrahedra()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.surface_nets"><code class="docutils literal notranslate"><span class="pre">surface_nets()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.get_intersection"><code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.make_grid"><code class="docutils literal notranslate"><span class="pre">make_grid()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.gaussian_smooth"><code class="docutils literal notranslate"><span class="pre">gaussian_smooth()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.write_obj"><code class="docutils literal notranslate"><span class="pre">write_obj()</span></code></a></li>
 </ul>
 </li>

@@ -5,11 +5,17 @@
 ```{eval-rst}
 .. autofunction:: isoext.marching_cubes
 
+.. autofunction:: isoext.marching_tetrahedra
+
 .. autofunction:: isoext.dual_contouring
+
+.. autofunction:: isoext.surface_nets
 
 .. autofunction:: isoext.get_intersection
 
 .. autofunction:: isoext.make_grid
+
+.. autofunction:: isoext.gaussian_smooth
 
 .. autofunction:: isoext.write_obj
 ```
