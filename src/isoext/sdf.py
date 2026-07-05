@@ -141,14 +141,10 @@ class SmoothUnionOp(SDF):
     k: float  # blending parameter
 
     def __call__(self, p: torch.Tensor) -> torch.Tensor:
-        results = [sdf(p) for sdf in self.sdf_list]
-        # results is [d1, d2, ...]
-        # We take a pairwise or reduce approach to do a smooth union:
-        d = results[0]
-        for i in range(1, len(results)):
-            d2 = results[i]
-            d = -self.k * torch.log(torch.exp(-d / self.k) + torch.exp(-d2 / self.k))
-        return d
+        results = torch.stack([sdf(p) for sdf in self.sdf_list], dim=-1)
+        # Exponential smooth min, computed with logsumexp so that exp never
+        # under- or overflows when |d| is much larger than k.
+        return -self.k * torch.logsumexp(-results / self.k, dim=-1)
 
 
 @dataclass
