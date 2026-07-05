@@ -12,7 +12,7 @@ import shutil
 from pathlib import Path
 
 import viser
-from IPython.display import HTML
+from IPython.display import IFrame
 from matplotlib.colors import to_rgb
 
 from isoext.viewer import serialize_scene
@@ -21,9 +21,7 @@ _STATIC_DIR = Path(__file__).parent / "_static"
 _CLIENT_FILE = _STATIC_DIR / "viser" / "index.html"
 _SCENES_DIR = _STATIC_DIR / "scenes"
 
-_IFRAME_STYLE = (
-    "width: 100%; height: 420px; border: 1px solid #8888; border-radius: 4px;"
-)
+_IFRAME_STYLE = "border: 1px solid #8888; border-radius: 4px;"
 
 
 def ensure_client() -> None:
@@ -67,4 +65,4 @@ def show_mesh(vertices, faces, color="lightblue", smooth_shading=True, **kwargs)
     # Both paths are relative: the iframe src is resolved against the built
     # page (at the doc root) and playbackPath against the client's URL.
     src = f"_static/viser/index.html?playbackPath=../scenes/{scene_name}"
-    return HTML(f'<iframe src="{src}" style="{_IFRAME_STYLE}"></iframe>')
+    return IFrame(src, width="100%", height=420, extras=[f'style="{_IFRAME_STYLE}"'])

@@ -54,7 +54,7 @@ nanobind = "*"
 scikit-build-core = { version = "*", extras = ["pyproject"] }
 
 [tool.pixi.tasks]
-compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -ve .", cwd = "." }
+compile = { cmd = "uv pip install --no-build-isolation -C editable.rebuild=true -C editable.verbose=false -ve .", cwd = "." }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"
@@ -82,7 +82,7 @@ sdf = { git = "git+https://github.com/fogleman/sdf" }
 
 [tool.pixi.feature.doc.tasks]
 doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
-doc-serve = { cmd = "sphinx-autobuild . _build/html --open-browser --watch ../src", cwd = "doc", depends-on = ["compile"] }
+doc-serve = { cmd = "sphinx-autobuild . _build/html --host 0.0.0.0 --watch ../src", cwd = "doc", depends-on = ["compile"] }
 doc-clean = { cmd = "rm -rf _build", cwd = "doc", depends-on = ["compile"] }
 doc-rebuild = { cmd = "rm -rf _build && sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
 doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }

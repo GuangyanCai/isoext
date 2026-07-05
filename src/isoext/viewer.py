@@ -13,6 +13,8 @@ Typical use::
     server = viewer.show(v, f)   # open an interactive viewer in the browser
 """
 
+import contextlib
+import io
 from pathlib import Path
 
 import torch
@@ -83,6 +85,25 @@ def show(vertices: torch.Tensor, faces: torch.Tensor, *, port: int = 8080, **mes
     return server
 
 
+# Hidden server reused by serialize_scene. Stopping a server prints from its
+# background thread, so keeping one alive is both quieter and faster than
+# creating a fresh one per call.
+_scene_recorder = None
+
+
+def _get_scene_recorder():
+    global _scene_recorder
+    viser = _import_viser()
+    if _scene_recorder is None:
+        # The server prints a startup banner even with verbose=False; swallow
+        # it since nothing ever connects to this instance.
+        with contextlib.redirect_stdout(io.StringIO()):
+            _scene_recorder = viser.ViserServer(verbose=False)
+    else:
+        _scene_recorder.scene.reset()
+    return _scene_recorder
+
+
 def serialize_scene(vertices: torch.Tensor, faces: torch.Tensor, **mesh_kwargs) -> bytes:
     """Serialize a scene containing the given mesh to .viser bytes.
 
@@ -90,13 +111,9 @@ def serialize_scene(vertices: torch.Tensor, faces: torch.Tensor, **mesh_kwargs) 
     viser's static client, e.g. embedded in a web page. See save_scene for a
     convenience wrapper.
     """
-    viser = _import_viser()
-    server = viser.ViserServer(verbose=False)
-    try:
-        add_mesh(server, vertices, faces, **mesh_kwargs)
-        return server.get_scene_serializer().serialize()
-    finally:
-        server.stop()
+    server = _get_scene_recorder()
+    add_mesh(server, vertices, faces, **mesh_kwargs)
+    return server.get_scene_serializer().serialize()
 
 
 def save_scene(path, vertices: torch.Tensor, faces: torch.Tensor, **mesh_kwargs) -> None:
