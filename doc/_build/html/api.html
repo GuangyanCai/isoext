@@ -493,7 +493,7 @@ with the default backface culling.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.show">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.show" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.show" title="Link to this definition">¶</a></dt>
 <dd><p>Open an interactive viewer serving the given mesh.</p>
 <p>The server keeps running until it is stopped or the process exits; the
 printed URL can be opened in any browser.</p>
@@ -503,6 +503,8 @@ printed URL can be opened in any browser.</p>
 <li><p><strong>vertices</strong> (<em>Tensor</em>) – (N, 3) tensor of vertex positions.</p></li>
 <li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
 <li><p><strong>port</strong> (<em>int</em>) – Port to serve on (the next free port is used if taken).</p></li>
+<li><p><strong>grid</strong> – Optional grid to overlay with add_grid.</p></li>
+<li><p><strong>grid_level</strong> (<em>float</em>) – Iso-value for the grid overlay’s corner colors.</p></li>
 <li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh.</p></li>
 </ul>
 </dd>
@@ -514,7 +516,7 @@ printed URL can be opened in any browser.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.serialize_scene">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">serialize_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.serialize_scene" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">serialize_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.serialize_scene" title="Link to this definition">¶</a></dt>
 <dd><p>Serialize a scene containing the given mesh to .viser bytes.</p>
 <p>The bytes can be written to a <code class="docutils literal notranslate"><span class="pre">.viser</span></code> file and played back offline by
 viser’s static client, e.g. embedded in a web page. See save_scene and
@@ -524,6 +526,7 @@ embed for convenience wrappers.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>vertices</strong> (<em>Tensor</em>)</p></li>
 <li><p><strong>faces</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>grid_level</strong> (<em>float</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -582,7 +585,8 @@ statically, for example on documentation pages.</p>
 <li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
 <li><p><strong>root</strong> – Directory for the static assets, relative to the notebook.</p></li>
 <li><p><strong>height</strong> (<em>int</em>) – Height of the embedded viewer in pixels.</p></li>
-<li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh.</p></li>
+<li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh; pass grid= (and optionally
+grid_level=) to overlay the grid’s edges and corner signs.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
