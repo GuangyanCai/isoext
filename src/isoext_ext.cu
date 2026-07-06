@@ -113,15 +113,15 @@ NB_MODULE(isoext_ext, m) {
             auto [v, f] = mc::marching_cubes(grid, level, method);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
-        "grid"_a, "level"_a = 0.f, "method"_a = "lewiner",
+        "grid"_a, "level"_a = 0.f, "method"_a = "vega",
         "Extract an iso-surface from a grid using the Marching Cubes algorithm.\n\n"
         "Args:\n"
         "    grid: The input grid (UniformGrid or SparseGrid) containing scalar values.\n"
         "    level: The iso-value at which to extract the surface. Default is 0.0.\n"
-        "    method: The marching cubes variant to use. Options are 'lewiner'\n"
-        "        (default), 'vega', 'nagae', or 'lorensen'. The default resolves\n"
-        "        the topological ambiguities of standard marching cubes; 'vega'\n"
-        "        additionally uses the corrected interior test.\n\n"
+        "    method: The marching cubes variant to use. Options are 'vega'\n"
+        "        (default), 'lewiner', 'nagae', or 'lorensen'. The default\n"
+        "        resolves the topological ambiguities of standard marching cubes\n"
+        "        with the corrected interior test of Vega et al.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions\n"
         "    and faces is an (M, 3) int32 tensor of triangle indices.");

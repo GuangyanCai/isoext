@@ -117,19 +117,23 @@ def test_vega_symmetry_invariance():
 
 
 def test_vega_mirror_regression():
-    """The single-cell field from the docs where mirroring changes the
-    Lewiner topology; vega must resolve both orientations the same."""
-    values = torch.tensor(
+    """Single-cell fields where mirroring changes the Lewiner topology;
+    vega must resolve both orientations the same. The second field is
+    the one shown in the variants doc page; the first is exactly
+    degenerate (the interpolant's neck has zero thickness)."""
+    fields = [
         [0.0625, -0.0625, 0.1875, 0.0625, 0.0625, 0.0625, -0.0625, -0.0625],
-        device="cuda",
-    ).reshape(2, 2, 2)
-    mirrored = values.permute(2, 1, 0).contiguous()
+        [0.5625, -0.4375, 0.0625, 0.5625, 0.1875, 0.125, -0.4375, 0.125],
+    ]
+    for flat in fields:
+        values = torch.tensor(flat, device="cuda").reshape(2, 2, 2)
+        mirrored = values.permute(2, 1, 0).contiguous()
 
-    lewiner = [extract_topology(f, "lewiner") for f in (values, mirrored)]
-    vega = [extract_topology(f, "vega") for f in (values, mirrored)]
+        lewiner = [extract_topology(f, "lewiner") for f in (values, mirrored)]
+        vega = [extract_topology(f, "vega") for f in (values, mirrored)]
 
-    assert lewiner[0] != lewiner[1], "expected Lewiner counterexample"
-    assert vega[0] == vega[1]
+        assert lewiner[0] != lewiner[1], f"expected Lewiner counterexample: {flat}"
+        assert vega[0] == vega[1], flat
 
 
 def test_vega_topology_matches_trilinear():
