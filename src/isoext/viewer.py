@@ -108,12 +108,13 @@ def add_grid(
     """Draw a grid's cell edges and its corner values as colored dots.
 
     Corners with a value below the level are drawn red (inside the
-    surface), the rest blue. Meant for small demonstration grids, like
-    the single-cell examples on the marching cubes variants page.
+    surface), the rest blue. For sparse grids only the active cells are
+    drawn. Meant for small demonstration grids, like the single-cell
+    examples on the marching cubes variants page.
 
     Args:
         server: A viser.ViserServer instance.
-        grid: A UniformGrid whose values are set.
+        grid: A UniformGrid or SparseGrid whose values are set.
         level: The iso-value that separates inside from outside.
         name: Scene tree name prefix for the lines and dots.
         point_size: Dot diameter in world units. Defaults to a fraction
@@ -123,18 +124,31 @@ def add_grid(
     import numpy as np
 
     points = grid.get_points()
-    if points.ndim != 4:
-        raise ValueError("add_grid expects a UniformGrid")
     if points[..., 0].numel() > 32**3:
         raise ValueError("add_grid is meant for small demonstration grids")
-    values = grid.get_values().reshape(points.shape[:3])
+    if points.ndim == 4:   # uniform: (nx, ny, nz, 3)
+        p = points
+        segments = torch.cat([
+            torch.stack([p[:-1], p[1:]], dim=-2).reshape(-1, 2, 3),
+            torch.stack([p[:, :-1], p[:, 1:]], dim=-2).reshape(-1, 2, 3),
+            torch.stack([p[:, :, :-1], p[:, :, 1:]], dim=-2).reshape(-1, 2, 3),
+        ])
+        edge = (p[1, 0, 0] - p[0, 0, 0]).norm() if p.shape[0] > 1 else 1.0
+    elif points.ndim == 3 and points.shape[1:] == (8, 3):   # sparse cells
+        if len(points) == 0:
+            return
+        # Corner index bits within a cell are (x << 2) | (y << 1) | z.
+        cell_edges = [
+            (0, 1), (2, 3), (4, 5), (6, 7),
+            (0, 2), (1, 3), (4, 6), (5, 7),
+            (0, 4), (1, 5), (2, 6), (3, 7),
+        ]
+        segments = points[:, cell_edges].reshape(-1, 2, 3)
+        edge = (points[0, 1] - points[0, 0]).norm()
+    else:
+        raise ValueError("add_grid expects a UniformGrid or SparseGrid")
 
-    p = points
-    segments = torch.cat([
-        torch.stack([p[:-1], p[1:]], dim=-2).reshape(-1, 2, 3),
-        torch.stack([p[:, :-1], p[:, 1:]], dim=-2).reshape(-1, 2, 3),
-        torch.stack([p[:, :, :-1], p[:, :, 1:]], dim=-2).reshape(-1, 2, 3),
-    ]).cpu().numpy()
+    segments = segments.cpu().numpy()
     server.scene.add_line_segments(
         f"{name}/edges",
         segments,
@@ -143,9 +157,8 @@ def add_grid(
     )
 
     if point_size is None:
-        edge = (p[1, 0, 0] - p[0, 0, 0]).norm() if p.shape[0] > 1 else 1.0
         point_size = 0.1 * float(edge)
-    inside = (values < level).reshape(-1).cpu().numpy()
+    inside = (grid.get_values() < level).reshape(-1).cpu().numpy()
     colors = np.where(
         inside[:, None], (0.85, 0.25, 0.2), (0.25, 0.45, 0.85)
     ).astype(np.float32)
