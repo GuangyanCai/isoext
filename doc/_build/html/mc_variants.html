@@ -328,7 +328,10 @@ avoid reflections and always produce closed meshes; so do
 <section id="a-crack-up-close">
 <h2>A Crack, Up Close<a class="headerlink" href="#a-crack-up-close" title="Link to this heading">¶</a></h2>
 <p>Two cells sharing an ambiguous face. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> triangulates the
-shared face incompatibly on its two sides and leaves a slit:</p>
+shared face incompatibly on its two sides and leaves a slit: the
+zigzag lines crossing the middle of the surface are the two
+unmatched borders of the crack, one from each cell, each following
+a different diagonal of the shared face.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>

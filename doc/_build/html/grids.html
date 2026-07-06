@@ -422,6 +422,35 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
         </div></div>
 </div>
 </section>
+<section id="seeing-the-grid">
+<h3>Seeing the Grid<a class="headerlink" href="#seeing-the-grid" title="Link to this heading">¶</a></h3>
+<p>For small grids, the viewer can overlay the grid itself: gray lines
+are the cell edges, red dots are corners inside the surface, blue
+dots corners outside. Pass the grid to <code class="docutils literal notranslate"><span class="pre">viewer.embed</span></code> or
+<code class="docutils literal notranslate"><span class="pre">viewer.show</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">small</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="n">small</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">small</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">small</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">small</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="360"
+            src="_static/viser/index.html?playbackPath=../scenes/99ec906eca6ef3fa.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
 <section id="using-neural-networks">
 <h3>Using Neural Networks<a class="headerlink" href="#using-neural-networks" title="Link to this heading">¶</a></h3>
 <p>Since <code class="docutils literal notranslate"><span class="pre">get_points()</span></code> returns a standard PyTorch tensor on CUDA, you can feed it directly to a neural network:</p>
@@ -549,7 +578,44 @@ Extracted: 2,416,776 vertices
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/be70171b93161477.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/a4a2e84beb01a66d.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="seeing-active-cells">
+<h3>Seeing Active Cells<a class="headerlink" href="#seeing-active-cells" title="Link to this heading">¶</a></h3>
+<p>The overlay works for sparse grids too and draws only the active
+cells, which makes the sparseness itself visible: the cells hug the
+surface and the rest of the volume is empty.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">SparseGrid</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">shell</span><span class="o">.</span><span class="n">get_potential_cell_indices</span><span class="p">(</span><span class="mi">100000</span><span class="p">):</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">shell</span><span class="o">.</span><span class="n">get_points_by_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="n">near</span> <span class="o">=</span> <span class="n">shell</span><span class="o">.</span><span class="n">filter_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">points</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">near</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">shell</span><span class="o">.</span><span class="n">add_cells</span><span class="p">(</span><span class="n">near</span><span class="p">)</span>
+<span class="n">shell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">shell</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">shell</span><span class="o">.</span><span class="n">get_num_cells</span><span class="p">()</span><span class="si">}</span><span class="s2"> active cells of </span><span class="si">{</span><span class="mi">7</span><span class="o">**</span><span class="mi">3</span><span class="si">}</span><span class="s2"> possible&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">shell</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>98 active cells of 343 possible
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="360"
+            src="_static/viser/index.html?playbackPath=../scenes/5796fbcc469936f2.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -631,11 +697,13 @@ Extracted: 2,416,776 vertices
 <li><a class="reference internal" href="#creating-a-grid">Creating a Grid</a></li>
 <li><a class="reference internal" href="#getting-point-positions">Getting Point Positions</a></li>
 <li><a class="reference internal" href="#setting-values">Setting Values</a></li>
+<li><a class="reference internal" href="#seeing-the-grid">Seeing the Grid</a></li>
 <li><a class="reference internal" href="#using-neural-networks">Using Neural Networks</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#sparsegrid">SparseGrid</a><ul>
 <li><a class="reference internal" href="#sparsegrid-workflow">SparseGrid Workflow</a></li>
+<li><a class="reference internal" href="#seeing-active-cells">Seeing Active Cells</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#summary">Summary</a></li>

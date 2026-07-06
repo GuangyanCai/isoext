@@ -18,10 +18,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:50.483586Z",
-     "iopub.status.busy": "2026-07-06T04:43:50.483500Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.074495Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.073761Z"
+     "iopub.execute_input": "2026-07-06T06:12:22.873335Z",
+     "iopub.status.busy": "2026-07-06T06:12:22.873236Z",
+     "iopub.status.idle": "2026-07-06T06:12:23.528260Z",
+     "shell.execute_reply": "2026-07-06T06:12:23.527788Z"
     }
    },
    "outputs": [],
@@ -54,10 +54,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.076114Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.075999Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.205987Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.205360Z"
+     "iopub.execute_input": "2026-07-06T06:12:23.530299Z",
+     "iopub.status.busy": "2026-07-06T06:12:23.530157Z",
+     "iopub.status.idle": "2026-07-06T06:12:23.700914Z",
+     "shell.execute_reply": "2026-07-06T06:12:23.700616Z"
     }
    },
    "outputs": [
@@ -92,10 +92,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.219715Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.219615Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.330483Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.329362Z"
+     "iopub.execute_input": "2026-07-06T06:12:23.718417Z",
+     "iopub.status.busy": "2026-07-06T06:12:23.718280Z",
+     "iopub.status.idle": "2026-07-06T06:12:23.843979Z",
+     "shell.execute_reply": "2026-07-06T06:12:23.843316Z"
     }
    },
    "outputs": [
@@ -142,10 +142,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.332007Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.331921Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.439984Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.439440Z"
+     "iopub.execute_input": "2026-07-06T06:12:23.845563Z",
+     "iopub.status.busy": "2026-07-06T06:12:23.845479Z",
+     "iopub.status.idle": "2026-07-06T06:12:23.964327Z",
+     "shell.execute_reply": "2026-07-06T06:12:23.964003Z"
     }
    },
    "outputs": [
@@ -171,7 +171,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x74149a182240>"
+       "<IPython.lib.display.IFrame at 0x7869bd25ab70>"
       ]
      },
      "execution_count": 4,
@@ -197,10 +197,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.441691Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.441581Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.512168Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.511198Z"
+     "iopub.execute_input": "2026-07-06T06:12:23.965150Z",
+     "iopub.status.busy": "2026-07-06T06:12:23.965044Z",
+     "iopub.status.idle": "2026-07-06T06:12:24.035115Z",
+     "shell.execute_reply": "2026-07-06T06:12:24.034752Z"
     }
    },
    "outputs": [
@@ -226,7 +226,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x74149a182690>"
+       "<IPython.lib.display.IFrame at 0x7869bd25aae0>"
       ]
      },
      "execution_count": 5,
@@ -256,9 +256,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### Using Neural Networks\n",
+    "### Seeing the Grid\n",
     "\n",
-    "Since `get_points()` returns a standard PyTorch tensor on CUDA, you can feed it directly to a neural network:\n"
+    "For small grids, the viewer can overlay the grid itself: gray lines\n",
+    "are the cell edges, red dots are corners inside the surface, blue\n",
+    "dots corners outside. Pass the grid to `viewer.embed` or\n",
+    "`viewer.show`:\n"
    ]
   },
   {
@@ -266,10 +269,62 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.514051Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.513919Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.515426Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.515163Z"
+     "iopub.execute_input": "2026-07-06T06:12:24.036233Z",
+     "iopub.status.busy": "2026-07-06T06:12:24.036104Z",
+     "iopub.status.idle": "2026-07-06T06:12:24.043781Z",
+     "shell.execute_reply": "2026-07-06T06:12:24.043539Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"360\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/99ec906eca6ef3fa.viser\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7869bd2885f0>"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "small = isoext.UniformGrid([6, 6, 6])\n",
+    "small.set_values(small.get_points().norm(dim=-1) - 0.7)\n",
+    "\n",
+    "v, f = isoext.marching_cubes(small)\n",
+    "viewer.embed(v, f, grid=small, wireframe=True, height=360)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Using Neural Networks\n",
+    "\n",
+    "Since `get_points()` returns a standard PyTorch tensor on CUDA, you can feed it directly to a neural network:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-06T06:12:24.044884Z",
+     "iopub.status.busy": "2026-07-06T06:12:24.044809Z",
+     "iopub.status.idle": "2026-07-06T06:12:24.046114Z",
+     "shell.execute_reply": "2026-07-06T06:12:24.045915Z"
     }
    },
    "outputs": [],
@@ -309,13 +364,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.516422Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.516361Z",
-     "iopub.status.idle": "2026-07-06T04:43:51.523420Z",
-     "shell.execute_reply": "2026-07-06T04:43:51.522968Z"
+     "iopub.execute_input": "2026-07-06T06:12:24.047148Z",
+     "iopub.status.busy": "2026-07-06T06:12:24.047087Z",
+     "iopub.status.idle": "2026-07-06T06:12:24.050506Z",
+     "shell.execute_reply": "2026-07-06T06:12:24.050324Z"
     }
    },
    "outputs": [
@@ -359,13 +414,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:51.524673Z",
-     "iopub.status.busy": "2026-07-06T04:43:51.524586Z",
-     "iopub.status.idle": "2026-07-06T04:43:55.790542Z",
-     "shell.execute_reply": "2026-07-06T04:43:55.790105Z"
+     "iopub.execute_input": "2026-07-06T06:12:24.051726Z",
+     "iopub.status.busy": "2026-07-06T06:12:24.051653Z",
+     "iopub.status.idle": "2026-07-06T06:12:28.285952Z",
+     "shell.execute_reply": "2026-07-06T06:12:28.285449Z"
     },
     "scrolled": true
    },
@@ -392,7 +447,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/be70171b93161477.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/a4a2e84beb01a66d.viser\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -400,10 +455,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x74144645de50>"
+       "<IPython.lib.display.IFrame at 0x786972386600>"
       ]
      },
-     "execution_count": 8,
+     "execution_count": 9,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -449,6 +504,73 @@
     "preview.set_values(preview.get_points().norm(dim=-1) - 0.7)\n",
     "v_lo, f_lo = isoext.marching_cubes(preview)\n",
     "viewer.embed(v_lo, f_lo, color=\"steelblue\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Seeing Active Cells\n",
+    "\n",
+    "The overlay works for sparse grids too and draws only the active\n",
+    "cells, which makes the sparseness itself visible: the cells hug the\n",
+    "surface and the rest of the volume is empty.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-06T06:12:28.287780Z",
+     "iopub.status.busy": "2026-07-06T06:12:28.287698Z",
+     "iopub.status.idle": "2026-07-06T06:12:28.295798Z",
+     "shell.execute_reply": "2026-07-06T06:12:28.295519Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "98 active cells of 343 possible\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"360\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/5796fbcc469936f2.viser\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x786c4a7a0140>"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "shell = isoext.SparseGrid([8, 8, 8])\n",
+    "for chunk in shell.get_potential_cell_indices(100000):\n",
+    "    points = shell.get_points_by_cell_indices(chunk)\n",
+    "    near = shell.filter_cell_indices(chunk, points.norm(dim=-1) - 0.7)\n",
+    "    if len(near) > 0:\n",
+    "        shell.add_cells(near)\n",
+    "shell.set_values(shell.get_points().norm(dim=-1) - 0.7)\n",
+    "\n",
+    "v, f = isoext.marching_cubes(shell)\n",
+    "print(f\"{shell.get_num_cells()} active cells of {7**3} possible\")\n",
+    "viewer.embed(v, f, grid=shell, wireframe=True, height=360)\n"
    ]
   },
   {

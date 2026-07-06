@@ -97,7 +97,10 @@
     "## A Crack, Up Close\n",
     "\n",
     "Two cells sharing an ambiguous face. `lorensen` triangulates the\n",
-    "shared face incompatibly on its two sides and leaves a slit:\n"
+    "shared face incompatibly on its two sides and leaves a slit: the\n",
+    "zigzag lines crossing the middle of the surface are the two\n",
+    "unmatched borders of the crack, one from each cell, each following\n",
+    "a different diagonal of the shared face.\n"
    ]
   },
   {
