@@ -206,9 +206,13 @@
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul class="current">
@@ -221,6 +225,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -363,7 +372,8 @@
 </section>
 <section id="mandelbulbsdf">
 <h3>MandelbulbSDF<a class="headerlink" href="#mandelbulbsdf" title="Link to this heading">¶</a></h3>
-<p>A distance estimator for the Mandelbulb fractal. The values approximate
+<p>A distance estimator for the Mandelbulb fractal of
+<span class="bibtex-citation" id="id1">White and Nylander [<a class="reference internal" href="#id11" title="Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: https://www.skytopia.com/project/fractal/mandelbulb.html.">2009</a>]</span>. The values approximate
 the distance to the surface rather than being an exact SDF; fewer
 iterations give a smoother shape.</p>
 <div class="cell docutils container">
@@ -489,6 +499,17 @@ iterations give a smoother shape.</p>
         </div></div>
 </div>
 </section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div class="docutils container" id="id2">
+<div role="list" class="citation-list">
+<div class="citation" id="id11" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: <a class="reference external" href="https://www.skytopia.com/project/fractal/mandelbulb.html">https://www.skytopia.com/project/fractal/mandelbulb.html</a>.</p>
+</div>
+</div>
+</div>
+</section>
 </section>
 
         </article>
@@ -556,6 +577,7 @@ iterations give a smoother shape.</p>
 </li>
 <li><a class="reference internal" href="#csg-operations">CSG Operations</a></li>
 <li><a class="reference internal" href="#transformations">Transformations</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>

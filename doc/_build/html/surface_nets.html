@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Using External SDF Libraries" href="more_sdf.html"><link rel="prev" title="SDF Utilities" href="sdf_guide.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Cubes Variants" href="mc_variants.html"><link rel="prev" title="Dual Contouring" href="dual_contouring.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Working with Occupancy Grids - isoext documentation</title>
+        <title>Surface Nets - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -204,21 +204,21 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Surface Nets</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Working with Occupancy Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
@@ -250,12 +250,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/occupancy_grids.ipynb?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/surface_nets.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/occupancy_grids.ipynb" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/surface_nets.ipynb" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -272,70 +272,82 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="working-with-occupancy-grids">
-<h1>Working with Occupancy Grids<a class="headerlink" href="#working-with-occupancy-grids" title="Link to this heading">¶</a></h1>
-<p>While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from <strong>binary occupancy grids</strong>—voxel grids where each cell is either occupied (1) or empty (0).</p>
-<p>This is useful when:</p>
+          <section id="surface-nets">
+<h1>Surface Nets<a class="headerlink" href="#surface-nets" title="Link to this heading">¶</a></h1>
+<p>Surface nets (<span class="bibtex-citation" id="id1">Gibson [<a class="reference internal" href="#id7" title="Sarah F. F. Gibson. Constrained elastic surface nets: generating smooth surfaces from binary segmented data. In Medical Image Computing and Computer-Assisted Intervention (MICCAI '98), LNCS 1496, 888–898. Springer, 1998. doi:10.1007/BFb0056277.">1998</a>]</span>) is a dual method: instead of cutting triangles out of
+each cell the way marching cubes does, it places one vertex inside
+every cell the surface crosses and connects the vertices of
+neighboring cells. The vertex sits at the centroid of the points
+where the surface crosses the cell’s edges. That placement needs no
+normals and no solves, so the method has no parameters to tune, and
+the mesh comes out smooth and evenly tessellated.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">MandelbulbSDF</span><span class="p">,</span> <span class="n">get_sdf_normal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_smooth</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">surface_nets</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</pre></div>
+</div>
 <ul class="simple">
-<li><p>You have voxelized data from 3D scanning or segmentation</p></li>
-<li><p>Your data comes from a boolean CSG operation</p></li>
-<li><p>You want to convert a mesh to voxels and back</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">grid</span></code>: A <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> or <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> with values set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: The iso-value to extract (default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intersection</span></code>: Optional precomputed edge crossings from
+<code class="docutils literal notranslate"><span class="pre">get_intersection</span></code>; computed automatically when omitted</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
-</pre></div>
-</div>
-</div>
-</div>
-<section id="creating-an-occupancy-grid">
-<h2>Creating an Occupancy Grid<a class="headerlink" href="#creating-an-occupancy-grid" title="Link to this heading">¶</a></h2>
-<p>Let’s create a binary occupancy grid from a sphere SDF. Values &gt; 0 are outside, so we threshold to get a binary mask:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a grid and compute sphere SDF</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
-<span class="n">sdf_values</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># Sphere</span>
 
-<span class="c1"># Convert to binary occupancy: 0 = outside, 1 = inside</span>
-<span class="n">occupancy</span> <span class="o">=</span> <span class="p">(</span><span class="n">sdf_values</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Occupancy values: </span><span class="si">{</span><span class="n">occupancy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">surface_nets</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Occupancy values: [0.0, 1.0]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>11,954 vertices, 23,904 triangles
 </pre></div>
 </div>
 </div>
 </div>
 </section>
-<section id="direct-extraction-jagged-result">
-<h2>Direct Extraction (Jagged Result)<a class="headerlink" href="#direct-extraction-jagged-result" title="Link to this heading">¶</a></h2>
-<p>You can run marching cubes directly on the binary grid using <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code> (the boundary between 0 and 1). However, the result will be <strong>jagged</strong> because there’s no gradient information—every surface point lands exactly on a voxel face:</p>
+<section id="a-smooth-field">
+<h2>A Smooth Field<a class="headerlink" href="#a-smooth-field" title="Link to this heading">¶</a></h2>
+<p>Because the vertex placement only uses where the surface crosses the
+cell edges, surface nets works well on fields where normals are
+unreliable: distance estimators, neural network outputs, or smoothed
+data. The Mandelbulb below is a distance estimator, and the mesh
+stays clean without any of the tuning dual contouring would need
+here:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">occupancy</span><span class="p">)</span>
-<span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bulb_grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">1.2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">[</span><span class="mf">1.2</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">MandelbulbSDF</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)(</span><span class="n">bulb_grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<span class="n">bulb_grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jagged mesh: </span><span class="si">{</span><span class="n">v_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">surface_nets</span><span class="p">(</span><span class="n">bulb_grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;coral&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Jagged mesh: 9168 vertices, 18332 faces
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>84,708 vertices
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/ead150578e6ce454.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/6c0cacc45119d344.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -343,35 +355,79 @@
         </div></div>
 </div>
 </section>
-<section id="smoothed-extraction">
-<h2>Smoothed Extraction<a class="headerlink" href="#smoothed-extraction" title="Link to this heading">¶</a></h2>
-<p>To get a smoother result, apply <strong>Gaussian smoothing</strong> before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:</p>
+<section id="versus-dual-contouring">
+<h2>Versus Dual Contouring<a class="headerlink" href="#versus-dual-contouring" title="Link to this heading">¶</a></h2>
+<p>Surface nets and dual contouring build the same mesh connectivity
+and differ only in where the vertex goes inside each cell. Dual
+contouring solves for the point that best fits the surface normals,
+which can reconstruct sharp edges and corners exactly – provided it
+gets good normals, here computed from the SDF gradient. Surface nets
+averages the edge crossings, which rounds them off. The cube below
+shows the difference. Use dual contouring when the field has sharp
+features worth preserving and normals you trust; use surface nets
+otherwise. See <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> for the details on normals.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Smooth the occupancy grid</span>
-<span class="n">smoothed</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">occupancy</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">smoothed</span><span class="p">)</span>
-<span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cube_grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">cube</span> <span class="o">=</span> <span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">cube_grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">cube_grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smooth mesh: </span><span class="si">{</span><span class="n">v_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span><span class="p">)</span>
+<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">cube_grid</span><span class="p">)</span>
+<span class="n">its</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">cube_grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dual_contouring: </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;goldenrod&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smooth mesh: 8232 vertices, 16460 faces
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dual_contouring: 6,146 vertices
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/6657d7f18e790d46.viser"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/56f648fbd166cc72.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
         ></iframe>
         </div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">surface_nets</span><span class="p">(</span><span class="n">cube_grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;surface_nets:    </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>surface_nets:    6,146 vertices
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/ca243954d5194b35.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div class="docutils container" id="id2">
+<div role="list" class="citation-list">
+<div class="citation" id="id7" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Sarah F. F. Gibson. Constrained elastic surface nets: generating smooth surfaces from binary segmented data. In <em>Medical Image Computing and Computer-Assisted Intervention (MICCAI '98), LNCS 1496</em>, 888–898. Springer, 1998. <a class="reference external" href="https://doi.org/10.1007/BFb0056277">doi:10.1007/BFb0056277</a>.</p>
+</div>
+</div>
 </div>
 </section>
 </section>
@@ -381,23 +437,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="more_sdf.html">
+          <a class="next-page" href="mc_variants.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Using External SDF Libraries</div>
+                <div class="title">Marching Cubes Variants</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="sdf_guide.html">
+          <a class="prev-page" href="dual_contouring.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">SDF Utilities</div>
+                <div class="title">Dual Contouring</div>
                 
               </div>
             </a>
@@ -431,10 +487,11 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Working with Occupancy Grids</a><ul>
-<li><a class="reference internal" href="#creating-an-occupancy-grid">Creating an Occupancy Grid</a></li>
-<li><a class="reference internal" href="#direct-extraction-jagged-result">Direct Extraction (Jagged Result)</a></li>
-<li><a class="reference internal" href="#smoothed-extraction">Smoothed Extraction</a></li>
+<li><a class="reference internal" href="#">Surface Nets</a><ul>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#a-smooth-field">A Smooth Field</a></li>
+<li><a class="reference internal" href="#versus-dual-contouring">Versus Dual Contouring</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>

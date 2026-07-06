@@ -43,8 +43,8 @@
     "\n",
     "When two diagonally opposite corners of a cell face are inside and\n",
     "the other two outside, the face admits two triangulations. The\n",
-    "`lorensen` tables, built with reflections, can pick incompatible\n",
-    "sides in neighboring cells, which leaves cracks. The `nagae` tables\n",
+    "`lorensen` tables ({cite:t}`lorensen1987`), built with reflections, can pick incompatible\n",
+    "sides in neighboring cells, which leaves cracks. The `nagae` tables ({cite:t}`nagae1993`)\n",
     "avoid reflections and always produce closed meshes; so do\n",
     "`lewiner` and `vega`. Counting broken meshes over 50 random closed fields:\n"
    ]
@@ -206,7 +206,8 @@
     "Closing the cracks still leaves a choice: are the pieces of surface\n",
     "in an ambiguous cell connected or separate? Fixed tables always\n",
     "answer the same way; `lewiner` and `vega` evaluate the\n",
-    "interpolant of the corner values and follow it. In the cell below the fixed table\n",
+    "interpolant of the corner values and follow it, implementing the\n",
+    "MC33 method of {cite:t}`chernyaev1995`. In the cell below the fixed table\n",
     "produces three separate pieces, while the interpolant connects two\n",
     "of them:\n"
    ]
@@ -322,11 +323,11 @@
    "source": [
     "### Lewiner Limitations\n",
     "\n",
-    "The `lewiner` variant ports the implementation of Lewiner et al.\n",
-    "(2003) and inherits its documented limitations: the interior test\n",
+    "The `lewiner` variant ports the implementation of {cite:t}`lewiner2003`\n",
+    "and inherits its documented limitations: the interior test\n",
     "examines the interpolant on a single section instead of analyzing it\n",
     "fully, so it can misjudge tunnel connectivity in rare configurations,\n",
-    "and it is not invariant under reflections. Custodio et al. (2013)\n",
+    "and it is not invariant under reflections. {cite:t}`custodio2013`\n",
     "document both issues. The field below triggers them at once:\n",
     "`lewiner` connects the surface into a tunnel, and mirroring the\n",
     "values changes its topology to two separate sheets. The meshes stay\n",
@@ -442,7 +443,7 @@
    "id": "5a61ba03",
    "metadata": {},
    "source": [
-    "The `vega` variant ports the implementation of Vega et al. (2019),\n",
+    "The `vega` variant ports the implementation of {cite:t}`vega2019`,\n",
     "which replaces the interior test with one that analyzes the\n",
     "interpolant fully. Here it extracts the two sheets the interpolant\n",
     "actually contains, and mirroring the field does not change the\n",
@@ -586,8 +587,7 @@
     "and interior test descriptors, and re-deriving that machinery is\n",
     "where historical implementations accumulated bugs.\n",
     "\n",
-    "The `vega` table is converted from the MC33_c_library of Vega et al.\n",
-    "(MIT) by\n",
+    "The `vega` table is converted from the MC33_c_library of {cite:t}`vega2019` (MIT) by\n",
     "[`luts/convert_vega_luts.py`](https://github.com/GuangyanCai/isoext/blob/master/luts/convert_vega_luts.py).\n",
     "The converter re-derives every offset the case dispatch can reach and\n",
     "decodes the triangle strip at each one, so a conversion error fails\n",
@@ -601,21 +601,9 @@
    "source": [
     "## References\n",
     "\n",
-    "- Lorensen and Cline, \"Marching cubes: A high resolution 3D surface\n",
-    "  construction algorithm\" (SIGGRAPH 1987)\n",
-    "- Nagae, Agui and Nagahashi, \"Surface construction and contour\n",
-    "  generation from volume data\" (1991)\n",
-    "- Chernyaev, \"Marching Cubes 33: Construction of Topologically\n",
-    "  Correct Isosurfaces\" (1995)\n",
-    "- Lewiner, Lopes, Vieira and Tavares, \"Efficient implementation of\n",
-    "  Marching Cubes' cases with topological guarantees\" (Journal of\n",
-    "  Graphics Tools, 2003)\n",
-    "- Custodio, Etiene, Pesco and Silva, \"Practical considerations on\n",
-    "  Marching Cubes 33 topological correctness\" (Computers & Graphics,\n",
-    "  2013)\n",
-    "- Vega, Abache and Coll, \"A Fast and Memory-Saving Marching Cubes 33\n",
-    "  implementation with the correct interior test\" (Journal of Computer\n",
-    "  Graphics Techniques, 2019)\n"
+    "```{bibliography}\n",
+    ":filter: docname in docnames\n",
+    "```\n"
    ]
   }
  ],

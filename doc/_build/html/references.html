@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Using External SDF Libraries" href="more_sdf.html"><link rel="prev" title="SDF Utilities" href="sdf_guide.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Development" href="development.html"><link rel="prev" title="Performance" href="performance.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Working with Occupancy Grids - isoext documentation</title>
+        <title>References - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -180,7 +180,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -215,17 +215,17 @@
 <li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="grids.html">Working with Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Working with Occupancy Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">References</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -250,12 +250,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/occupancy_grids.ipynb?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/references.md?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/occupancy_grids.ipynb" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/references.md" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -267,113 +267,28 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="working-with-occupancy-grids">
-<h1>Working with Occupancy Grids<a class="headerlink" href="#working-with-occupancy-grids" title="Link to this heading">¶</a></h1>
-<p>While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from <strong>binary occupancy grids</strong>—voxel grids where each cell is either occupied (1) or empty (0).</p>
-<p>This is useful when:</p>
-<ul class="simple">
-<li><p>You have voxelized data from 3D scanning or segmentation</p></li>
-<li><p>Your data comes from a boolean CSG operation</p></li>
-<li><p>You want to convert a mesh to voxels and back</p></li>
+          <section id="references">
+<h1>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h1>
+<p>Every work referenced in this documentation, alphabetical by author.
+Each method page also lists the works it cites.</p>
+<ul class="simple" id="id1">
+<li id="id5"><p>Evgeni Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Technical Report CERN-CN-95-17, CERN, Geneva, 1995. URL: <a class="reference external" href="https://repository.cern/records/7zfxg-q0t96">https://repository.cern/records/7zfxg-q0t96</a>.</p></li>
+<li id="id11"><p>Lis Custodio, Tiago Etiene, Sinesio Pesco, and Claudio Silva. Practical considerations on marching cubes 33 topological correctness. <em>Computers &amp; Graphics</em>, 37(7):840–850, 2013. <a class="reference external" href="https://doi.org/10.1016/j.cag.2013.04.004">doi:10.1016/j.cag.2013.04.004</a>.</p></li>
+<li id="id3"><p>Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. <em>IEICE Transactions on Information and Systems</em>, E74-D(1):214–224, 1991.</p></li>
+<li id="id6"><p>Sarah F. F. Gibson. Constrained elastic surface nets: generating smooth surfaces from binary segmented data. In <em>Medical Image Computing and Computer-Assisted Intervention (MICCAI '98), LNCS 1496</em>, 888–898. Springer, 1998. <a class="reference external" href="https://doi.org/10.1007/BFb0056277">doi:10.1007/BFb0056277</a>.</p></li>
+<li id="id7"><p>Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In <em>Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02)</em>, 339–346. 2002. <a class="reference external" href="https://doi.org/10.1145/566570.566586">doi:10.1145/566570.566586</a>.</p></li>
+<li id="id9"><p>Thomas Lewiner, Hélio Lopes, Antônio Wilson Vieira, and Geovan Tavares. Efficient implementation of marching cubes' cases with topological guarantees. <em>Journal of Graphics Tools</em>, 8(2):1–15, 2003. <a class="reference external" href="https://doi.org/10.1080/10867651.2003.10487582">doi:10.1080/10867651.2003.10487582</a>.</p></li>
+<li id="id2"><p>William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3D surface construction algorithm. In <em>Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '87)</em>, 163–169. 1987. <a class="reference external" href="https://doi.org/10.1145/37401.37422">doi:10.1145/37401.37422</a>.</p></li>
+<li id="id4"><p>Takanori Nagae, Takeshi Agui, and Hiroshi Nagahashi. Surface construction and contour generation from volume data. In <em>Medical Imaging 1993: Image Processing, Proc. SPIE 1898</em>, 74–84. 1993. <a class="reference external" href="https://doi.org/10.1117/12.154567">doi:10.1117/12.154567</a>.</p></li>
+<li id="id8"><p>Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: <a class="reference external" href="https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf</a>.</p></li>
+<li id="id12"><p>David Vega, Javier Abache, and David Coll. A fast and memory-saving marching cubes 33 implementation with the correct interior test. <em>Journal of Computer Graphics Techniques (JCGT)</em>, 8(3):1–18, 2019. URL: <a class="reference external" href="https://jcgt.org/published/0008/03/01/">https://jcgt.org/published/0008/03/01/</a>.</p></li>
+<li id="id10"><p>Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: <a class="reference external" href="https://www.skytopia.com/project/fractal/mandelbulb.html">https://www.skytopia.com/project/fractal/mandelbulb.html</a>.</p></li>
 </ul>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
-</pre></div>
-</div>
-</div>
-</div>
-<section id="creating-an-occupancy-grid">
-<h2>Creating an Occupancy Grid<a class="headerlink" href="#creating-an-occupancy-grid" title="Link to this heading">¶</a></h2>
-<p>Let’s create a binary occupancy grid from a sphere SDF. Values &gt; 0 are outside, so we threshold to get a binary mask:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a grid and compute sphere SDF</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
-<span class="n">sdf_values</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
-
-<span class="c1"># Convert to binary occupancy: 0 = outside, 1 = inside</span>
-<span class="n">occupancy</span> <span class="o">=</span> <span class="p">(</span><span class="n">sdf_values</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Occupancy values: </span><span class="si">{</span><span class="n">occupancy</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Occupancy values: [0.0, 1.0]
-</pre></div>
-</div>
-</div>
-</div>
-</section>
-<section id="direct-extraction-jagged-result">
-<h2>Direct Extraction (Jagged Result)<a class="headerlink" href="#direct-extraction-jagged-result" title="Link to this heading">¶</a></h2>
-<p>You can run marching cubes directly on the binary grid using <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code> (the boundary between 0 and 1). However, the result will be <strong>jagged</strong> because there’s no gradient information—every surface point lands exactly on a voxel face:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">occupancy</span><span class="p">)</span>
-<span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Jagged mesh: </span><span class="si">{</span><span class="n">v_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_jagged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_jagged</span><span class="p">,</span> <span class="n">f_jagged</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Jagged mesh: 9168 vertices, 18332 faces
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/ead150578e6ce454.viser"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-</section>
-<section id="smoothed-extraction">
-<h2>Smoothed Extraction<a class="headerlink" href="#smoothed-extraction" title="Link to this heading">¶</a></h2>
-<p>To get a smoother result, apply <strong>Gaussian smoothing</strong> before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Smooth the occupancy grid</span>
-<span class="n">smoothed</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">occupancy</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">smoothed</span><span class="p">)</span>
-<span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Smooth mesh: </span><span class="si">{</span><span class="n">v_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">f_smooth</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> faces&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_smooth</span><span class="p">,</span> <span class="n">f_smooth</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Smooth mesh: 8232 vertices, 16460 faces
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/6657d7f18e790d46.viser"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-</section>
 </section>
 
         </article>
@@ -381,23 +296,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="more_sdf.html">
+          <a class="next-page" href="development.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Using External SDF Libraries</div>
+                <div class="title">Development</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="sdf_guide.html">
+          <a class="prev-page" href="performance.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">SDF Utilities</div>
+                <div class="title">Performance</div>
                 
               </div>
             </a>
@@ -419,29 +334,8 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Working with Occupancy Grids</a><ul>
-<li><a class="reference internal" href="#creating-an-occupancy-grid">Creating an Occupancy Grid</a></li>
-<li><a class="reference internal" href="#direct-extraction-jagged-result">Direct Extraction (Jagged Result)</a></li>
-<li><a class="reference internal" href="#smoothed-extraction">Smoothed Extraction</a></li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

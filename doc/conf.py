@@ -17,10 +17,28 @@ extensions = [
     "myst_nb",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",  # For Google/NumPy style docstrings
+    "sphinxcontrib.bibtex",
 ]
 
 # MyST-NB settings
 nb_execution_mode = "off"  # Don't execute notebooks during build (requires GPU)
+
+# Bibliography. Pages cite with {cite:t}`key` and end with a local
+# {bibliography} directive filtered to their own citations; the references
+# page lists everything.
+bibtex_bibfiles = ["references.bib"]
+bibtex_reference_style = "author_year"
+bibtex_default_style = "unsrt"
+# The per-page lists restart their numeric labels, which is intended.
+suppress_warnings = ["bibtex.duplicate_label"]
+
+# ACM and Taylor & Francis serve 403 to non-browser agents; the DOIs
+# behind these were verified against Crossref when references.bib was
+# written.
+linkcheck_ignore = [
+    r"https://doi\.org/10\.1145/.*",
+    r"https://doi\.org/10\.1080/.*",
+]
 
 # Copy viser's static client into _static so the interactive scene embeds in
 # the executed notebooks keep working in the built documentation.

@@ -72,6 +72,7 @@ torch = { index = "https://download.pytorch.org/whl/cu128" }
 [tool.pixi.feature.doc.pypi-dependencies]
 sphinx = "*"
 sphinx-autobuild = "*"
+sphinxcontrib-bibtex = "*"
 furo = "*"
 myst-nb = "*"
 ipywidgets = "*"
@@ -83,6 +84,7 @@ doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc", depends-o
 doc-serve = { cmd = "sphinx-autobuild . _build/html --host 0.0.0.0 --watch ../src", cwd = "doc", depends-on = ["compile"] }
 doc-clean = { cmd = "rm -rf _build", cwd = "doc", depends-on = ["compile"] }
 doc-rebuild = { cmd = "rm -rf _build && sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
+doc-linkcheck = { cmd = "sphinx-build -b linkcheck . _build/linkcheck", cwd = "doc", depends-on = ["compile"] }
 doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }
 
 [tool.pixi.environments]

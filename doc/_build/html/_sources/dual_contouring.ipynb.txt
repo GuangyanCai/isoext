@@ -104,9 +104,9 @@
     "\n",
     "For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:\n",
     "\n",
-    "1. **Get intersections** — Call `get_intersection()` to get intersection points\n",
-    "2. **Compute normals** — Use SDF gradient for accurate surface normals\n",
-    "3. **Run dual contouring** — Pass the intersection with custom normals\n"
+    "1. **Get intersections** \u2014 Call `get_intersection()` to get intersection points\n",
+    "2. **Compute normals** \u2014 Use SDF gradient for accurate surface normals\n",
+    "3. **Run dual contouring** \u2014 Pass the intersection with custom normals\n"
    ]
   },
   {
@@ -244,12 +244,10 @@
     "matter: it is only safe for exact fields like analytic SDFs. On\n",
     "approximate fields, such as distance estimators or neural networks,\n",
     "noise in the points and normals can throw unclamped vertices far from\n",
-    "the surface, producing what Schaefer and Warren call spikes (\"Dual\n",
-    "Contouring: The Secret Sauce\", 2002). For those fields, and for purely\n",
+    "the surface, producing what {cite:t}`schaefer2002` call spikes. For those fields, and for purely\n",
     "sampled volumes, keep the default clamp.\n",
     "\n",
-    "The vertex placement follows Ju et al., \"Dual Contouring of Hermite Data\"\n",
-    "(SIGGRAPH 2002).\n"
+    "The vertex placement follows {cite:t}`ju2002`.\n"
    ]
   },
   {
@@ -302,6 +300,17 @@
     "\n",
     "vertices, faces = isoext.dual_contouring(grid, intersection=its, clamp=False)\n",
     "viewer.embed(vertices, faces, color=\"gold\", flat_shading=True)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## References\n",
+    "\n",
+    "```{bibliography}\n",
+    ":filter: docname in docnames\n",
+    "```\n"
    ]
   }
  ],

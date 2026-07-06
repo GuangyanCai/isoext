@@ -35,6 +35,8 @@ instead of 134M.
 
 ## Reproducing
 
+The environment setup is described in {doc}`development`. Then:
+
 ```bash
 pixi run --environment cu128 bench
 

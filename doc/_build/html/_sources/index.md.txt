@@ -19,7 +19,8 @@
 `isoext` extracts iso-surfaces from scalar fields on the GPU. The field
 values come in as a PyTorch tensor and the mesh comes back as tensors, so
 it fits directly into training loops and other GPU pipelines. Marching
-cubes and dual contouring are implemented, on both dense and sparse grids.
+cubes, marching tetrahedra, dual contouring and surface nets are
+implemented, on both dense and sparse grids.
 
 ## Quick Example
 
@@ -40,10 +41,12 @@ isoext.write_obj("sphere.obj", vertices, faces)
 
 Median extraction times for a sphere SDF on an RTX 5090:
 
-| Algorithm       | uniform 512³ | sparse 512³ |
-|-----------------|--------------|-------------|
-| marching_cubes  | 5.4 ms       | 1.9 ms      |
-| dual_contouring | 7.0 ms       | 2.3 ms      |
+| Algorithm           | uniform 512³ | sparse 512³ |
+|---------------------|--------------|-------------|
+| marching_cubes      | 5.4 ms       | 1.9 ms      |
+| marching_tetrahedra | 6.7 ms       | 3.2 ms      |
+| dual_contouring     | 7.0 ms       | 2.3 ms      |
+| surface_nets        | 6.9 ms       | 2.2 ms      |
 
 See {doc}`performance` for the full table and how to reproduce it.
 
@@ -62,9 +65,17 @@ quickstart
 :hidden:
 
 marching_cubes
-mc_variants
 marching_tetrahedra
 dual_contouring
+surface_nets
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: In Depth
+:hidden:
+
+mc_variants
 ```
 
 ```{toctree}
@@ -85,4 +96,13 @@ more_sdf
 
 api
 performance
+references
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Development
+:hidden:
+
+development
 ```

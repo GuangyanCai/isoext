@@ -206,9 +206,13 @@
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
@@ -221,6 +225,11 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -278,7 +287,8 @@
 </div><p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> extracts iso-surfaces from scalar fields on the GPU. The field
 values come in as a PyTorch tensor and the mesh comes back as tensors, so
 it fits directly into training loops and other GPU pipelines. Marching
-cubes and dual contouring are implemented, on both dense and sparse grids.</p>
+cubes, marching tetrahedra, dual contouring and surface nets are
+implemented, on both dense and sparse grids.</p>
 <section id="quick-example">
 <h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
@@ -310,14 +320,26 @@ cubes and dual contouring are implemented, on both dense and sparse grids.</p>
 <td><p>5.4 ms</p></td>
 <td><p>1.9 ms</p></td>
 </tr>
-<tr class="row-odd"><td><p>dual_contouring</p></td>
+<tr class="row-odd"><td><p>marching_tetrahedra</p></td>
+<td><p>6.7 ms</p></td>
+<td><p>3.2 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>dual_contouring</p></td>
 <td><p>7.0 ms</p></td>
 <td><p>2.3 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>surface_nets</p></td>
+<td><p>6.9 ms</p></td>
+<td><p>2.2 ms</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p>See <a class="reference internal" href="performance.html"><span class="doc">Performance</span></a> for the full table and how to reproduce it.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
