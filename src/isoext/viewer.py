@@ -66,6 +66,7 @@ def add_mesh(
     color=(0.71, 0.8, 1.0),
     flat_shading: bool = False,
     wireframe: bool = False,
+    side: str = "front",
 ):
     """Add a mesh from isoext output tensors to a viser scene.
 
@@ -77,6 +78,9 @@ def add_mesh(
         color: RGB tuple with components in [0, 1], or a color name.
         flat_shading: Shade each triangle with a constant normal.
         wireframe: Render the mesh as a wireframe.
+        side: Which triangle sides to render: "front", "back" or "double".
+            Use "double" for open surfaces, which disappear from behind
+            with the default backface culling.
 
     Returns:
         The viser mesh handle.
@@ -88,6 +92,7 @@ def add_mesh(
         color=_to_rgb(color),
         flat_shading=flat_shading,
         wireframe=wireframe,
+        side=side,
     )
 
 
