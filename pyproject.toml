@@ -92,6 +92,7 @@ doc-linkcheck = { cmd = "sphinx-build -b linkcheck . _build/linkcheck", cwd = "d
 doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }
 
 [tool.pixi.environments]
-dev = { features = ["dev"] }
-cu128 = { features = ["dev", "cu128"] }
+# The CUDA flavor is picked here, so the commands stay the same when it
+# changes: plain `pixi run <task>` for development, `-e doc` for docs.
+default = { features = ["dev", "cu128"] }
 doc = { features = ["doc", "cu128"] }

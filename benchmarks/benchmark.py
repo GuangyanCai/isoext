@@ -1,8 +1,8 @@
 """Benchmark isoext extraction algorithms.
 
 Usage:
-    pixi run --environment cu128 bench
-    pixi run --environment cu128 python benchmarks/benchmark.py \
+    pixi run bench
+    pixi run python benchmarks/benchmark.py \
         --res 32 64 --iters 50 --json benchmarks/results/out.json
 """
 

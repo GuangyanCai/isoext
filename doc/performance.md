@@ -38,10 +38,10 @@ instead of 134M.
 The environment setup is described in {doc}`development`. Then:
 
 ```bash
-pixi run --environment cu128 bench
+pixi run bench
 
 # or directly, with options:
-pixi run --environment cu128 python benchmarks/benchmark.py \
+pixi run python benchmarks/benchmark.py \
     --res 32 64 128 256 512 --json results.json
 ```
 

@@ -32,15 +32,17 @@ compiler if that happens.
 | Command | What it does |
 |---|---|
 | `pixi run compile` | Build and install the extension |
-| `pixi run --environment cu128 test` | Run the test suite |
-| `pixi run --environment cu128 bench` | Run the benchmark |
-| `pixi run --environment cu128 format` | Format the sources |
-| `pixi run --environment doc doc-serve` | Serve the docs with live reload |
-| `pixi run --environment doc doc-rebuild` | Rebuild the docs from scratch |
+| `pixi run test` | Run the test suite |
+| `pixi run bench` | Run the benchmark |
+| `pixi run format` | Format the sources |
+| `pixi run -e doc doc-serve` | Serve the docs with live reload |
+| `pixi run -e doc doc-rebuild` | Rebuild the docs from scratch |
 
-The environments differ by what they add on top of the build
-dependencies: `cu128` adds PyTorch with CUDA 12.8 wheels and the test
-tools, `doc` adds Sphinx and Jupyter.
+The default environment carries everything development needs,
+including PyTorch with CUDA 12.8 wheels; the `doc` environment adds
+Sphinx and Jupyter. The CUDA flavor is chosen inside the environment
+definitions in `pyproject.toml`, so a future CUDA bump changes those
+definitions and none of the commands.
 
 `format` applies the repository's `.clang-format` to the CUDA/C++
 sources -- except the generated lookup-table headers, which follow
@@ -50,8 +52,8 @@ Run it before committing.
 ## Tests
 
 ```bash
-pixi run --environment cu128 test                      # everything
-pixi run --environment cu128 pytest tests/test_vega.py -n 2   # one file
+pixi run test                                # everything
+pixi run pytest tests/test_vega.py -n 2      # one file
 ```
 
 The suite runs under pytest-xdist (`-n 2`) so that a crashed CUDA
@@ -127,7 +129,7 @@ The doc pages are Jupyter notebooks executed in place plus a few
 Markdown files, built with Sphinx:
 
 ```bash
-pixi run --environment doc doc-serve    # live preview on :8000
+pixi run -e doc doc-serve    # live preview on :8000
 ```
 
 The interactive viewers are serialized [viser](https://viser.studio)
@@ -143,7 +145,7 @@ notebook.
 ## Benchmarks
 
 ```bash
-pixi run --environment cu128 python benchmarks/benchmark.py \
+pixi run python benchmarks/benchmark.py \
     --res 128 512 --json results.json
 ```
 
