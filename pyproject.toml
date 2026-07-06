@@ -61,10 +61,14 @@ numpy = "*"
 pytest = "*"
 pytest-xdist = "*"
 scikit-image = "*"
+clang-format = "*"
 
 [tool.pixi.feature.dev.tasks]
 test = { cmd = "pytest tests/ -n 2", cwd = ".", depends-on = ["compile"] }
 bench = { cmd = "python benchmarks/benchmark.py", cwd = ".", depends-on = ["compile"] }
+# The generated LUT headers are excluded: reformatting them would churn
+# against their generators.
+format = { cmd = "find include src -name '*.cu' -o -name '*.cuh' | grep -vE '(lewiner|vega)_luts' | xargs clang-format -i && ruff format .", cwd = "." }
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }
