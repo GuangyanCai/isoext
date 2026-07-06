@@ -17,16 +17,7 @@ import shutil
 from pathlib import Path
 
 import torch
-
-
-def _import_viser():
-    try:
-        import viser
-    except ImportError as e:
-        raise ImportError(
-            "The isoext viewer requires viser. Install it with: pip install viser"
-        ) from e
-    return viser
+import viser
 
 
 def _suppress_output():
@@ -50,9 +41,7 @@ def _to_rgb(color):
         try:
             from matplotlib.colors import to_rgb
         except ImportError as e:
-            raise ImportError(
-                "Color names require matplotlib; pass an RGB tuple instead."
-            ) from e
+            raise ImportError("Color names require matplotlib; pass an RGB tuple instead.") from e
         return to_rgb(color)
     return color
 
@@ -126,22 +115,33 @@ def add_grid(
     points = grid.get_points()
     if points[..., 0].numel() > 32**3:
         raise ValueError("add_grid is meant for small demonstration grids")
-    if points.ndim == 4:   # uniform: (nx, ny, nz, 3)
+    if points.ndim == 4:  # uniform: (nx, ny, nz, 3)
         p = points
-        segments = torch.cat([
-            torch.stack([p[:-1], p[1:]], dim=-2).reshape(-1, 2, 3),
-            torch.stack([p[:, :-1], p[:, 1:]], dim=-2).reshape(-1, 2, 3),
-            torch.stack([p[:, :, :-1], p[:, :, 1:]], dim=-2).reshape(-1, 2, 3),
-        ])
+        segments = torch.cat(
+            [
+                torch.stack([p[:-1], p[1:]], dim=-2).reshape(-1, 2, 3),
+                torch.stack([p[:, :-1], p[:, 1:]], dim=-2).reshape(-1, 2, 3),
+                torch.stack([p[:, :, :-1], p[:, :, 1:]], dim=-2).reshape(-1, 2, 3),
+            ]
+        )
         edge = (p[1, 0, 0] - p[0, 0, 0]).norm() if p.shape[0] > 1 else 1.0
-    elif points.ndim == 3 and points.shape[1:] == (8, 3):   # sparse cells
+    elif points.ndim == 3 and points.shape[1:] == (8, 3):  # sparse cells
         if len(points) == 0:
             return
         # Corner index bits within a cell are (x << 2) | (y << 1) | z.
         cell_edges = [
-            (0, 1), (2, 3), (4, 5), (6, 7),
-            (0, 2), (1, 3), (4, 6), (5, 7),
-            (0, 4), (1, 5), (2, 6), (3, 7),
+            (0, 1),
+            (2, 3),
+            (4, 5),
+            (6, 7),
+            (0, 2),
+            (1, 3),
+            (4, 6),
+            (5, 7),
+            (0, 4),
+            (1, 5),
+            (2, 6),
+            (3, 7),
         ]
         segments = points[:, cell_edges].reshape(-1, 2, 3)
         edge = (points[0, 1] - points[0, 0]).norm()
@@ -159,9 +159,7 @@ def add_grid(
     if point_size is None:
         point_size = 0.1 * float(edge)
     inside = (grid.get_values() < level).reshape(-1).cpu().numpy()
-    colors = np.where(
-        inside[:, None], (0.85, 0.25, 0.2), (0.25, 0.45, 0.85)
-    ).astype(np.float32)
+    colors = np.where(inside[:, None], (0.85, 0.25, 0.2), (0.25, 0.45, 0.85)).astype(np.float32)
     server.scene.add_point_cloud(
         f"{name}/corners",
         points.reshape(-1, 3).cpu().numpy(),
@@ -195,7 +193,6 @@ def show(
     Returns:
         The running viser.ViserServer; call .stop() to shut it down.
     """
-    viser = _import_viser()
     server = viser.ViserServer(port=port)
     add_mesh(server, vertices, faces, **mesh_kwargs)
     if grid is not None:
@@ -211,7 +208,6 @@ _scene_recorder = None
 
 def _get_scene_recorder():
     global _scene_recorder
-    viser = _import_viser()
     if _scene_recorder is None:
         with _suppress_output():
             _scene_recorder = viser.ViserServer(verbose=False)
@@ -256,7 +252,6 @@ def copy_client(directory) -> Path:
     Returns:
         The path of the copied index.html.
     """
-    viser = _import_viser()
     src = Path(viser.__file__).parent / "client" / "build" / "index.html"
     dst = Path(directory) / "index.html"
     if not dst.exists() or dst.stat().st_size != src.stat().st_size:
