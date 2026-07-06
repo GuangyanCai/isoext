@@ -34,12 +34,18 @@ compiler if that happens.
 | `pixi run compile` | Build and install the extension |
 | `pixi run --environment cu128 test` | Run the test suite |
 | `pixi run --environment cu128 bench` | Run the benchmark |
+| `pixi run --environment cu128 format` | Format the sources |
 | `pixi run --environment doc doc-serve` | Serve the docs with live reload |
 | `pixi run --environment doc doc-rebuild` | Rebuild the docs from scratch |
 
 The environments differ by what they add on top of the build
 dependencies: `cu128` adds PyTorch with CUDA 12.8 wheels and the test
 tools, `doc` adds Sphinx and Jupyter.
+
+`format` applies the repository's `.clang-format` to the CUDA/C++
+sources -- except the generated lookup-table headers, which follow
+their generators instead -- and `ruff format` to the Python files.
+Run it before committing.
 
 ## Tests
 

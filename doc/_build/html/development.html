@@ -321,10 +321,13 @@ compiler if that happens.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">--environment</span> <span class="pre">cu128</span> <span class="pre">bench</span></code></p></td>
 <td><p>Run the benchmark</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">--environment</span> <span class="pre">doc</span> <span class="pre">doc-serve</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">--environment</span> <span class="pre">cu128</span> <span class="pre">format</span></code></p></td>
+<td><p>Format the sources</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">--environment</span> <span class="pre">doc</span> <span class="pre">doc-serve</span></code></p></td>
 <td><p>Serve the docs with live reload</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">--environment</span> <span class="pre">doc</span> <span class="pre">doc-rebuild</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">--environment</span> <span class="pre">doc</span> <span class="pre">doc-rebuild</span></code></p></td>
 <td><p>Rebuild the docs from scratch</p></td>
 </tr>
 </tbody>
@@ -333,6 +336,10 @@ compiler if that happens.</p>
 <p>The environments differ by what they add on top of the build
 dependencies: <code class="docutils literal notranslate"><span class="pre">cu128</span></code> adds PyTorch with CUDA 12.8 wheels and the test
 tools, <code class="docutils literal notranslate"><span class="pre">doc</span></code> adds Sphinx and Jupyter.</p>
+<p><code class="docutils literal notranslate"><span class="pre">format</span></code> applies the repository’s <code class="docutils literal notranslate"><span class="pre">.clang-format</span></code> to the CUDA/C++
+sources – except the generated lookup-table headers, which follow
+their generators instead – and <code class="docutils literal notranslate"><span class="pre">ruff</span> <span class="pre">format</span></code> to the Python files.
+Run it before committing.</p>
 </section>
 <section id="tests">
 <h2>Tests<a class="headerlink" href="#tests" title="Link to this heading">¶</a></h2>
