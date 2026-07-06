@@ -4,13 +4,18 @@
 
 `isoext` requires:
 
-- **Python** 3.10 – 3.12
+- **Python** 3.10 or newer
 - **PyTorch** with CUDA support
 - **CUDA Toolkit** 12.4 or newer. Older nvcc versions fail on the glibc
   headers of recent Linux distributions (Ubuntu 24.04 and later) with
   errors like `"__builtin_dynamic_object_size" is undefined`. The build
   checks for this and stops with instructions if it finds an old nvcc.
 - A C++ compiler (GCC on Linux, Visual Studio on Windows)
+
+The three have to agree with each other: use the PyTorch build that
+matches your CUDA toolkit's major version (compare `torch.version.cuda`
+with `nvcc --version`), and a C++ compiler your CUDA toolkit supports --
+each nvcc release accepts host compilers only up to a certain version.
 
 ## Install from PyPI
 
@@ -29,13 +34,14 @@ Enable long paths by following [this guide](https://www.howtogeek.com/266621/how
 
 ## Install from Source
 
-For development or to get the latest changes:
+To get the latest unreleased changes:
 
 ```bash
-git clone https://github.com/GuangyanCai/isoext
-cd isoext
-pip install -e .
+pip install git+https://github.com/GuangyanCai/isoext
 ```
+
+For a development setup with the pinned toolchain, tests and docs, see
+{doc}`development`.
 
 ## Verify Installation
 
@@ -82,8 +88,8 @@ The result is cached on disk, so this happens once per machine.
 If you see `ImportError: PyTorch is required`, install PyTorch first:
 
 ```bash
-pip install torch --index-url https://download.pytorch.org/whl/cu121
+pip install torch --index-url https://download.pytorch.org/whl/cu128
 ```
 
-Replace `cu121` with your CUDA version (e.g., `cu118`, `cu124`).
+Replace `cu128` with your CUDA version.
 

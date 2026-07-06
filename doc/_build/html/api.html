@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Performance" href="performance.html"><link rel="prev" title="Using External SDF Libraries" href="more_sdf.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Performance" href="performance.html"><link rel="prev" title="Viewer" href="viewer.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>API Reference - isoext documentation</title>
@@ -220,6 +220,10 @@
 <li class="toctree-l1"><a class="reference internal" href="sdf_guide.html">SDF Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
@@ -454,7 +458,7 @@ points using linear interpolation.</p>
 
 </section>
 <section id="viewer">
-<h2>Viewer<a class="headerlink" href="#viewer" title="Link to this heading">¶</a></h2>
+<span id="api-viewer"></span><h2>Viewer<a class="headerlink" href="#viewer" title="Link to this heading">¶</a></h2>
 <p>Interactive visualization built on <a class="reference external" href="https://viser.studio">viser</a>.</p>
 <p id="module-isoext.viewer">Interactive mesh viewing and scene export built on viser.</p>
 <p>Typical use:</p>
@@ -487,6 +491,29 @@ with the default backface culling.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The viser mesh handle.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_grid">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/grid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Draw a grid’s cell edges and its corner values as colored dots.</p>
+<p>Corners with a value below the level are drawn red (inside the
+surface), the rest blue. For sparse grids only the active cells are
+drawn. Meant for small demonstration grids, like the single-cell
+examples on the marching cubes variants page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>grid</strong> – A UniformGrid or SparseGrid whose values are set.</p></li>
+<li><p><strong>level</strong> (<em>float</em>) – The iso-value that separates inside from outside.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Scene tree name prefix for the lines and dots.</p></li>
+<li><p><strong>point_size</strong> (<em>float</em><em> | </em><em>None</em>) – Dot diameter in world units. Defaults to a fraction
+of the cell edge length.</p></li>
+<li><p><strong>line_width</strong> (<em>float</em>) – Width of the cell edges in pixels.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -837,14 +864,14 @@ against the exact SDF.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="more_sdf.html">
+          <a class="prev-page" href="viewer.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Using External SDF Libraries</div>
+                <div class="title">Viewer</div>
                 
               </div>
             </a>
@@ -892,6 +919,7 @@ against the exact SDF.</p>
 </li>
 <li><a class="reference internal" href="#viewer">Viewer</a><ul>
 <li><a class="reference internal" href="#isoext.viewer.add_mesh"><code class="docutils literal notranslate"><span class="pre">add_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_grid"><code class="docutils literal notranslate"><span class="pre">add_grid()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.serialize_scene"><code class="docutils literal notranslate"><span class="pre">serialize_scene()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.save_scene"><code class="docutils literal notranslate"><span class="pre">save_scene()</span></code></a></li>

@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Dual Contouring" href="dual_contouring.html"><link rel="prev" title="Marching Cubes" href="marching_cubes.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="API Reference" href="api.html"><link rel="prev" title="Using External SDF Libraries" href="more_sdf.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Marching Tetrahedra - isoext documentation</title>
+        <title>Viewer - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -204,9 +204,9 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 </ul>
@@ -222,8 +222,8 @@
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Viewer</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
@@ -254,12 +254,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/marching_tetrahedra.ipynb?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/viewer.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/marching_tetrahedra.ipynb" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/viewer.ipynb" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -276,71 +276,61 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="marching-tetrahedra">
-<h1>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">¶</a></h1>
-<p>Marching tetrahedra splits every cell into six tetrahedra and extracts
-the surface per tetrahedron. A tetrahedron has no ambiguous sign
-configurations, so the mesh is watertight and consistent by
-construction. The price is roughly 2-3x more triangles than marching
-cubes, with worse triangle shapes and a slight directional grain from
-the cell split. The method goes back to <span class="bibtex-citation" id="id1">Doi and Koide [<a class="reference internal" href="#id4" title="Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. IEICE Transactions on Information and Systems, E74-D(1):214–224, 1991.">1991</a>]</span>.</p>
+          <section id="viewer">
+<h1>Viewer<a class="headerlink" href="#viewer" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">isoext.viewer</span></code> module shows extraction results without leaving
+Python. It is built on <a class="reference external" href="https://viser.studio">viser</a>, which installs
+together with isoext, and has two modes: a live server for
+interactive work, and serialized scenes for notebooks and static web
+pages, which is how the examples in this documentation are rendered.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
-</pre></div>
-</div>
-</div>
-</div>
-<section id="basic-usage">
-<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
-<p>The interface matches the other extraction methods: a grid with scalar
-values in, vertex and face tensors out.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">TorusSDF</span>
 
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;marching_tetrahedra: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">96</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">torus</span> <span class="o">=</span> <span class="n">TorusSDF</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torus</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="n">v_mc</span><span class="p">,</span> <span class="n">f_mc</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;marching_cubes:      </span><span class="si">{</span><span class="n">f_mc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>marching_tetrahedra: 13,416 triangles
-marching_cubes:      4,508 triangles
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>19,416 vertices
 </pre></div>
 </div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/0aa6cc85cc83b61e.viser"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
+</div>
+</div>
+<section id="live-viewing">
+<h2>Live Viewing<a class="headerlink" href="#live-viewing" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">show</span></code> starts a local server and prints its URL; open it in any
+browser. The server keeps running until you stop it, so you can keep
+working while the mesh stays up.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">)</span>
+<span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To put several meshes in one scene, call <code class="docutils literal notranslate"><span class="pre">add_mesh</span></code> on the running
+server with different scene names:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;/torus&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;/sphere&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;seagreen&quot;</span><span class="p">)</span>
+</pre></div>
 </div>
 </section>
-<section id="tessellation">
-<h2>Tessellation<a class="headerlink" href="#tessellation" title="Link to this heading">¶</a></h2>
-<p>The wireframes on a coarse grid show where the extra triangles go and
-the diagonal grain left by the six-tetrahedra split. Marching cubes
-first, marching tetrahedra second.</p>
+<section id="styling">
+<h2>Styling<a class="headerlink" href="#styling" title="Link to this heading">¶</a></h2>
+<p>All viewing functions take the same styling options: <code class="docutils literal notranslate"><span class="pre">color</span></code> accepts
+an RGB tuple or a matplotlib color name, <code class="docutils literal notranslate"><span class="pre">flat_shading</span></code> shades each
+triangle with a constant normal, <code class="docutils literal notranslate"><span class="pre">wireframe</span></code> draws only the triangle
+edges, and <code class="docutils literal notranslate"><span class="pre">side</span></code> selects which triangle sides to render – use
+<code class="docutils literal notranslate"><span class="pre">side=&quot;double&quot;</span></code> for open surfaces, which disappear from behind under
+the default backface culling.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coarse</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">])</span>
-<span class="n">coarse</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">coarse</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
-
-<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;goldenrod&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -348,18 +338,30 @@ first, marching tetrahedra second.</p>
 <div class="output text_html">
         <iframe
             width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/bcb84fae47ae4b4f.viser"
+            height="360"
+            src="_static/viser/index.html?playbackPath=../scenes/7cb570eb748ab64d.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
         ></iframe>
         </div></div>
 </div>
+</section>
+<section id="grid-overlay">
+<h2>Grid Overlay<a class="headerlink" href="#grid-overlay" title="Link to this heading">¶</a></h2>
+<p>For small demonstration grids, the viewer can draw the grid itself:
+pass <code class="docutils literal notranslate"><span class="pre">grid=</span></code> to <code class="docutils literal notranslate"><span class="pre">show</span></code> or <code class="docutils literal notranslate"><span class="pre">embed</span></code>, or call <code class="docutils literal notranslate"><span class="pre">add_grid</span></code> on a server.
+Gray lines are the cell edges; red dots mark corners inside the
+surface, blue dots corners outside. <code class="docutils literal notranslate"><span class="pre">grid_level=</span></code> sets the iso-value
+the colors compare against. See <a class="reference internal" href="grids.html"><span class="doc">Working with Grids</span></a> for a sparse grid
+example.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">small</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">12</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">small</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torus</span><span class="p">(</span><span class="n">small</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+
+<span class="n">v_small</span><span class="p">,</span> <span class="n">f_small</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">small</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v_small</span><span class="p">,</span> <span class="n">f_small</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">small</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -367,8 +369,8 @@ first, marching tetrahedra second.</p>
 <div class="output text_html">
         <iframe
             width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/df2fc4b01bd96805.viser"
+            height="360"
+            src="_static/viser/index.html?playbackPath=../scenes/5cc4526584f56e05.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -376,23 +378,23 @@ first, marching tetrahedra second.</p>
         </div></div>
 </div>
 </section>
-<section id="when-to-use-it">
-<h2>When to Use It<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Pick marching tetrahedra when guaranteed topology matters more than
-triangle count, for example as input to solvers or simplification
-passes that assume a closed manifold. For visual quality at the same
-budget, marching cubes gives cleaner triangles.</p>
-</section>
-<section id="references">
-<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
-<div class="docutils container" id="id2">
-<div role="list" class="citation-list">
-<div class="citation" id="id4" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. <em>IEICE Transactions on Information and Systems</em>, E74-D(1):214–224, 1991.</p>
+<section id="static-scenes">
+<h2>Static Scenes<a class="headerlink" href="#static-scenes" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">embed</span></code> returns an IPython IFrame for notebooks. It writes the
+serialized scene and viser’s self-contained client under <code class="docutils literal notranslate"><span class="pre">_static/</span></code>
+next to the notebook and references them with relative URLs, so
+executed notebooks stay interactive when rendered to HTML and hosted
+statically – every example in this documentation works this way.</p>
+<p>Outside notebooks, <code class="docutils literal notranslate"><span class="pre">save_scene</span></code> writes a <code class="docutils literal notranslate"><span class="pre">.viser</span></code> scene file and
+<code class="docutils literal notranslate"><span class="pre">copy_client</span></code> provides the player page. Putting both in one
+directory gives a self-contained scene you can host anywhere:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">viewer</span><span class="o">.</span><span class="n">copy_client</span><span class="p">(</span><span class="s2">&quot;scene/&quot;</span><span class="p">)</span>   <span class="c1"># writes scene/index.html</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">save_scene</span><span class="p">(</span><span class="s2">&quot;scene/torus.viser&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;goldenrod&quot;</span><span class="p">)</span>
+<span class="c1"># serve scene/ and open index.html?playbackPath=torus.viser</span>
+</pre></div>
 </div>
-</div>
-</div>
+<p>The full argument list for every function is in
+<a class="reference internal" href="api.html#api-viewer"><span class="std std-ref">the viewer section of the API reference</span></a>.</p>
 </section>
 </section>
 
@@ -401,23 +403,23 @@ budget, marching cubes gives cleaner triangles.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="dual_contouring.html">
+          <a class="next-page" href="api.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Dual Contouring</div>
+                <div class="title">API Reference</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="marching_cubes.html">
+          <a class="prev-page" href="more_sdf.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Marching Cubes</div>
+                <div class="title">Using External SDF Libraries</div>
                 
               </div>
             </a>
@@ -451,11 +453,11 @@ budget, marching cubes gives cleaner triangles.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Marching Tetrahedra</a><ul>
-<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
-<li><a class="reference internal" href="#tessellation">Tessellation</a></li>
-<li><a class="reference internal" href="#when-to-use-it">When to Use It</a></li>
-<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#">Viewer</a><ul>
+<li><a class="reference internal" href="#live-viewing">Live Viewing</a></li>
+<li><a class="reference internal" href="#styling">Styling</a></li>
+<li><a class="reference internal" href="#grid-overlay">Grid Overlay</a></li>
+<li><a class="reference internal" href="#static-scenes">Static Scenes</a></li>
 </ul>
 </li>
 </ul>

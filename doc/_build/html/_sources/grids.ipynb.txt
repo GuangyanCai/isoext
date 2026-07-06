@@ -9,8 +9,8 @@
     "Grids are the foundation of iso-surface extraction. They define **where** in 3D space we sample scalar values, and **store** those values for the extraction algorithms.\n",
     "\n",
     "`isoext` provides two grid types:\n",
-    "- **UniformGrid** — Dense regular lattice, simple and fast\n",
-    "- **SparseGrid** — Only stores active cells, memory-efficient for large sparse domains\n"
+    "- **UniformGrid** \u2014 Dense regular lattice, simple and fast\n",
+    "- **SparseGrid** \u2014 Only stores active cells, memory-efficient for large sparse domains\n"
    ]
   },
   {
@@ -71,7 +71,7 @@
     }
    ],
    "source": [
-    "# Create a 64³ grid spanning [-1, 1]³ (default bounds)\n",
+    "# Create a 64\u00b3 grid spanning [-1, 1]\u00b3 (default bounds)\n",
     "grid = isoext.UniformGrid([64, 64, 64])\n",
     "\n",
     "print(f\"Cells: {grid.get_num_cells():,}\")\n",
@@ -130,11 +130,11 @@
    "source": [
     "### Setting Values\n",
     "\n",
-    "`set_values()` stores your scalar field on the grid. The values can come from **anywhere** — you're not limited to the built-in SDF utilities.\n",
+    "`set_values()` stores your scalar field on the grid. The values can come from **anywhere** \u2014 you're not limited to the built-in SDF utilities.\n",
     "\n",
     "The iso-surface is extracted where values equal zero:\n",
-    "- **Negative** values → inside the surface\n",
-    "- **Positive** values → outside the surface\n"
+    "- **Negative** values \u2192 inside the surface\n",
+    "- **Positive** values \u2192 outside the surface\n"
    ]
   },
   {
@@ -181,7 +181,7 @@
    ],
    "source": [
     "# Example 1: Simple sphere using raw PyTorch\n",
-    "# No SDF classes needed — just compute distance from origin minus radius\n",
+    "# No SDF classes needed \u2014 just compute distance from origin minus radius\n",
     "points = grid.get_points()\n",
     "radius = 0.7\n",
     "values = points.norm(dim=-1) - radius  # Signed distance to sphere\n",
@@ -235,7 +235,7 @@
     }
    ],
    "source": [
-    "# Example 2: Gyroid — a triply periodic minimal surface\n",
+    "# Example 2: Gyroid \u2014 a triply periodic minimal surface\n",
     "points = grid.get_points()\n",
     "x, y, z = points[..., 0], points[..., 1], points[..., 2]\n",
     "scale = 6.0\n",
@@ -583,9 +583,7 @@
     "- Use `get_points()` to get coordinates for computing your scalar field\n",
     "- Values can come from anywhere: math formulas, SDFs, neural networks, simulations\n",
     "- Negative values = inside, positive = outside, zero = surface\n",
-    "- Use `UniformGrid` for most cases, `SparseGrid` for large sparse domains\n",
-    "\n",
-    "**Next:** [Marching Cubes](marching_cubes.ipynb) or [Dual Contouring](dual_contouring.ipynb)\n"
+    "- Use `UniformGrid` for most cases, `SparseGrid` for large sparse domains\n"
    ]
   }
  ],

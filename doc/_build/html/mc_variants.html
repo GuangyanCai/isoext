@@ -221,6 +221,10 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -274,11 +278,13 @@
         <article role="main" id="furo-main-content">
           <section id="marching-cubes-variants">
 <h1>Marching Cubes Variants<a class="headerlink" href="#marching-cubes-variants" title="Link to this heading">¶</a></h1>
-<p>All four variants walk the same grid and share one interface; they
-differ in how each cell’s sign pattern is turned into triangles.
-This page shows where the differences appear. The example meshes are
-open surfaces, so they are rendered double-sided. The overlays show
-the grid: red dots are corners inside the surface, blue dots outside.</p>
+<p>Marching cubes turns each cell’s corner signs into triangles by
+table lookup. Some sign patterns have more than one valid
+triangulation, and the four variants differ in how they pick one.
+This page shows the consequences. The example meshes are open
+surfaces, so they are rendered double-sided; the overlays show the
+grid, with red dots for corners inside the surface and blue dots for
+corners outside.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -292,12 +298,15 @@ the grid: red dots are corners inside the surface, blue dots outside.</p>
 </div>
 <section id="watertightness">
 <h2>Watertightness<a class="headerlink" href="#watertightness" title="Link to this heading">¶</a></h2>
-<p>When two diagonally opposite corners of a cell face are inside and
-the other two outside, the face admits two triangulations. The
-<code class="docutils literal notranslate"><span class="pre">lorensen</span></code> tables (<span class="bibtex-citation" id="id1">Lorensen and Cline [<a class="reference internal" href="#id9" title="William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3D surface construction algorithm. In Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '87), 163–169. 1987. doi:10.1145/37401.37422.">1987</a>]</span>), built with reflections, can pick incompatible
-sides in neighboring cells, which leaves cracks. The <code class="docutils literal notranslate"><span class="pre">nagae</span></code> tables (<span class="bibtex-citation" id="id2">Nagae <em>et al.</em> [<a class="reference internal" href="#id11" title="Takanori Nagae, Takeshi Agui, and Hiroshi Nagahashi. Surface construction and contour generation from volume data. In Medical Imaging 1993: Image Processing, Proc. SPIE 1898, 74–84. 1993. doi:10.1117/12.154567.">1993</a>]</span>)
-avoid reflections and always produce closed meshes; so do
-<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code>. Counting broken meshes over 50 random closed fields:</p>
+<p>A face of a cell is ambiguous when two diagonally opposite corners
+are inside and the other two outside: the surface can cut the face
+along either diagonal. Neighboring cells share faces, so both cells
+must pick the same diagonal, or the mesh gets a hole. The <code class="docutils literal notranslate"><span class="pre">lorensen</span></code>
+tables (<span class="bibtex-citation" id="id1">Lorensen and Cline [<a class="reference internal" href="#id9" title="William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3D surface construction algorithm. In Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '87), 163–169. 1987. doi:10.1145/37401.37422.">1987</a>]</span>) were built with reflections, which
+can make the two cells disagree. The <code class="docutils literal notranslate"><span class="pre">nagae</span></code> tables
+(<span class="bibtex-citation" id="id2">Nagae <em>et al.</em> [<a class="reference internal" href="#id11" title="Takanori Nagae, Takeshi Agui, and Hiroshi Nagahashi. Surface construction and contour generation from volume data. In Medical Imaging 1993: Image Processing, Proc. SPIE 1898, 74–84. 1993. doi:10.1117/12.154567.">1993</a>]</span>) avoid reflections and always agree; so do
+<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code>. Counting broken meshes over 50 random closed
+fields:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">open_meshes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lorensen&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;nagae&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;lewiner&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;vega&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
@@ -327,11 +336,10 @@ avoid reflections and always produce closed meshes; so do
 </section>
 <section id="a-crack-up-close">
 <h2>A Crack, Up Close<a class="headerlink" href="#a-crack-up-close" title="Link to this heading">¶</a></h2>
-<p>Two cells sharing an ambiguous face. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> triangulates the
-shared face incompatibly on its two sides and leaves a slit: the
-zigzag lines crossing the middle of the surface are the two
-unmatched borders of the crack, one from each cell, each following
-a different diagonal of the shared face.</p>
+<p>Here are two cells sharing an ambiguous face. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> cuts the
+face along a different diagonal on each side, so the two surface
+pieces do not meet. The zigzag lines crossing the middle are the two
+unmatched borders of the crack, one from each cell:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
@@ -381,13 +389,14 @@ a different diagonal of the shared face.</p>
 </section>
 <section id="topology-of-ambiguous-cells">
 <h2>Topology of Ambiguous Cells<a class="headerlink" href="#topology-of-ambiguous-cells" title="Link to this heading">¶</a></h2>
-<p>Closing the cracks still leaves a choice: are the pieces of surface
-in an ambiguous cell connected or separate? Fixed tables always
-answer the same way; <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code> evaluate the
-interpolant of the corner values and follow it, implementing the
-MC33 method of <span class="bibtex-citation" id="id3">Chernyaev [<a class="reference internal" href="#id12" title="Evgeni Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Technical Report CERN-CN-95-17, CERN, Geneva, 1995. URL: https://repository.cern/records/7zfxg-q0t96.">1995</a>]</span>. In the cell below the fixed table
-produces three separate pieces, while the interpolant connects two
-of them:</p>
+<p>Sealing the cracks still leaves a choice: are the surface pieces in
+an ambiguous cell connected or separate? Fixed tables like <code class="docutils literal notranslate"><span class="pre">nagae</span></code>
+always answer the same way. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code> instead evaluate
+the trilinear interpolant – the smooth field you get by blending
+the eight corner values across the cell – and follow its topology,
+implementing the MC33 method of <span class="bibtex-citation" id="id3">Chernyaev [<a class="reference internal" href="#id12" title="Evgeni Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Technical Report CERN-CN-95-17, CERN, Geneva, 1995. URL: https://repository.cern/records/7zfxg-q0t96.">1995</a>]</span>. In the cell
+below, the fixed table gives three separate pieces, while the
+interpolant connects two of them:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
@@ -442,15 +451,16 @@ of them:</p>
 </div>
 <section id="lewiner-limitations">
 <h3>Lewiner Limitations<a class="headerlink" href="#lewiner-limitations" title="Link to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> variant ports the implementation of <span class="bibtex-citation" id="id4">Lewiner <em>et al.</em> [<a class="reference internal" href="#id16" title="Thomas Lewiner, Hélio Lopes, Antônio Wilson Vieira, and Geovan Tavares. Efficient implementation of marching cubes' cases with topological guarantees. Journal of Graphics Tools, 8(2):1–15, 2003. doi:10.1080/10867651.2003.10487582.">2003</a>]</span>
-and inherits its documented limitations: the interior test
-examines the interpolant on a single section instead of analyzing it
-fully, so it can misjudge tunnel connectivity in rare configurations,
-and it is not invariant under reflections. <span class="bibtex-citation" id="id5">Custodio <em>et al.</em> [<a class="reference internal" href="#id18" title="Lis Custodio, Tiago Etiene, Sinesio Pesco, and Claudio Silva. Practical considerations on marching cubes 33 topological correctness. Computers &amp; Graphics, 37(7):840–850, 2013. doi:10.1016/j.cag.2013.04.004.">2013</a>]</span>
-document both issues. The field below triggers them at once:
-<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> connects the surface into a tunnel, and mirroring the
-values changes its topology to two separate sheets. The meshes stay
-watertight and crack free either way.</p>
+<p>Deciding whether two pieces connect through the inside of a cell
+takes an interior test. The <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> variant ports the
+implementation of <span class="bibtex-citation" id="id4">Lewiner <em>et al.</em> [<a class="reference internal" href="#id16" title="Thomas Lewiner, Hélio Lopes, Antônio Wilson Vieira, and Geovan Tavares. Efficient implementation of marching cubes' cases with topological guarantees. Journal of Graphics Tools, 8(2):1–15, 2003. doi:10.1080/10867651.2003.10487582.">2003</a>]</span>, whose interior test checks
+the interpolant on a single cross-section instead of analyzing it
+fully. That has two consequences, documented by
+<span class="bibtex-citation" id="id5">Custodio <em>et al.</em> [<a class="reference internal" href="#id18" title="Lis Custodio, Tiago Etiene, Sinesio Pesco, and Claudio Silva. Practical considerations on marching cubes 33 topological correctness. Computers &amp; Graphics, 37(7):840–850, 2013. doi:10.1016/j.cag.2013.04.004.">2013</a>]</span>: the test can misjudge tunnels in rare
+configurations, and mirroring the input field can change the answer.
+The field below triggers both. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> connects the surface into a
+tunnel, and extracting the mirrored field gives two separate sheets
+instead. The meshes stay watertight and crack free either way.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
@@ -560,14 +570,13 @@ answer:</p>
 </section>
 <section id="choosing-a-variant">
 <h2>Choosing a Variant<a class="headerlink" href="#choosing-a-variant" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">vega</span></code> is the default: watertight and topologically faithful to the
-trilinear interpolant of the samples, at about 10% more time than
-the fixed tables. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> also follows the interpolant but has the
-limitations shown above; it is kept for comparison with other ports
-of the same implementation, such as scikit-image’s. Use <code class="docutils literal notranslate"><span class="pre">nagae</span></code> when
-the margin matters and the topology of ambiguous cells does not.
-<code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is included for reference and comparison with other
-implementations.</p>
+<p><code class="docutils literal notranslate"><span class="pre">vega</span></code> is the default: watertight, faithful to the trilinear
+interpolant, and about 10% slower than the fixed tables. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code>
+follows the interpolant too but has the limitations shown above; it
+is kept for comparison with other ports of the same implementation,
+such as scikit-image’s. Use <code class="docutils literal notranslate"><span class="pre">nagae</span></code> when that margin matters and the
+topology of ambiguous cells does not. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is included for
+reference and comparison with other implementations.</p>
 </section>
 <section id="lookup-tables">
 <h2>Lookup Tables<a class="headerlink" href="#lookup-tables" title="Link to this heading">¶</a></h2>
