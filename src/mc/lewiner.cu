@@ -25,8 +25,8 @@
 //    al.; those corrections are not included here.
 //
 // The meshes are always watertight and crack free; the limitations only
-// affect which of the locally plausible topologies is chosen. A corrected
-// variant based on Custodio et al. is planned under the name "custodio".
+// affect which of the locally plausible topologies is chosen. The "vega"
+// variant implements the corrected interior test and avoids them.
 //
 // Cells are processed in Lewiner's corner numbering and converted to ours
 // only when vertices are emitted.
