@@ -9,7 +9,7 @@
         <title>isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -290,7 +290,13 @@
     A power-8 Mandelbulb, extracted with <code>isoext.marching_cubes</code>:
     around 220k vertices in about 2&nbsp;ms. Drag to rotate.
   </p>
-</div><p>An iso-surface is the set of points where a 3D scalar field equals a
+</div><div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Every 3D view in these docs is interactive: drag to orbit, right-drag
+to pan, scroll to zoom. The <a class="reference internal" href="viewer.html"><span class="doc">viewer page</span></a> covers the
+controls and how to open one from your own code.</p>
+</div>
+<p>An iso-surface is the set of points where a 3D scalar field equals a
 chosen value: the shape described by a signed distance function, or the
 boundary of a density volume. <code class="docutils literal notranslate"><span class="pre">isoext</span></code> is a growing collection of
 iso-surface extraction methods that turn such fields into triangle

@@ -17,6 +17,12 @@
 </div>
 ```
 
+```{tip}
+Every 3D view in these docs is interactive: drag to orbit, right-drag
+to pan, scroll to zoom. The {doc}`viewer page <viewer>` covers the
+controls and how to open one from your own code.
+```
+
 An iso-surface is the set of points where a 3D scalar field equals a
 chosen value: the shape described by a signed distance function, or the
 boundary of a density volume. `isoext` is a growing collection of

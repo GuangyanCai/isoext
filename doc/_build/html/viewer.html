@@ -9,7 +9,7 @@
         <title>Viewer - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -284,6 +284,13 @@ Python. It is built on <a class="reference external" href="https://viser.studio"
 together with isoext, and has two modes: a live server for
 interactive work, and serialized scenes for notebooks and static web
 pages, which is how the examples in this documentation are rendered.</p>
+<section id="controls">
+<h2>Controls<a class="headerlink" href="#controls" title="Link to this heading">¶</a></h2>
+<p>Every view, embedded in a page or served live, uses the same
+controls: drag with the left mouse button to orbit, drag with the
+right button to pan, and scroll to zoom. On a touch screen, one
+finger orbits and two fingers pan and zoom. Embedded views start
+framed on their content; reload the page to reset the camera.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
@@ -305,6 +312,7 @@ pages, which is how the examples in this documentation are rendered.</p>
 </div>
 </div>
 </div>
+</section>
 <section id="live-viewing">
 <h2>Live Viewing<a class="headerlink" href="#live-viewing" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">show</span></code> starts a local server and prints its URL; open it in any
@@ -323,12 +331,20 @@ server with different scene names:</p>
 </section>
 <section id="styling">
 <h2>Styling<a class="headerlink" href="#styling" title="Link to this heading">¶</a></h2>
-<p>All viewing functions take the same styling options: <code class="docutils literal notranslate"><span class="pre">color</span></code> accepts
-an RGB tuple or a matplotlib color name, <code class="docutils literal notranslate"><span class="pre">flat_shading</span></code> shades each
-triangle with a constant normal, <code class="docutils literal notranslate"><span class="pre">wireframe</span></code> draws only the triangle
-edges, and <code class="docutils literal notranslate"><span class="pre">side</span></code> selects which triangle sides to render – use
-<code class="docutils literal notranslate"><span class="pre">side=&quot;double&quot;</span></code> for open surfaces, which disappear from behind under
-the default backface culling.</p>
+<p>Each mesh is drawn in one solid color, set by the <code class="docutils literal notranslate"><span class="pre">color</span></code> argument:
+either an RGB tuple with components in [0, 1] or a color name, like
+<code class="docutils literal notranslate"><span class="pre">&quot;coral&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;goldenrod&quot;</span></code>. Names are resolved by matplotlib, so
+anything from its
+<a class="reference external" href="https://matplotlib.org/stable/gallery/color/named_colors.html">named colors list</a>
+works. What you see on screen
+is that color under the scene’s lighting, so faces brighten and
+darken with their orientation. The default is a light blue.</p>
+<p>The remaining options change how the triangles are drawn:
+<code class="docutils literal notranslate"><span class="pre">flat_shading</span></code> uses one normal per triangle instead of smoothing
+across vertices, which makes the tessellation visible; <code class="docutils literal notranslate"><span class="pre">wireframe</span></code>
+draws only the triangle edges; and <code class="docutils literal notranslate"><span class="pre">side</span></code> selects which triangle
+sides to render – use <code class="docutils literal notranslate"><span class="pre">side=&quot;double&quot;</span></code> for open surfaces, which
+disappear from behind under the default backface culling.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;goldenrod&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
@@ -455,6 +471,7 @@ directory gives a self-contained scene you can host anywhere:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Viewer</a><ul>
+<li><a class="reference internal" href="#controls">Controls</a></li>
 <li><a class="reference internal" href="#live-viewing">Live Viewing</a></li>
 <li><a class="reference internal" href="#styling">Styling</a></li>
 <li><a class="reference internal" href="#grid-overlay">Grid Overlay</a></li>

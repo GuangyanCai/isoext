@@ -15,6 +15,19 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Controls\n",
+    "\n",
+    "Every view, embedded in a page or served live, uses the same\n",
+    "controls: drag with the left mouse button to orbit, drag with the\n",
+    "right button to pan, and scroll to zoom. On a touch screen, one\n",
+    "finger orbits and two fingers pan and zoom. Embedded views start\n",
+    "framed on their content; reload the page to reset the camera.\n"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 1,
    "id": "e0190aa4",
@@ -80,12 +93,21 @@
    "source": [
     "## Styling\n",
     "\n",
-    "All viewing functions take the same styling options: `color` accepts\n",
-    "an RGB tuple or a matplotlib color name, `flat_shading` shades each\n",
-    "triangle with a constant normal, `wireframe` draws only the triangle\n",
-    "edges, and `side` selects which triangle sides to render -- use\n",
-    "`side=\"double\"` for open surfaces, which disappear from behind under\n",
-    "the default backface culling.\n"
+    "Each mesh is drawn in one solid color, set by the `color` argument:\n",
+    "either an RGB tuple with components in [0, 1] or a color name, like\n",
+    "`\"coral\"` or `\"goldenrod\"`. Names are resolved by matplotlib, so\n",
+    "anything from its\n",
+    "[named colors list](https://matplotlib.org/stable/gallery/color/named_colors.html)\n",
+    "works. What you see on screen\n",
+    "is that color under the scene's lighting, so faces brighten and\n",
+    "darken with their orientation. The default is a light blue.\n",
+    "\n",
+    "The remaining options change how the triangles are drawn:\n",
+    "`flat_shading` uses one normal per triangle instead of smoothing\n",
+    "across vertices, which makes the tessellation visible; `wireframe`\n",
+    "draws only the triangle edges; and `side` selects which triangle\n",
+    "sides to render -- use `side=\"double\"` for open surfaces, which\n",
+    "disappear from behind under the default backface culling.\n"
    ]
   },
   {
