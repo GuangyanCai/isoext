@@ -24,10 +24,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T06:20:13.767600Z",
-     "iopub.status.busy": "2026-07-05T06:20:13.767513Z",
-     "iopub.status.idle": "2026-07-05T06:20:14.359931Z",
-     "shell.execute_reply": "2026-07-05T06:20:14.359621Z"
+     "iopub.execute_input": "2026-07-06T04:04:45.872438Z",
+     "iopub.status.busy": "2026-07-06T04:04:45.872364Z",
+     "iopub.status.idle": "2026-07-06T04:04:46.481829Z",
+     "shell.execute_reply": "2026-07-06T04:04:46.481428Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T06:20:14.362187Z",
-     "iopub.status.busy": "2026-07-05T06:20:14.362071Z",
-     "iopub.status.idle": "2026-07-05T06:20:14.661469Z",
-     "shell.execute_reply": "2026-07-05T06:20:14.661116Z"
+     "iopub.execute_input": "2026-07-06T04:04:46.483405Z",
+     "iopub.status.busy": "2026-07-06T04:04:46.483290Z",
+     "iopub.status.idle": "2026-07-06T04:04:46.807609Z",
+     "shell.execute_reply": "2026-07-06T04:04:46.807343Z"
     }
    },
    "outputs": [
@@ -73,7 +73,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e5f485ca4b0>"
+       "<IPython.lib.display.IFrame at 0x758aea07a900>"
       ]
      },
      "execution_count": 2,
@@ -104,9 +104,9 @@
     "\n",
     "For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:\n",
     "\n",
-    "1. **Get intersections** \u2014 Call `get_intersection()` to get intersection points\n",
-    "2. **Compute normals** \u2014 Use SDF gradient for accurate surface normals\n",
-    "3. **Run dual contouring** \u2014 Pass the intersection with custom normals\n"
+    "1. **Get intersections** — Call `get_intersection()` to get intersection points\n",
+    "2. **Compute normals** — Use SDF gradient for accurate surface normals\n",
+    "3. **Run dual contouring** — Pass the intersection with custom normals\n"
    ]
   },
   {
@@ -114,10 +114,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T06:20:14.678313Z",
-     "iopub.status.busy": "2026-07-05T06:20:14.678180Z",
-     "iopub.status.idle": "2026-07-05T06:20:14.681276Z",
-     "shell.execute_reply": "2026-07-05T06:20:14.680405Z"
+     "iopub.execute_input": "2026-07-06T04:04:46.824118Z",
+     "iopub.status.busy": "2026-07-06T04:04:46.823973Z",
+     "iopub.status.idle": "2026-07-06T04:04:46.826485Z",
+     "shell.execute_reply": "2026-07-06T04:04:46.826037Z"
     }
    },
    "outputs": [
@@ -141,10 +141,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T06:20:14.682518Z",
-     "iopub.status.busy": "2026-07-05T06:20:14.682435Z",
-     "iopub.status.idle": "2026-07-05T06:20:14.977457Z",
-     "shell.execute_reply": "2026-07-05T06:20:14.976686Z"
+     "iopub.execute_input": "2026-07-06T04:04:46.827237Z",
+     "iopub.status.busy": "2026-07-06T04:04:46.827165Z",
+     "iopub.status.idle": "2026-07-06T04:04:47.125629Z",
+     "shell.execute_reply": "2026-07-06T04:04:47.125220Z"
     }
    },
    "outputs": [
@@ -169,10 +169,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T06:20:14.979189Z",
-     "iopub.status.busy": "2026-07-05T06:20:14.979037Z",
-     "iopub.status.idle": "2026-07-05T06:20:14.989380Z",
-     "shell.execute_reply": "2026-07-05T06:20:14.988986Z"
+     "iopub.execute_input": "2026-07-06T04:04:47.127010Z",
+     "iopub.status.busy": "2026-07-06T04:04:47.126883Z",
+     "iopub.status.idle": "2026-07-06T04:04:47.137159Z",
+     "shell.execute_reply": "2026-07-06T04:04:47.136752Z"
     }
    },
    "outputs": [
@@ -199,7 +199,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e5f43c53200>"
+       "<IPython.lib.display.IFrame at 0x758ae95471a0>"
       ]
      },
      "execution_count": 5,
@@ -257,10 +257,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T06:20:14.991002Z",
-     "iopub.status.busy": "2026-07-05T06:20:14.990933Z",
-     "iopub.status.idle": "2026-07-05T06:20:15.073125Z",
-     "shell.execute_reply": "2026-07-05T06:20:15.072800Z"
+     "iopub.execute_input": "2026-07-06T04:04:47.138513Z",
+     "iopub.status.busy": "2026-07-06T04:04:47.138445Z",
+     "iopub.status.idle": "2026-07-06T04:04:47.221096Z",
+     "shell.execute_reply": "2026-07-06T04:04:47.220195Z"
     }
    },
    "outputs": [
@@ -279,7 +279,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e5f436d5f70>"
+       "<IPython.lib.display.IFrame at 0x758ae9ae1e80>"
       ]
      },
      "execution_count": 6,

@@ -494,10 +494,11 @@ watertight and crack free either way.</p>
 </section>
 <section id="choosing-a-variant">
 <h2>Choosing a Variant<a class="headerlink" href="#choosing-a-variant" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> is a good default: watertight and fast. Use <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> when
-the topology matters, for example on thin or nearly touching
-structures; it costs about 10% more time. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is included for
-reference and comparison with other implementations.</p>
+<p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> is the default: watertight and topologically faithful to
+the sampled field, at about 10% more time than the fixed tables.
+Use <code class="docutils literal notranslate"><span class="pre">nagae</span></code> when that margin matters and the topology of ambiguous
+cells does not. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is included for reference and comparison
+with other implementations.</p>
 </section>
 <section id="lookup-tables">
 <h2>Lookup Tables<a class="headerlink" href="#lookup-tables" title="Link to this heading">¶</a></h2>

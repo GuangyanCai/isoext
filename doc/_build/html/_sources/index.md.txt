@@ -11,7 +11,7 @@
           frameborder="0"></iframe>
   <p class="hero-caption">
     A power-8 Mandelbulb, extracted with <code>isoext.marching_cubes</code>:
-    219k vertices in about 4&nbsp;ms. Drag to rotate.
+    219k vertices in about 2&nbsp;ms. Drag to rotate.
   </p>
 </div>
 ```

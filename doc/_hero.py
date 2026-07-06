@@ -27,6 +27,7 @@ def main() -> None:
     grid = isoext.UniformGrid([192] * 3, aabb_min=[-1.2] * 3, aabb_max=[1.2] * 3)
     values = MandelbulbSDF(iterations=6)(grid.get_points())
     grid.set_values(gaussian_smooth(values, sigma=1.0))
+    isoext.marching_cubes(grid)   # warm up: the first call pays the PTX JIT
     torch.cuda.synchronize()
     start = time.perf_counter()
     v, f = isoext.marching_cubes(grid)

@@ -14,10 +14,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T03:53:26.812020Z",
-     "iopub.status.busy": "2026-07-06T03:53:26.811934Z",
-     "iopub.status.idle": "2026-07-06T03:53:27.647398Z",
-     "shell.execute_reply": "2026-07-06T03:53:27.646560Z"
+     "iopub.execute_input": "2026-07-06T04:04:27.484138Z",
+     "iopub.status.busy": "2026-07-06T04:04:27.484065Z",
+     "iopub.status.idle": "2026-07-06T04:04:28.260741Z",
+     "shell.execute_reply": "2026-07-06T04:04:28.260472Z"
     }
    },
    "outputs": [],
@@ -52,10 +52,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T03:53:27.648746Z",
-     "iopub.status.busy": "2026-07-06T03:53:27.648624Z",
-     "iopub.status.idle": "2026-07-06T03:53:27.736698Z",
-     "shell.execute_reply": "2026-07-06T03:53:27.736150Z"
+     "iopub.execute_input": "2026-07-06T04:04:28.262527Z",
+     "iopub.status.busy": "2026-07-06T04:04:28.262398Z",
+     "iopub.status.idle": "2026-07-06T04:04:28.388373Z",
+     "shell.execute_reply": "2026-07-06T04:04:28.387996Z"
     }
    },
    "outputs": [
@@ -74,7 +74,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/a2ce8dd973f21c15.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/9f82c481f4cfb292.viser\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -82,7 +82,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x79405c0f18b0>"
+       "<IPython.lib.display.IFrame at 0x7ea6d49e9a30>"
       ]
      },
      "execution_count": 2,
@@ -108,11 +108,11 @@
     "The `method` argument selects between three variants that share the\n",
     "same interface:\n",
     "\n",
-    "- `nagae` (default) produces watertight meshes.\n",
+    "- `lewiner` (default) resolves topological ambiguities by following\n",
+    "  the field's interpolant.\n",
+    "- `nagae` uses fixed tables; watertight and slightly faster.\n",
     "- `lorensen` is the original 1987 algorithm; ambiguous cells can\n",
     "  leave small cracks.\n",
-    "- `lewiner` additionally resolves topological ambiguities, following\n",
-    "  the field's interpolant.\n",
     "\n",
     "See {doc}`mc_variants` for the differences in detail.\n"
    ]
@@ -122,10 +122,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T03:53:27.749854Z",
-     "iopub.status.busy": "2026-07-06T03:53:27.749723Z",
-     "iopub.status.idle": "2026-07-06T03:53:27.797432Z",
-     "shell.execute_reply": "2026-07-06T03:53:27.797073Z"
+     "iopub.execute_input": "2026-07-06T04:04:28.405276Z",
+     "iopub.status.busy": "2026-07-06T04:04:28.405142Z",
+     "iopub.status.idle": "2026-07-06T04:04:28.410557Z",
+     "shell.execute_reply": "2026-07-06T04:04:28.410167Z"
     }
    },
    "outputs": [
@@ -159,10 +159,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T03:53:27.798212Z",
-     "iopub.status.busy": "2026-07-06T03:53:27.798141Z",
-     "iopub.status.idle": "2026-07-06T03:53:27.801333Z",
-     "shell.execute_reply": "2026-07-06T03:53:27.801036Z"
+     "iopub.execute_input": "2026-07-06T04:04:28.411946Z",
+     "iopub.status.busy": "2026-07-06T04:04:28.411874Z",
+     "iopub.status.idle": "2026-07-06T04:04:28.415335Z",
+     "shell.execute_reply": "2026-07-06T04:04:28.415125Z"
     }
    },
    "outputs": [
@@ -197,10 +197,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T03:53:27.802391Z",
-     "iopub.status.busy": "2026-07-06T03:53:27.802317Z",
-     "iopub.status.idle": "2026-07-06T03:53:27.817478Z",
-     "shell.execute_reply": "2026-07-06T03:53:27.817153Z"
+     "iopub.execute_input": "2026-07-06T04:04:28.416489Z",
+     "iopub.status.busy": "2026-07-06T04:04:28.416426Z",
+     "iopub.status.idle": "2026-07-06T04:04:28.430992Z",
+     "shell.execute_reply": "2026-07-06T04:04:28.430417Z"
     }
    },
    "outputs": [

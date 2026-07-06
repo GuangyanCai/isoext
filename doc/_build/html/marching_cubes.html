@@ -310,7 +310,7 @@ Faces: torch.Size([18332, 3])
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/a2ce8dd973f21c15.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/9f82c481f4cfb292.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -323,11 +323,11 @@ Faces: torch.Size([18332, 3])
 <p>The <code class="docutils literal notranslate"><span class="pre">method</span></code> argument selects between three variants that share the
 same interface:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> (default) produces watertight meshes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> (default) resolves topological ambiguities by following
+the field’s interpolant.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> uses fixed tables; watertight and slightly faster.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is the original 1987 algorithm; ambiguous cells can
 leave small cracks.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> additionally resolves topological ambiguities, following
-the field’s interpolant.</p></li>
 </ul>
 <p>See <a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a> for the differences in detail.</p>
 <div class="cell docutils container">
