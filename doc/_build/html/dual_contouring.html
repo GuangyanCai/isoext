@@ -418,6 +418,11 @@ noise in the points and normals can throw unclamped vertices far from
 the surface, producing what <span class="bibtex-citation" id="id1">Schaefer and Warren [<a class="reference internal" href="#id10" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
 sampled volumes, keep the default clamp.</p>
 <p>The vertex placement follows <span class="bibtex-citation" id="id2">Ju <em>et al.</em> [<a class="reference internal" href="#id9" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>.</p>
+<p>Here is the difference on a cube rotated so its edges cross the
+grid at an angle. First without the refinement: the normals are
+taken at the interpolated crossings, which sit slightly off the true
+surface near the cube’s edges, and the unclamped vertices inherit
+the error – look along an edge and it comes out slightly serrated:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">RotationOp</span><span class="p">,</span> <span class="n">project_to_surface</span>
@@ -428,16 +433,48 @@ sampled volumes, keep the default clamp.</p>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
 <span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">points</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<span class="n">its</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">,</span> <span class="n">clamp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max vertex error: 0.0038
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/feb4d841aa51a80f.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<p>With the refinement, the tangent planes pass through the exact
+surface, the vertex error drops by an order of magnitude, and the
+edges come out clean:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
 <span class="n">its</span><span class="o">.</span><span class="n">set_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 <span class="n">its</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">))</span>
 
 <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">,</span> <span class="n">clamp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max vertex error: 0.0002
+</pre></div>
+</div>
 <div class="output text_html">
         <iframe
             width="100%"
