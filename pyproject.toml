@@ -60,6 +60,7 @@ ruff = "*"
 numpy = "*"
 pytest = "*"
 pytest-xdist = "*"
+scikit-image = "*"
 
 [tool.pixi.feature.dev.tasks]
 test = { cmd = "pytest tests/ -n 2", cwd = ".", depends-on = ["compile"] }

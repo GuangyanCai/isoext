@@ -118,7 +118,9 @@ NB_MODULE(isoext_ext, m) {
         "Args:\n"
         "    grid: The input grid (UniformGrid or SparseGrid) containing scalar values.\n"
         "    level: The iso-value at which to extract the surface. Default is 0.0.\n"
-        "    method: The marching cubes variant to use. Options are 'nagae' (default) or 'lorensen'.\n\n"
+        "    method: The marching cubes variant to use. Options are 'nagae'\n"
+        "        (default), 'lorensen', or 'lewiner'. The 'lewiner' variant resolves\n"
+        "        the topological ambiguities of standard marching cubes.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor of vertex positions\n"
         "    and faces is an (M, 3) int32 tensor of triangle indices.");

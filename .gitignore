@@ -9,6 +9,7 @@ build
 .vs
 luts/*
 !luts/gen_mc_lut.py
+!luts/convert_mc33_luts.py
 !luts/mc_methods/*
 src/isoext/isoext_ext.pyi
 src/isoext/py.typed
