@@ -96,7 +96,76 @@ def add_mesh(
     )
 
 
-def show(vertices: torch.Tensor, faces: torch.Tensor, *, port: int = 8080, **mesh_kwargs):
+def add_grid(
+    server,
+    grid,
+    *,
+    level: float = 0.0,
+    name: str = "/grid",
+    point_size: float | None = None,
+    line_width: float = 2.0,
+):
+    """Draw a grid's cell edges and its corner values as colored dots.
+
+    Corners with a value below the level are drawn red (inside the
+    surface), the rest blue. Meant for small demonstration grids, like
+    the single-cell examples on the marching cubes variants page.
+
+    Args:
+        server: A viser.ViserServer instance.
+        grid: A UniformGrid whose values are set.
+        level: The iso-value that separates inside from outside.
+        name: Scene tree name prefix for the lines and dots.
+        point_size: Dot diameter in world units. Defaults to a fraction
+            of the cell edge length.
+        line_width: Width of the cell edges in pixels.
+    """
+    import numpy as np
+
+    points = grid.get_points()
+    if points.ndim != 4:
+        raise ValueError("add_grid expects a UniformGrid")
+    if points[..., 0].numel() > 32**3:
+        raise ValueError("add_grid is meant for small demonstration grids")
+    values = grid.get_values().reshape(points.shape[:3])
+
+    p = points
+    segments = torch.cat([
+        torch.stack([p[:-1], p[1:]], dim=-2).reshape(-1, 2, 3),
+        torch.stack([p[:, :-1], p[:, 1:]], dim=-2).reshape(-1, 2, 3),
+        torch.stack([p[:, :, :-1], p[:, :, 1:]], dim=-2).reshape(-1, 2, 3),
+    ]).cpu().numpy()
+    server.scene.add_line_segments(
+        f"{name}/edges",
+        segments,
+        colors=np.full_like(segments, 0.55),
+        line_width=line_width,
+    )
+
+    if point_size is None:
+        edge = (p[1, 0, 0] - p[0, 0, 0]).norm() if p.shape[0] > 1 else 1.0
+        point_size = 0.1 * float(edge)
+    inside = (values < level).reshape(-1).cpu().numpy()
+    colors = np.where(
+        inside[:, None], (0.85, 0.25, 0.2), (0.25, 0.45, 0.85)
+    ).astype(np.float32)
+    server.scene.add_point_cloud(
+        f"{name}/corners",
+        points.reshape(-1, 3).cpu().numpy(),
+        colors=colors,
+        point_size=point_size,
+    )
+
+
+def show(
+    vertices: torch.Tensor,
+    faces: torch.Tensor,
+    *,
+    port: int = 8080,
+    grid=None,
+    grid_level: float = 0.0,
+    **mesh_kwargs,
+):
     """Open an interactive viewer serving the given mesh.
 
     The server keeps running until it is stopped or the process exits; the
@@ -106,6 +175,8 @@ def show(vertices: torch.Tensor, faces: torch.Tensor, *, port: int = 8080, **mes
         vertices: (N, 3) tensor of vertex positions.
         faces: (M, 3) tensor of triangle indices.
         port: Port to serve on (the next free port is used if taken).
+        grid: Optional grid to overlay with add_grid.
+        grid_level: Iso-value for the grid overlay's corner colors.
         **mesh_kwargs: Forwarded to add_mesh.
 
     Returns:
@@ -114,6 +185,8 @@ def show(vertices: torch.Tensor, faces: torch.Tensor, *, port: int = 8080, **mes
     viser = _import_viser()
     server = viser.ViserServer(port=port)
     add_mesh(server, vertices, faces, **mesh_kwargs)
+    if grid is not None:
+        add_grid(server, grid, level=grid_level)
     return server
 
 
@@ -134,7 +207,14 @@ def _get_scene_recorder():
     return _scene_recorder
 
 
-def serialize_scene(vertices: torch.Tensor, faces: torch.Tensor, **mesh_kwargs) -> bytes:
+def serialize_scene(
+    vertices: torch.Tensor,
+    faces: torch.Tensor,
+    *,
+    grid=None,
+    grid_level: float = 0.0,
+    **mesh_kwargs,
+) -> bytes:
     """Serialize a scene containing the given mesh to .viser bytes.
 
     The bytes can be written to a ``.viser`` file and played back offline by
@@ -143,6 +223,8 @@ def serialize_scene(vertices: torch.Tensor, faces: torch.Tensor, **mesh_kwargs) 
     """
     server = _get_scene_recorder()
     add_mesh(server, vertices, faces, **mesh_kwargs)
+    if grid is not None:
+        add_grid(server, grid, level=grid_level)
     return server.get_scene_serializer().serialize()
 
 
@@ -191,7 +273,8 @@ def embed(
         faces: (M, 3) tensor of triangle indices.
         root: Directory for the static assets, relative to the notebook.
         height: Height of the embedded viewer in pixels.
-        **mesh_kwargs: Forwarded to add_mesh.
+        **mesh_kwargs: Forwarded to add_mesh; pass grid= (and optionally
+            grid_level=) to overlay the grid's edges and corner signs.
 
     Returns:
         An IPython IFrame displaying the scene.
