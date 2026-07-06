@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Tetrahedra" href="marching_tetrahedra.html"><link rel="prev" title="Quick Start" href="quickstart.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Cubes Variants" href="mc_variants.html"><link rel="prev" title="Quick Start" href="quickstart.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Marching Cubes - isoext documentation</title>
@@ -206,6 +206,7 @@
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 </ul>
@@ -319,33 +320,32 @@ Faces: torch.Size([18332, 3])
 </section>
 <section id="algorithm-variants">
 <h2>Algorithm Variants<a class="headerlink" href="#algorithm-variants" title="Link to this heading">¶</a></h2>
-<section id="nagae-default">
-<h3><code class="docutils literal notranslate"><span class="pre">nagae</span></code> (default)<a class="headerlink" href="#nagae-default" title="Link to this heading">¶</a></h3>
-<p>Uses only rotations to handle ambiguous cases, producing <strong>watertight meshes</strong> without holes or cracks.</p>
-<p>From: <em>“Surface construction and contour generation from volume data”</em> (1991)</p>
-</section>
-<section id="lorensen">
-<h3><code class="docutils literal notranslate"><span class="pre">lorensen</span></code><a class="headerlink" href="#lorensen" title="Link to this heading">¶</a></h3>
-<p>The original Marching Cubes algorithm. Uses rotations and reflections, which can create ambiguities leading to small holes in the mesh.</p>
-<p>From: <em>“Marching cubes: A high resolution 3D surface construction algorithm”</em> (1987)</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">method</span></code> argument selects between three variants that share the
+same interface:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> (default) produces watertight meshes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is the original 1987 algorithm; ambiguous cells can
+leave small cracks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> additionally resolves topological ambiguities, following
+the field’s interpolant.</p></li>
+</ul>
+<p>See <a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a> for the differences in detail.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v_nagae</span><span class="p">,</span> <span class="n">f_nagae</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nagae&quot;</span><span class="p">)</span>
-<span class="n">v_lorensen</span><span class="p">,</span> <span class="n">f_lorensen</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lorensen&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nagae:    </span><span class="si">{</span><span class="n">f_nagae</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lorensen: </span><span class="si">{</span><span class="n">f_lorensen</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nagae&quot;</span><span class="p">,</span> <span class="s2">&quot;lorensen&quot;</span><span class="p">,</span> <span class="s2">&quot;lewiner&quot;</span><span class="p">]:</span>
+    <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">:</span><span class="s2">9s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Nagae:    18,332 triangles
-Lorensen: 18,332 triangles
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>nagae     18,332 triangles
+lorensen  18,332 triangles
+lewiner   18,332 triangles
 </pre></div>
 </div>
 </div>
 </div>
-</section>
 </section>
 <section id="iso-level">
 <h2>Iso-Level<a class="headerlink" href="#iso-level" title="Link to this heading">¶</a></h2>
@@ -386,25 +386,6 @@ level=+0.2: 15,072 vertices (radius ≈ 0.5)
 </div>
 </div>
 </section>
-<section id="lookup-tables">
-<h2>Lookup tables<a class="headerlink" href="#lookup-tables" title="Link to this heading">¶</a></h2>
-<p>The lookup tables that drive marching cubes are generated by <a class="reference external" href="https://github.com/GuangyanCai/isoext/blob/master/luts/gen_mc_lut.py"><code class="docutils literal notranslate"><span class="pre">luts/gen_mc_lut.py</span></code></a>. This script:</p>
-<ol class="arabic simple">
-<li><p>Reads base cases from a JSON file (e.g., <code class="docutils literal notranslate"><span class="pre">luts/mc_methods/nagae.json</span></code>)</p></li>
-<li><p>Generates all 256 cases via rotations (and optionally reflections)</p></li>
-<li><p>Outputs lookup tables and debug meshes</p></li>
-</ol>
-<p>You can use this as a reference for:</p>
-<ul class="simple">
-<li><p><strong>Understanding the algorithm</strong>: See how base cases expand to cover all configurations</p></li>
-<li><p><strong>Implementing your own variant</strong>: Create a new JSON file with your base cases</p></li>
-<li><p><strong>Debugging</strong>: The script outputs OBJ files for each case to visualize the triangulations</p></li>
-</ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate lookup tables for a marching cubes variant</span>
-python<span class="w"> </span>luts/gen_mc_lut.py<span class="w"> </span>luts/mc_methods/nagae.json<span class="w"> </span>output_dir/
-</pre></div>
-</div>
-</section>
 </section>
 
         </article>
@@ -412,12 +393,12 @@ python<span class="w"> </span>luts/gen_mc_lut.py<span class="w"> </span>luts/mc_
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="marching_tetrahedra.html">
+          <a class="next-page" href="mc_variants.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Marching Tetrahedra</div>
+                <div class="title">Marching Cubes Variants</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -464,14 +445,9 @@ python<span class="w"> </span>luts/gen_mc_lut.py<span class="w"> </span>luts/mc_
             <ul>
 <li><a class="reference internal" href="#">Marching Cubes</a><ul>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
-<li><a class="reference internal" href="#algorithm-variants">Algorithm Variants</a><ul>
-<li><a class="reference internal" href="#nagae-default"><code class="docutils literal notranslate"><span class="pre">nagae</span></code> (default)</a></li>
-<li><a class="reference internal" href="#lorensen"><code class="docutils literal notranslate"><span class="pre">lorensen</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#algorithm-variants">Algorithm Variants</a></li>
 <li><a class="reference internal" href="#iso-level">Iso-Level</a></li>
 <li><a class="reference internal" href="#saving-meshes">Saving Meshes</a></li>
-<li><a class="reference internal" href="#lookup-tables">Lookup tables</a></li>
 </ul>
 </li>
 </ul>

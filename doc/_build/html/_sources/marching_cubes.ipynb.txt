@@ -14,10 +14,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:20.152460Z",
-     "iopub.status.busy": "2026-07-05T04:06:20.152358Z",
-     "iopub.status.idle": "2026-07-05T04:06:20.986455Z",
-     "shell.execute_reply": "2026-07-05T04:06:20.986097Z"
+     "iopub.execute_input": "2026-07-06T03:53:26.812020Z",
+     "iopub.status.busy": "2026-07-06T03:53:26.811934Z",
+     "iopub.status.idle": "2026-07-06T03:53:27.647398Z",
+     "shell.execute_reply": "2026-07-06T03:53:27.646560Z"
     }
    },
    "outputs": [],
@@ -52,10 +52,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:20.988789Z",
-     "iopub.status.busy": "2026-07-05T04:06:20.988664Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.072786Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.072373Z"
+     "iopub.execute_input": "2026-07-06T03:53:27.648746Z",
+     "iopub.status.busy": "2026-07-06T03:53:27.648624Z",
+     "iopub.status.idle": "2026-07-06T03:53:27.736698Z",
+     "shell.execute_reply": "2026-07-06T03:53:27.736150Z"
     }
    },
    "outputs": [
@@ -82,7 +82,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7b248d90f320>"
+       "<IPython.lib.display.IFrame at 0x79405c0f18b0>"
       ]
      },
      "execution_count": 2,
@@ -105,17 +105,16 @@
    "source": [
     "## Algorithm Variants\n",
     "\n",
-    "### `nagae` (default)\n",
+    "The `method` argument selects between three variants that share the\n",
+    "same interface:\n",
     "\n",
-    "Uses only rotations to handle ambiguous cases, producing **watertight meshes** without holes or cracks.\n",
+    "- `nagae` (default) produces watertight meshes.\n",
+    "- `lorensen` is the original 1987 algorithm; ambiguous cells can\n",
+    "  leave small cracks.\n",
+    "- `lewiner` additionally resolves topological ambiguities, following\n",
+    "  the field's interpolant.\n",
     "\n",
-    "From: *\"Surface construction and contour generation from volume data\"* (1991)\n",
-    "\n",
-    "### `lorensen`\n",
-    "\n",
-    "The original Marching Cubes algorithm. Uses rotations and reflections, which can create ambiguities leading to small holes in the mesh.\n",
-    "\n",
-    "From: *\"Marching cubes: A high resolution 3D surface construction algorithm\"* (1987)\n"
+    "See {doc}`mc_variants` for the differences in detail.\n"
    ]
   },
   {
@@ -123,10 +122,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:21.087022Z",
-     "iopub.status.busy": "2026-07-05T04:06:21.086887Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.105181Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.104713Z"
+     "iopub.execute_input": "2026-07-06T03:53:27.749854Z",
+     "iopub.status.busy": "2026-07-06T03:53:27.749723Z",
+     "iopub.status.idle": "2026-07-06T03:53:27.797432Z",
+     "shell.execute_reply": "2026-07-06T03:53:27.797073Z"
     }
    },
    "outputs": [
@@ -134,17 +133,16 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Nagae:    18,332 triangles\n",
-      "Lorensen: 18,332 triangles\n"
+      "nagae     18,332 triangles\n",
+      "lorensen  18,332 triangles\n",
+      "lewiner   18,332 triangles\n"
      ]
     }
    ],
    "source": [
-    "v_nagae, f_nagae = isoext.marching_cubes(grid, method=\"nagae\")\n",
-    "v_lorensen, f_lorensen = isoext.marching_cubes(grid, method=\"lorensen\")\n",
-    "\n",
-    "print(f\"Nagae:    {f_nagae.shape[0]:,} triangles\")\n",
-    "print(f\"Lorensen: {f_lorensen.shape[0]:,} triangles\")\n"
+    "for method in [\"nagae\", \"lorensen\", \"lewiner\"]:\n",
+    "    v, f = isoext.marching_cubes(grid, method=method)\n",
+    "    print(f\"{method:9s} {f.shape[0]:,} triangles\")\n"
    ]
   },
   {
@@ -161,10 +159,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:21.107009Z",
-     "iopub.status.busy": "2026-07-05T04:06:21.106941Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.109825Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.109610Z"
+     "iopub.execute_input": "2026-07-06T03:53:27.798212Z",
+     "iopub.status.busy": "2026-07-06T03:53:27.798141Z",
+     "iopub.status.idle": "2026-07-06T03:53:27.801333Z",
+     "shell.execute_reply": "2026-07-06T03:53:27.801036Z"
     }
    },
    "outputs": [
@@ -199,10 +197,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:21.111319Z",
-     "iopub.status.busy": "2026-07-05T04:06:21.111254Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.125969Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.125772Z"
+     "iopub.execute_input": "2026-07-06T03:53:27.802391Z",
+     "iopub.status.busy": "2026-07-06T03:53:27.802317Z",
+     "iopub.status.idle": "2026-07-06T03:53:27.817478Z",
+     "shell.execute_reply": "2026-07-06T03:53:27.817153Z"
     }
    },
    "outputs": [
@@ -218,29 +216,6 @@
     "vertices, faces = isoext.marching_cubes(grid)\n",
     "isoext.write_obj(\"mesh.obj\", vertices, faces)\n",
     "print(\"Saved to mesh.obj\")\n"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "## Lookup tables\n",
-    "\n",
-    "The lookup tables that drive marching cubes are generated by [`luts/gen_mc_lut.py`](https://github.com/GuangyanCai/isoext/blob/master/luts/gen_mc_lut.py). This script:\n",
-    "\n",
-    "1. Reads base cases from a JSON file (e.g., `luts/mc_methods/nagae.json`)\n",
-    "2. Generates all 256 cases via rotations (and optionally reflections)\n",
-    "3. Outputs lookup tables and debug meshes\n",
-    "\n",
-    "You can use this as a reference for:\n",
-    "- **Understanding the algorithm**: See how base cases expand to cover all configurations\n",
-    "- **Implementing your own variant**: Create a new JSON file with your base cases\n",
-    "- **Debugging**: The script outputs OBJ files for each case to visualize the triangulations\n",
-    "\n",
-    "```bash\n",
-    "# Generate lookup tables for a marching cubes variant\n",
-    "python luts/gen_mc_lut.py luts/mc_methods/nagae.json output_dir/\n",
-    "```\n"
    ]
   },
   {

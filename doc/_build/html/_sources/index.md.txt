@@ -62,6 +62,7 @@ quickstart
 :hidden:
 
 marching_cubes
+mc_variants
 marching_tetrahedra
 dual_contouring
 ```

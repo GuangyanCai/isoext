@@ -206,6 +206,7 @@
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 </ul>
@@ -275,7 +276,9 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> – The input grid (UniformGrid or SparseGrid) containing scalar values.</p></li>
 <li><p><strong>level</strong> – The iso-value at which to extract the surface. Default is 0.0.</p></li>
-<li><p><strong>method</strong> – The marching cubes variant to use. Options are ‘nagae’ (default) or ‘lorensen’.</p></li>
+<li><p><strong>method</strong> – The marching cubes variant to use. Options are ‘nagae’
+(default), ‘lorensen’, or ‘lewiner’. The ‘lewiner’ variant resolves
+the topological ambiguities of standard marching cubes.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -455,7 +458,7 @@ points using linear interpolation.</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.add_mesh">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.71,</span> <span class="pre">0.8,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_mesh" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.71,</span> <span class="pre">0.8,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'front'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_mesh" title="Link to this definition">¶</a></dt>
 <dd><p>Add a mesh from isoext output tensors to a viser scene.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -467,6 +470,9 @@ points using linear interpolation.</p>
 <li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
 <li><p><strong>flat_shading</strong> (<em>bool</em>) – Shade each triangle with a constant normal.</p></li>
 <li><p><strong>wireframe</strong> (<em>bool</em>) – Render the mesh as a wireframe.</p></li>
+<li><p><strong>side</strong> (<em>str</em>) – Which triangle sides to render: “front”, “back” or “double”.
+Use “double” for open surfaces, which disappear from behind
+with the default backface culling.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
