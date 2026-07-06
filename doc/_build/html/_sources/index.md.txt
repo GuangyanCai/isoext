@@ -23,7 +23,8 @@ boundary of a density volume. `isoext` is a growing collection of
 iso-surface extraction methods that turn such fields into triangle
 meshes on the GPU. The field values come in as a PyTorch tensor and the
 mesh comes back as tensors, so it fits directly into training loops and
-other GPU pipelines.
+other GPU pipelines. {doc}`how_it_works` introduces the ideas behind all
+of the methods.
 
 ## Features
 
@@ -101,6 +102,7 @@ surface_nets
 :caption: In Depth
 :hidden:
 
+how_it_works
 mc_variants
 ```
 

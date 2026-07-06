@@ -24,10 +24,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:40.712880Z",
-     "iopub.status.busy": "2026-07-06T04:43:40.712799Z",
-     "iopub.status.idle": "2026-07-06T04:43:41.301865Z",
-     "shell.execute_reply": "2026-07-06T04:43:41.301403Z"
+     "iopub.execute_input": "2026-07-06T19:39:00.992952Z",
+     "iopub.status.busy": "2026-07-06T19:39:00.992869Z",
+     "iopub.status.idle": "2026-07-06T19:39:01.667033Z",
+     "shell.execute_reply": "2026-07-06T19:39:01.666526Z"
     }
    },
    "outputs": [],
@@ -43,10 +43,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:41.302933Z",
-     "iopub.status.busy": "2026-07-06T04:43:41.302812Z",
-     "iopub.status.idle": "2026-07-06T04:43:41.629479Z",
-     "shell.execute_reply": "2026-07-06T04:43:41.629239Z"
+     "iopub.execute_input": "2026-07-06T19:39:01.668455Z",
+     "iopub.status.busy": "2026-07-06T19:39:01.668332Z",
+     "iopub.status.idle": "2026-07-06T19:39:01.968931Z",
+     "shell.execute_reply": "2026-07-06T19:39:01.968528Z"
     }
    },
    "outputs": [
@@ -65,7 +65,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/12fca5502d9cf198.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/12fca5502d9cf198.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -73,7 +73,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x765c5d2b0aa0>"
+       "<IPython.lib.display.IFrame at 0x713c6c0815b0>"
       ]
      },
      "execution_count": 2,
@@ -104,9 +104,9 @@
     "\n",
     "For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:\n",
     "\n",
-    "1. **Get intersections** \u2014 Call `get_intersection()` to get intersection points\n",
-    "2. **Compute normals** \u2014 Use SDF gradient for accurate surface normals\n",
-    "3. **Run dual contouring** \u2014 Pass the intersection with custom normals\n"
+    "1. **Get intersections** — Call `get_intersection()` to get intersection points\n",
+    "2. **Compute normals** — Use SDF gradient for accurate surface normals\n",
+    "3. **Run dual contouring** — Pass the intersection with custom normals\n"
    ]
   },
   {
@@ -114,10 +114,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:41.646087Z",
-     "iopub.status.busy": "2026-07-06T04:43:41.645938Z",
-     "iopub.status.idle": "2026-07-06T04:43:41.648683Z",
-     "shell.execute_reply": "2026-07-06T04:43:41.648284Z"
+     "iopub.execute_input": "2026-07-06T19:39:01.983954Z",
+     "iopub.status.busy": "2026-07-06T19:39:01.983781Z",
+     "iopub.status.idle": "2026-07-06T19:39:01.986862Z",
+     "shell.execute_reply": "2026-07-06T19:39:01.986311Z"
     }
    },
    "outputs": [
@@ -141,10 +141,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:41.649746Z",
-     "iopub.status.busy": "2026-07-06T04:43:41.649667Z",
-     "iopub.status.idle": "2026-07-06T04:43:41.885541Z",
-     "shell.execute_reply": "2026-07-06T04:43:41.884718Z"
+     "iopub.execute_input": "2026-07-06T19:39:01.988356Z",
+     "iopub.status.busy": "2026-07-06T19:39:01.988268Z",
+     "iopub.status.idle": "2026-07-06T19:39:02.232469Z",
+     "shell.execute_reply": "2026-07-06T19:39:02.231839Z"
     }
    },
    "outputs": [
@@ -169,10 +169,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:41.887325Z",
-     "iopub.status.busy": "2026-07-06T04:43:41.887181Z",
-     "iopub.status.idle": "2026-07-06T04:43:41.898063Z",
-     "shell.execute_reply": "2026-07-06T04:43:41.897548Z"
+     "iopub.execute_input": "2026-07-06T19:39:02.233811Z",
+     "iopub.status.busy": "2026-07-06T19:39:02.233673Z",
+     "iopub.status.idle": "2026-07-06T19:39:02.244747Z",
+     "shell.execute_reply": "2026-07-06T19:39:02.244408Z"
     }
    },
    "outputs": [
@@ -191,7 +191,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/addd76f03945e2c6.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/addd76f03945e2c6.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -199,7 +199,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x765c0b44bd70>"
+       "<IPython.lib.display.IFrame at 0x713c45864cb0>"
       ]
      },
      "execution_count": 5,
@@ -255,10 +255,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:41.899344Z",
-     "iopub.status.busy": "2026-07-06T04:43:41.899242Z",
-     "iopub.status.idle": "2026-07-06T04:43:41.981155Z",
-     "shell.execute_reply": "2026-07-06T04:43:41.980695Z"
+     "iopub.execute_input": "2026-07-06T19:39:02.245750Z",
+     "iopub.status.busy": "2026-07-06T19:39:02.245677Z",
+     "iopub.status.idle": "2026-07-06T19:39:02.329349Z",
+     "shell.execute_reply": "2026-07-06T19:39:02.329007Z"
     }
    },
    "outputs": [
@@ -269,7 +269,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/78d62cc830e7ee21.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/78d62cc830e7ee21.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -277,7 +277,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x765c5d27bd70>"
+       "<IPython.lib.display.IFrame at 0x714002c06f30>"
       ]
      },
      "execution_count": 6,

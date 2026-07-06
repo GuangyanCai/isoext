@@ -9,7 +9,7 @@
         <title>isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -212,6 +212,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How Iso-Surface Extraction Works</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
@@ -295,7 +296,8 @@ boundary of a density volume. <code class="docutils literal notranslate"><span c
 iso-surface extraction methods that turn such fields into triangle
 meshes on the GPU. The field values come in as a PyTorch tensor and the
 mesh comes back as tensors, so it fits directly into training loops and
-other GPU pipelines.</p>
+other GPU pipelines. <a class="reference internal" href="how_it_works.html"><span class="doc">How Iso-Surface Extraction Works</span></a> introduces the ideas behind all
+of the methods.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
 <ul class="simple">

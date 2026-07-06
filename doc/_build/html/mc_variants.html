@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Working with Grids" href="grids.html"><link rel="prev" title="Surface Nets" href="surface_nets.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Working with Grids" href="grids.html"><link rel="prev" title="How Iso-Surface Extraction Works" href="how_it_works.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Marching Cubes Variants - isoext documentation</title>
@@ -212,6 +212,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How Iso-Surface Extraction Works</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
@@ -346,7 +347,7 @@ unmatched borders of the crack, one from each cell:</p>
     <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
     <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">pair</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">pair</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
 <span class="n">pair</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lorensen&quot;</span><span class="p">)</span>
@@ -359,7 +360,7 @@ unmatched borders of the crack, one from each cell:</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/867c5003719f525c.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/9902a17fee151f04.viser&initialCameraPosition=1.397,1.397,0.978&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -379,7 +380,7 @@ unmatched borders of the crack, one from each cell:</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/46b20744a44880f4.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/98449f389ad67b08.viser&initialCameraPosition=1.397,1.397,0.978&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -419,7 +420,7 @@ interpolant connects two of them:</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/d0cda6f8df11800f.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/d0cda6f8df11800f.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -442,7 +443,7 @@ interpolant connects two of them:</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/5a8dac6c34d5e682.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/5a8dac6c34d5e682.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -482,7 +483,7 @@ instead. The meshes stay watertight and crack free either way.</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/7418667bd392457e.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/7418667bd392457e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -506,7 +507,7 @@ instead. The meshes stay watertight and crack free either way.</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/128f1d0f7d09de5f.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/128f1d0f7d09de5f.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -535,7 +536,7 @@ answer:</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/54f64cd22f4b4e85.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/54f64cd22f4b4e85.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -559,7 +560,7 @@ answer:</p>
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/8d64e6713476f236.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/8d64e6713476f236.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -645,14 +646,14 @@ at generation time instead of on the GPU.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="surface_nets.html">
+          <a class="prev-page" href="how_it_works.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Surface Nets</div>
+                <div class="title">How Iso-Surface Extraction Works</div>
                 
               </div>
             </a>

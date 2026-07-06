@@ -19,10 +19,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:46:13.760718Z",
-     "iopub.status.busy": "2026-07-06T04:46:13.760627Z",
-     "iopub.status.idle": "2026-07-06T04:46:14.352406Z",
-     "shell.execute_reply": "2026-07-06T04:46:14.351992Z"
+     "iopub.execute_input": "2026-07-06T19:41:38.830301Z",
+     "iopub.status.busy": "2026-07-06T19:41:38.830215Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.559631Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.558918Z"
     }
    },
    "outputs": [],
@@ -47,10 +47,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:46:14.353526Z",
-     "iopub.status.busy": "2026-07-06T04:46:14.353399Z",
-     "iopub.status.idle": "2026-07-06T04:46:14.555505Z",
-     "shell.execute_reply": "2026-07-06T04:46:14.555084Z"
+     "iopub.execute_input": "2026-07-06T19:41:39.561132Z",
+     "iopub.status.busy": "2026-07-06T19:41:39.561001Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.775147Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.774729Z"
     }
    },
    "outputs": [
@@ -87,10 +87,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:46:14.569162Z",
-     "iopub.status.busy": "2026-07-06T04:46:14.569071Z",
-     "iopub.status.idle": "2026-07-06T04:46:14.656260Z",
-     "shell.execute_reply": "2026-07-06T04:46:14.655890Z"
+     "iopub.execute_input": "2026-07-06T19:41:39.791957Z",
+     "iopub.status.busy": "2026-07-06T19:41:39.791846Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.847007Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.846564Z"
     }
    },
    "outputs": [
@@ -108,7 +108,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/ead150578e6ce454.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/ead150578e6ce454.viser&initialCameraPosition=1.380,1.380,0.966&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -116,7 +116,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x79f4d8259b20>"
+       "<IPython.lib.display.IFrame at 0x72d94cf534a0>"
       ]
      },
      "execution_count": 3,
@@ -146,10 +146,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:46:14.657608Z",
-     "iopub.status.busy": "2026-07-06T04:46:14.657497Z",
-     "iopub.status.idle": "2026-07-06T04:46:14.773390Z",
-     "shell.execute_reply": "2026-07-06T04:46:14.772870Z"
+     "iopub.execute_input": "2026-07-06T19:41:39.848445Z",
+     "iopub.status.busy": "2026-07-06T19:41:39.848358Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.969411Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.968624Z"
     }
    },
    "outputs": [
@@ -167,7 +167,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/6657d7f18e790d46.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/6657d7f18e790d46.viser&initialCameraPosition=1.312,1.312,0.918&initialCameraLookAt=0.000,-0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -175,7 +175,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x79f4d82a7a70>"
+       "<IPython.lib.display.IFrame at 0x72dab54e2660>"
       ]
      },
      "execution_count": 4,

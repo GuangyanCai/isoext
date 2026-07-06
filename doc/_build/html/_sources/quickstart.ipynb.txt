@@ -14,10 +14,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:43:12.531748Z",
-     "iopub.status.busy": "2026-07-06T04:43:12.531666Z",
-     "iopub.status.idle": "2026-07-06T04:43:13.679540Z",
-     "shell.execute_reply": "2026-07-06T04:43:13.679128Z"
+     "iopub.execute_input": "2026-07-06T19:38:31.726772Z",
+     "iopub.status.busy": "2026-07-06T19:38:31.726678Z",
+     "iopub.status.idle": "2026-07-06T19:38:32.936568Z",
+     "shell.execute_reply": "2026-07-06T19:38:32.936141Z"
     }
    },
    "outputs": [
@@ -35,7 +35,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/872267c9b0560687.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/872267c9b0560687.viser&initialCameraPosition=1.419,1.419,0.993&initialCameraLookAt=-0.000,-0.000,-0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -43,7 +43,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e0e800efda0>"
+       "<IPython.lib.display.IFrame at 0x7c40a84490d0>"
       ]
      },
      "execution_count": 1,

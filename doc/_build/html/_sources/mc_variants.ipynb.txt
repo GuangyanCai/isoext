@@ -22,10 +22,10 @@
    "id": "c28d90a7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:51.863638Z",
-     "iopub.status.busy": "2026-07-06T05:58:51.863545Z",
-     "iopub.status.idle": "2026-07-06T05:58:52.459590Z",
-     "shell.execute_reply": "2026-07-06T05:58:52.458950Z"
+     "iopub.execute_input": "2026-07-06T19:38:51.562368Z",
+     "iopub.status.busy": "2026-07-06T19:38:51.562292Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.245187Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.244627Z"
     }
    },
    "outputs": [],
@@ -61,10 +61,10 @@
    "id": "bf44022b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:52.461664Z",
-     "iopub.status.busy": "2026-07-06T05:58:52.461535Z",
-     "iopub.status.idle": "2026-07-06T05:58:52.961154Z",
-     "shell.execute_reply": "2026-07-06T05:58:52.960543Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.247129Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.246994Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.777325Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.775969Z"
     }
    },
    "outputs": [
@@ -113,10 +113,10 @@
    "id": "2af8020e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:52.962496Z",
-     "iopub.status.busy": "2026-07-06T05:58:52.962412Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.099472Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.099070Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.778922Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.778829Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.880530Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.879911Z"
     }
    },
    "outputs": [
@@ -127,7 +127,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/867c5003719f525c.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/9902a17fee151f04.viser&initialCameraPosition=1.397,1.397,0.978&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -135,7 +135,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x791a500f6570>"
+       "<IPython.lib.display.IFrame at 0x71e4b5eaeed0>"
       ]
      },
      "execution_count": 3,
@@ -148,7 +148,7 @@
     "    [0.1, 0.5, 0.4, 0.7, -0.6, 0.7, 1.0, -0.4, -1.0, -0.3, -0.2, -0.5],\n",
     "    device=\"cuda\",\n",
     ").reshape(3, 2, 2)\n",
-    "pair = isoext.UniformGrid([3, 2, 2])\n",
+    "pair = isoext.UniformGrid([3, 2, 2], aabb_min=[-1, -0.5, -0.5], aabb_max=[1, 0.5, 0.5])\n",
     "pair.set_values(values)\n",
     "\n",
     "v, f = isoext.marching_cubes(pair, method=\"lorensen\")\n",
@@ -169,10 +169,10 @@
    "id": "7ada0840",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.100785Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.100647Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.104878Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.104689Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.882208Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.882086Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.886543Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.886377Z"
     }
    },
    "outputs": [
@@ -183,7 +183,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/46b20744a44880f4.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/98449f389ad67b08.viser&initialCameraPosition=1.397,1.397,0.978&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -191,7 +191,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7917c70954c0>"
+       "<IPython.lib.display.IFrame at 0x71e6c9968260>"
       ]
      },
      "execution_count": 4,
@@ -227,10 +227,10 @@
    "id": "31a6ada8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.106085Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.106017Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.110183Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.109987Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.887700Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.887629Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.892179Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.892016Z"
     }
    },
    "outputs": [
@@ -248,7 +248,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/d0cda6f8df11800f.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d0cda6f8df11800f.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -256,7 +256,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7917c70973e0>"
+       "<IPython.lib.display.IFrame at 0x71e6c9968740>"
       ]
      },
      "execution_count": 5,
@@ -282,10 +282,10 @@
    "id": "4e7e656d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.111373Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.111304Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.114901Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.114736Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.893394Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.893324Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.897781Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.897527Z"
     }
    },
    "outputs": [
@@ -303,7 +303,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/5a8dac6c34d5e682.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/5a8dac6c34d5e682.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -311,7 +311,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7917d6fafb30>"
+       "<IPython.lib.display.IFrame at 0x71e4b408b3b0>"
       ]
      },
      "execution_count": 6,
@@ -350,10 +350,10 @@
    "id": "9bd5da6c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.115898Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.115829Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.120305Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.119730Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.898749Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.898679Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.902961Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.902780Z"
     }
    },
    "outputs": [
@@ -371,7 +371,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/7418667bd392457e.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/7418667bd392457e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -379,7 +379,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7917d6fade50>"
+       "<IPython.lib.display.IFrame at 0x71e6cab69580>"
       ]
      },
      "execution_count": 7,
@@ -404,10 +404,10 @@
    "id": "fa721c27",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.121343Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.121278Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.125044Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.124857Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.904210Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.904140Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.908388Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.908163Z"
     }
    },
    "outputs": [
@@ -425,7 +425,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/128f1d0f7d09de5f.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/128f1d0f7d09de5f.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -433,7 +433,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x791a52d73500>"
+       "<IPython.lib.display.IFrame at 0x71e4b408b5c0>"
       ]
      },
      "execution_count": 8,
@@ -466,10 +466,10 @@
    "id": "e5c5de00",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.126227Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.126164Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.129883Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.129608Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.909567Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.909501Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.913598Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.913438Z"
     }
    },
    "outputs": [
@@ -487,7 +487,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/54f64cd22f4b4e85.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/54f64cd22f4b4e85.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -495,7 +495,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x791a52d72450>"
+       "<IPython.lib.display.IFrame at 0x71e4b40a6180>"
       ]
      },
      "execution_count": 9,
@@ -516,10 +516,10 @@
    "id": "5b613a3f",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T05:58:53.130533Z",
-     "iopub.status.busy": "2026-07-06T05:58:53.130470Z",
-     "iopub.status.idle": "2026-07-06T05:58:53.134464Z",
-     "shell.execute_reply": "2026-07-06T05:58:53.134259Z"
+     "iopub.execute_input": "2026-07-06T19:38:52.914862Z",
+     "iopub.status.busy": "2026-07-06T19:38:52.914791Z",
+     "iopub.status.idle": "2026-07-06T19:38:52.918766Z",
+     "shell.execute_reply": "2026-07-06T19:38:52.918609Z"
     }
    },
    "outputs": [
@@ -537,7 +537,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/8d64e6713476f236.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/8d64e6713476f236.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -545,7 +545,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7917c70aa4b0>"
+       "<IPython.lib.display.IFrame at 0x71e4b40a5f40>"
       ]
      },
      "execution_count": 10,
