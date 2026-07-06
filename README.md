@@ -2,18 +2,24 @@
 
 [![PyPI version](https://badge.fury.io/py/isoext.svg?)](https://badge.fury.io/py/isoext)
 [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://guangyancai.github.io/isoext/)
+[![License](https://img.shields.io/github/license/GuangyanCai/isoext)](LICENSE)
 
 **GPU-accelerated iso-surface extraction for PyTorch**
 
-`isoext` is a high-performance library for extracting surfaces from scalar fields using CUDA.
+An iso-surface is the set of points where a 3D scalar field equals a chosen value: the shape described by a signed distance function, or the boundary of a density volume. `isoext` is a growing collection of iso-surface extraction methods that turn such fields into triangle meshes on the GPU, taking the field in as a PyTorch tensor and returning the mesh as tensors.
 
 ## Features
 
-- **Marching Cubes** — Fast triangular mesh extraction (about 5 ms for a 512³ grid on an RTX 5090)
-- **Dual Contouring** — Triangle meshes with sharp feature preservation
-- **Flexible Grids** — Dense uniform grids and memory-efficient sparse grids
-- **Interactive Viewer** — View meshes in the browser, built on [viser](https://viser.studio)
-- **SDF Utilities** — SDF primitives and CSG operations
+- **Extraction methods** — sharing one grid interface, with more on the way
+  - **Marching Cubes** — supports the same topology-correct MC33 as scikit-image (`lewiner`) and defaults to an improved variant with the corrected interior test (`vega`); the classic `nagae` and `lorensen` tables are included too
+  - **Marching Tetrahedra** — ambiguity-free extraction by splitting cells into tetrahedra
+  - **Dual Contouring** — sharp feature preservation from surface normals
+  - **Surface Nets** — smooth dual meshes without needing normals
+- **Grids**
+  - Dense uniform grids for full volumes
+  - Sparse grids that only store cells near the surface, so memory scales with area instead of volume
+- **Interactive viewer** — meshes and grid overlays in the browser, built on [viser](https://viser.studio); scenes can be embedded in static web pages
+- **SDF toolbox** — primitives from spheres to a Mandelbulb, CSG operations, and gradient and smoothing utilities
 
 ## Installation
 
