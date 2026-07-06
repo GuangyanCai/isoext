@@ -27,7 +27,7 @@ Interactive visualization built on [viser](https://viser.studio).
 
 ```{eval-rst}
 .. automodule:: isoext.viewer
-   :members: show, embed, add_mesh, add_grid, serialize_scene, save_scene, copy_client
+   :members: show, embed, add_mesh, add_grid, add_points, add_lines, add_arrows, add_planes, serialize_scene, save_scene, copy_client
 ```
 
 ## Classes
@@ -42,7 +42,8 @@ Interactive visualization built on [viser](https://viser.studio).
    The grid divides a 3D axis-aligned bounding box into a regular lattice of cells.
    Each cell has 8 corner points where scalar values are stored.
 
-   :param shape: The number of cells in each dimension (x, y, z).
+   :param shape: The number of sample points in each dimension (x, y, z);
+      the grid has one fewer cell than points along each axis.
    :type shape: Sequence[int]
    :param aabb_min: The minimum corner of the bounding box.
    :type aabb_min: Sequence[float]
@@ -66,7 +67,8 @@ Interactive visualization built on [viser](https://viser.studio).
    Unlike UniformGrid, SparseGrid only allocates memory for cells that are explicitly added.
    This is useful for large domains where only a small region contains the iso-surface.
 
-   :param shape: The maximum number of cells in each dimension (x, y, z).
+   :param shape: The number of sample points in each dimension (x, y, z);
+      cells may be added anywhere in the implied lattice.
    :type shape: Sequence[int]
    :param aabb_min: The minimum corner of the bounding box.
    :type aabb_min: Sequence[float]

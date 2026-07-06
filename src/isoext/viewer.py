@@ -13,6 +13,7 @@ Typical use::
 import contextlib
 import hashlib
 import io
+import itertools
 import shutil
 from pathlib import Path
 
@@ -168,6 +169,190 @@ def add_grid(
     )
 
 
+# Distinct default scene names for anonymous annotations; viser replaces
+# nodes that share a name.
+_anon_names = itertools.count()
+
+
+def add_points(
+    server,
+    points: torch.Tensor,
+    *,
+    color=(0.93, 0.79, 0.24),
+    point_size: float = 0.06,
+    name: str | None = None,
+):
+    """Draw raw points, for annotating a scene on top of the mesh and grid.
+
+    Args:
+        server: A viser.ViserServer instance.
+        points: (N, 3) tensor of positions.
+        color: RGB tuple with components in [0, 1], or a color name.
+        point_size: Dot diameter in world units.
+        name: Scene tree name of the point cloud. Defaults to a unique
+            name, so repeated calls add to the scene instead of replacing
+            the previous points.
+    """
+    import numpy as np
+
+    if name is None:
+        name = f"/points/{next(_anon_names)}"
+    pts = points.detach().reshape(-1, 3).cpu().numpy()
+    colors = np.tile(np.asarray(_to_rgb(color), dtype=np.float32), (len(pts), 1))
+    return server.scene.add_point_cloud(name, pts, colors=colors, point_size=point_size)
+
+
+def add_lines(
+    server,
+    segments: torch.Tensor,
+    *,
+    color=(0.55, 0.55, 0.55),
+    line_width: float = 2.0,
+    name: str | None = None,
+):
+    """Draw raw line segments, for annotating a scene.
+
+    Args:
+        server: A viser.ViserServer instance.
+        segments: (N, 2, 3) tensor: N segments with start and end points.
+        color: RGB tuple with components in [0, 1], or a color name.
+        line_width: Width of the segments in pixels.
+        name: Scene tree name of the segments. Defaults to a unique name,
+            so repeated calls add to the scene instead of replacing the
+            previous segments.
+    """
+    import numpy as np
+
+    if name is None:
+        name = f"/lines/{next(_anon_names)}"
+    segs = segments.detach().reshape(-1, 2, 3).cpu().numpy()
+    colors = np.broadcast_to(np.asarray(_to_rgb(color), dtype=np.float32), segs.shape)
+    return server.scene.add_line_segments(name, segs, colors=colors, line_width=line_width)
+
+
+def _orthonormal_frame(directions):
+    """Unit direction plus two unit vectors spanning its perpendicular plane."""
+    n = directions / directions.norm(dim=-1, keepdim=True).clamp_min(1e-12)
+    helper = torch.zeros_like(n)
+    helper[..., 0] = 1.0
+    helper[n[..., 0].abs() > 0.9] = torch.tensor([0.0, 1.0, 0.0], device=n.device, dtype=n.dtype)
+    u = torch.cross(n, helper, dim=-1)
+    u = u / u.norm(dim=-1, keepdim=True).clamp_min(1e-12)
+    return n, u, torch.cross(n, u, dim=-1)
+
+
+def add_arrows(
+    server,
+    origins: torch.Tensor,
+    directions: torch.Tensor,
+    *,
+    color=(0.45, 0.45, 0.45),
+    line_width: float = 2.0,
+    name: str | None = None,
+):
+    """Draw arrows as line shafts with cone heads, e.g. for normals.
+
+    Args:
+        server: A viser.ViserServer instance.
+        origins: (N, 3) tensor of arrow start points.
+        directions: (N, 3) tensor of arrow vectors; length sets the size.
+        color: RGB tuple with components in [0, 1], or a color name.
+        line_width: Width of the shafts in pixels.
+        name: Scene tree name prefix. Defaults to a unique name.
+    """
+    import numpy as np
+
+    if name is None:
+        name = f"/arrows/{next(_anon_names)}"
+    origins = origins.detach().reshape(-1, 3)
+    directions = directions.detach().reshape(-1, 3)
+    tips = origins + directions
+    n, u, w = _orthonormal_frame(directions)
+    head = 0.25 * directions.norm(dim=-1, keepdim=True)
+    base = tips - head * n
+    radius = 0.4 * head
+
+    count = len(origins)
+    k = 12
+    angles = torch.arange(k, device=origins.device) * (2.0 * torch.pi / k)
+    ring = base[:, None] + radius[:, None] * (
+        torch.cos(angles)[None, :, None] * u[:, None] + torch.sin(angles)[None, :, None] * w[:, None]
+    )
+    verts = torch.cat([ring.reshape(-1, 3), tips, base])
+    j = torch.arange(k, device=origins.device)
+    jn = (j + 1) % k
+    i = torch.arange(count, device=origins.device)[:, None]
+    apex = (count * k + i).expand(-1, k)
+    bottom = (count * k + count + i).expand(-1, k)
+    faces = torch.cat(
+        [
+            torch.stack([i * k + j, i * k + jn, apex], dim=-1).reshape(-1, 3),
+            torch.stack([i * k + jn, i * k + j, bottom], dim=-1).reshape(-1, 3),
+        ]
+    )
+    server.scene.add_mesh_simple(
+        f"{name}/heads",
+        verts.cpu().numpy(),
+        faces.cpu().numpy(),
+        color=_to_rgb(color),
+    )
+    segments = torch.stack([origins, base], dim=1).cpu().numpy()
+    server.scene.add_line_segments(
+        f"{name}/shafts",
+        segments,
+        colors=np.broadcast_to(np.asarray(_to_rgb(color), dtype=np.float32), segments.shape),
+        line_width=line_width,
+    )
+
+
+def add_planes(
+    server,
+    centers: torch.Tensor,
+    normals: torch.Tensor,
+    *,
+    size: float = 0.5,
+    color=(0.6, 0.7, 0.9),
+    opacity: float = 0.4,
+    name: str | None = None,
+):
+    """Draw translucent square patches perpendicular to the given normals,
+    e.g. tangent planes.
+
+    Args:
+        server: A viser.ViserServer instance.
+        centers: (N, 3) tensor of patch centers.
+        normals: (N, 3) tensor of patch normals.
+        size: Half of the patch side length, in world units.
+        color: RGB tuple with components in [0, 1], or a color name.
+        opacity: Patch opacity in [0, 1].
+        name: Scene tree name. Defaults to a unique name.
+    """
+    if name is None:
+        name = f"/planes/{next(_anon_names)}"
+    centers = centers.detach().reshape(-1, 3)
+    _, u, w = _orthonormal_frame(normals.detach().reshape(-1, 3))
+    corners = torch.stack(
+        [
+            centers - size * u - size * w,
+            centers + size * u - size * w,
+            centers + size * u + size * w,
+            centers - size * u + size * w,
+        ],
+        dim=1,
+    )
+    i = torch.arange(len(centers), device=centers.device)[:, None] * 4
+    tri = torch.tensor([[0, 1, 2], [0, 2, 3]], device=centers.device)
+    faces = (i[:, None] + tri[None]).reshape(-1, 3)
+    server.scene.add_mesh_simple(
+        name,
+        corners.reshape(-1, 3).cpu().numpy(),
+        faces.cpu().numpy(),
+        color=_to_rgb(color),
+        opacity=opacity,
+        side="double",
+    )
+
+
 def show(
     vertices: torch.Tensor,
     faces: torch.Tensor,
@@ -175,6 +360,7 @@ def show(
     port: int = 8080,
     grid=None,
     grid_level: float = 0.0,
+    draw=None,
     **mesh_kwargs,
 ):
     """Open an interactive viewer serving the given mesh.
@@ -188,6 +374,8 @@ def show(
         port: Port to serve on (the next free port is used if taken).
         grid: Optional grid to overlay with add_grid.
         grid_level: Iso-value for the grid overlay's corner colors.
+        draw: Callable that receives the server to add extra elements,
+            e.g. with add_points and add_lines.
         **mesh_kwargs: Forwarded to add_mesh.
 
     Returns:
@@ -197,6 +385,8 @@ def show(
     add_mesh(server, vertices, faces, **mesh_kwargs)
     if grid is not None:
         add_grid(server, grid, level=grid_level)
+    if draw is not None:
+        draw(server)
     return server
 
 
@@ -217,23 +407,28 @@ def _get_scene_recorder():
 
 
 def serialize_scene(
-    vertices: torch.Tensor,
-    faces: torch.Tensor,
+    vertices: torch.Tensor | None = None,
+    faces: torch.Tensor | None = None,
     *,
     grid=None,
     grid_level: float = 0.0,
+    draw=None,
     **mesh_kwargs,
 ) -> bytes:
     """Serialize a scene containing the given mesh to .viser bytes.
 
     The bytes can be written to a ``.viser`` file and played back offline by
     viser's static client, e.g. embedded in a web page. See save_scene and
-    embed for convenience wrappers.
+    embed for convenience wrappers. The mesh is optional: pass None to
+    build a scene of only a grid overlay and drawn annotations.
     """
     server = _get_scene_recorder()
-    add_mesh(server, vertices, faces, **mesh_kwargs)
+    if vertices is not None:
+        add_mesh(server, vertices, faces, **mesh_kwargs)
     if grid is not None:
         add_grid(server, grid, level=grid_level)
+    if draw is not None:
+        draw(server)
     return server.get_scene_serializer().serialize()
 
 
@@ -260,9 +455,33 @@ def copy_client(directory) -> Path:
     return dst
 
 
+def _camera_params(vertices, grid) -> str:
+    """Initial camera URL parameters framing the mesh and grid.
+
+    Without these the static client starts at a fixed distance, which
+    leaves small scenes occupying a fraction of the viewport.
+    """
+    pts = []
+    if vertices is not None and len(vertices) > 0:
+        pts.append(vertices.detach().reshape(-1, 3))
+    if grid is not None:
+        pts.append(grid.get_points().detach().reshape(-1, 3))
+    if not pts:
+        return ""
+    stacked = torch.cat(pts)
+    low, high = stacked.amin(dim=0), stacked.amax(dim=0)
+    center = ((low + high) / 2).cpu()
+    radius = max(float(((high - low) / 2).norm()), 1e-3)
+    direction = torch.tensor([1.0, 1.0, 0.7])
+    position = center + 1.8 * radius * direction / direction.norm()
+    look_at = ",".join(f"{v:.3f}" for v in center.tolist())
+    pos = ",".join(f"{v:.3f}" for v in position.tolist())
+    return f"&initialCameraPosition={pos}&initialCameraLookAt={look_at}&initialCameraUp=0,0,1"
+
+
 def embed(
-    vertices: torch.Tensor,
-    faces: torch.Tensor,
+    vertices: torch.Tensor | None = None,
+    faces: torch.Tensor | None = None,
     *,
     root="_static",
     height: int = 420,
@@ -277,12 +496,14 @@ def embed(
     statically, for example on documentation pages.
 
     Args:
-        vertices: (N, 3) tensor of vertex positions.
+        vertices: (N, 3) tensor of vertex positions, or None for a scene
+            without a mesh.
         faces: (M, 3) tensor of triangle indices.
         root: Directory for the static assets, relative to the notebook.
         height: Height of the embedded viewer in pixels.
         **mesh_kwargs: Forwarded to add_mesh; pass grid= (and optionally
-            grid_level=) to overlay the grid's edges and corner signs.
+            grid_level=) to overlay the grid's edges and corner signs, and
+            draw= to add extra elements with add_points and add_lines.
 
     Returns:
         An IPython IFrame displaying the scene.
@@ -306,6 +527,7 @@ def embed(
     # Both URLs are relative: the iframe src is resolved against the page and
     # playbackPath against the client's own URL.
     src = f"{root.as_posix()}/viser/index.html?playbackPath=../scenes/{scene_name}"
+    src += _camera_params(vertices, mesh_kwargs.get("grid"))
     return IFrame(
         src,
         width="100%",
