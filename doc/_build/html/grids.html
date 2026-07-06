@@ -9,7 +9,7 @@
         <title>Working with Grids - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -404,9 +404,9 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 <span class="n">scale</span> <span class="o">=</span> <span class="mf">6.0</span>
 
 <span class="n">gyroid</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">gyroid</span><span class="p">)</span>
@@ -545,13 +545,13 @@ After adding: 1000 active cells
 <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
     <span class="c1"># Get corner positions for these cells</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">sparse_grid</span><span class="o">.</span><span class="n">get_points_by_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>  <span class="c1"># (N, 8, 3)</span>
-    
+
     <span class="c1"># Compute values at corners (sphere SDF)</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span>  <span class="c1"># (N, 8)</span>
-    
+
     <span class="c1"># Filter to cells that cross the surface (have both + and - values)</span>
     <span class="n">active</span> <span class="o">=</span> <span class="n">sparse_grid</span><span class="o">.</span><span class="n">filter_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="n">active</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">active</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sparse_grid</span><span class="o">.</span><span class="n">add_cells</span><span class="p">(</span><span class="n">active</span><span class="p">)</span>
 

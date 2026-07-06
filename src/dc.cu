@@ -32,8 +32,9 @@ struct place_dual_vertex_op {
                          const uint *its_cell_indices, const GridView &view,
                          float reg, float tol, bool clamp)
         : dual_v(dual_v), its_points(its_points), its_normals(its_normals),
-          its_cell_offsets(its_cell_offsets), its_cell_indices(its_cell_indices),
-          view(view), reg(reg), tol(tol), clamp(clamp) {}
+          its_cell_offsets(its_cell_offsets),
+          its_cell_indices(its_cell_indices), view(view), reg(reg), tol(tol),
+          clamp(clamp) {}
 
     __host__ __device__ void operator()(uint idx) {
         // The QEF minimizes sum_i (n_i . (x - p_i))^2, accumulated as the
@@ -102,8 +103,8 @@ struct get_triangles_op {
     // vertex), or -1 if the cell has no intersections.
     __host__ __device__ int cell_to_dual_idx(int cell) const {
         const uint *end = its_cell_indices + num_cells;
-        const uint *it = thrust::lower_bound(thrust::seq, its_cell_indices,
-                                             end, uint(cell));
+        const uint *it =
+            thrust::lower_bound(thrust::seq, its_cell_indices, end, uint(cell));
         return (it != end && *it == uint(cell)) ? int(it - its_cell_indices)
                                                 : -1;
     }
@@ -198,14 +199,12 @@ build_dual_mesh(Grid *grid, const Intersection &its,
     uint num_quads = dual_quads_dv.size();
     thrust::device_vector<float3> v_dv(num_quads * 6,
                                        make_float3(NAN, NAN, NAN));
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_quads),
-                     get_triangles_op(v_dv.data().get(),
-                                      dual_v.data().get(),
-                                      dual_quads_dv.data().get(),
-                                      is_out_dv.data().get(),
-                                      its.cell_indices.data(),
-                                      its.cell_indices.size()));
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_quads),
+        get_triangles_op(v_dv.data().get(), dual_v.data().get(),
+                         dual_quads_dv.data().get(), is_out_dv.data().get(),
+                         its.cell_indices.data(), its.cell_indices.size()));
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),

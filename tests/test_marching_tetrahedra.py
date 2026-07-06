@@ -52,9 +52,7 @@ def test_marching_tetrahedra_winding_matches_marching_cubes(sphere_grid):
 
     def signed_volume(v, f):
         tri = v[f.long()]
-        return (
-            torch.cross(tri[:, 0], tri[:, 1], dim=-1) * tri[:, 2]
-        ).sum() / 6.0
+        return (torch.cross(tri[:, 0], tri[:, 1], dim=-1) * tri[:, 2]).sum() / 6.0
 
     v_mc, f_mc = isoext.marching_cubes(sphere_grid)
     v_mt, f_mt = isoext.marching_tetrahedra(sphere_grid)

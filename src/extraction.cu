@@ -22,9 +22,8 @@ compact_active_cells(thrust::device_vector<uint8_t> &cases) {
                                          cell_indices.end(), cases.begin(),
                                          is_empty_pred()),
                        cell_indices.end());
-    cases.erase(
-        thrust::remove_if(cases.begin(), cases.end(), is_empty_pred()),
-        cases.end());
+    cases.erase(thrust::remove_if(cases.begin(), cases.end(), is_empty_pred()),
+                cases.end());
     return cell_indices;
 }
 

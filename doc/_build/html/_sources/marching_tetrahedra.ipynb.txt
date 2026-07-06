@@ -31,7 +31,7 @@
    "source": [
     "import isoext\n",
     "from isoext import viewer\n",
-    "from isoext.sdf import SphereSDF\n"
+    "from isoext.sdf import SphereSDF"
    ]
   },
   {
@@ -99,7 +99,7 @@
     "v_mc, f_mc = isoext.marching_cubes(grid)\n",
     "print(f\"marching_cubes:      {f_mc.shape[0]:,} triangles\")\n",
     "\n",
-    "viewer.embed(vertices, faces, color=\"tomato\", flat_shading=True)\n"
+    "viewer.embed(vertices, faces, color=\"tomato\", flat_shading=True)"
    ]
   },
   {
@@ -155,7 +155,7 @@
     "coarse.set_values(SphereSDF(radius=0.7)(coarse.get_points()))\n",
     "\n",
     "v, f = isoext.marching_cubes(coarse)\n",
-    "viewer.embed(v, f, color=\"steelblue\", wireframe=True)\n"
+    "viewer.embed(v, f, color=\"steelblue\", wireframe=True)"
    ]
   },
   {
@@ -196,7 +196,7 @@
    ],
    "source": [
     "v, f = isoext.marching_tetrahedra(coarse)\n",
-    "viewer.embed(v, f, color=\"tomato\", wireframe=True)\n"
+    "viewer.embed(v, f, color=\"tomato\", wireframe=True)"
    ]
   },
   {

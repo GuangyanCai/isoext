@@ -85,8 +85,9 @@ Lorensen::run(float3 *v, const uint num_cells, const uint8_t *cases,
         *new thrust::device_vector<int>(edge_status_table,
                                         edge_status_table + edge_table_size);
     static const thrust::device_vector<int> &tri_table_dv =
-        *new thrust::device_vector<int>(
-            Lorensen::tri_table, Lorensen::tri_table + Lorensen::tri_table_size);
+        *new thrust::device_vector<int>(Lorensen::tri_table,
+                                        Lorensen::tri_table +
+                                            Lorensen::tri_table_size);
 
     thrust::for_each(thrust::counting_iterator<uint>(0),
                      thrust::counting_iterator<uint>(num_cells),

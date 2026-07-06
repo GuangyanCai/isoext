@@ -33,7 +33,7 @@
     "import isoext\n",
     "from isoext import viewer\n",
     "from isoext.sdf import CuboidSDF, MandelbulbSDF, get_sdf_normal\n",
-    "from isoext.utils import gaussian_smooth\n"
+    "from isoext.utils import gaussian_smooth"
    ]
   },
   {
@@ -79,7 +79,7 @@
     "grid.set_values(grid.get_points().norm(dim=-1) - 0.8)  # Sphere\n",
     "\n",
     "vertices, faces = isoext.surface_nets(grid)\n",
-    "print(f\"{vertices.shape[0]:,} vertices, {faces.shape[0]:,} triangles\")\n"
+    "print(f\"{vertices.shape[0]:,} vertices, {faces.shape[0]:,} triangles\")"
    ]
   },
   {
@@ -147,7 +147,7 @@
     "\n",
     "v, f = isoext.surface_nets(bulb_grid)\n",
     "print(f\"{v.shape[0]:,} vertices\")\n",
-    "viewer.embed(v, f, color=\"coral\")\n"
+    "viewer.embed(v, f, color=\"coral\")"
    ]
   },
   {
@@ -220,7 +220,7 @@
     "its.set_normals(get_sdf_normal(cube, its.get_points()))\n",
     "v, f = isoext.dual_contouring(cube_grid, intersection=its)\n",
     "print(f\"dual_contouring: {v.shape[0]:,} vertices\")\n",
-    "viewer.embed(v, f, color=\"goldenrod\", flat_shading=True, height=300)\n"
+    "viewer.embed(v, f, color=\"goldenrod\", flat_shading=True, height=300)"
    ]
   },
   {
@@ -269,7 +269,7 @@
    "source": [
     "v, f = isoext.surface_nets(cube_grid)\n",
     "print(f\"surface_nets:    {v.shape[0]:,} vertices\")\n",
-    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, height=300)\n"
+    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, height=300)"
    ]
   },
   {

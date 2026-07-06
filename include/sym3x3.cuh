@@ -79,8 +79,8 @@ solve_sym_3x3(const float A[3][3], float3 b, float tol) {
     float V[3][3];
     sym_eigen_3x3(M, eigenvalues, V);
 
-    float threshold = tol * fmaxf(eigenvalues[0],
-                                  fmaxf(eigenvalues[1], eigenvalues[2]));
+    float threshold =
+        tol * fmaxf(eigenvalues[0], fmaxf(eigenvalues[1], eigenvalues[2]));
 
     float3 x = make_float3(0.0f, 0.0f, 0.0f);
     for (int i = 0; i < 3; i++) {

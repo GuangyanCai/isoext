@@ -156,8 +156,9 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
     uint num_cells = new_cell_indices.size();
 
     // View the candidate cells and their corner values as a sparse grid.
-    GridView view = {shape, aabb_min, aabb_max, new_values.data(),
-                     new_cell_indices.data(), true};
+    GridView view = {
+        shape, aabb_min, aabb_max, new_values.data(), new_cell_indices.data(),
+        true};
 
     // Get the case index of each cell.
     thrust::device_vector<uint8_t> cases_dv(num_cells);

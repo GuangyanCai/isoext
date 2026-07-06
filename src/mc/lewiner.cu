@@ -58,12 +58,42 @@ struct cell_worker {
         int abs_face = face < 0 ? -face : face;
         float a, b, c, d;
         switch (abs_face) {
-            case 1: a = lv[0]; b = lv[4]; c = lv[5]; d = lv[1]; break;
-            case 2: a = lv[1]; b = lv[5]; c = lv[6]; d = lv[2]; break;
-            case 3: a = lv[2]; b = lv[6]; c = lv[7]; d = lv[3]; break;
-            case 4: a = lv[3]; b = lv[7]; c = lv[4]; d = lv[0]; break;
-            case 5: a = lv[0]; b = lv[3]; c = lv[2]; d = lv[1]; break;
-            default: a = lv[4]; b = lv[7]; c = lv[6]; d = lv[5]; break;
+        case 1:
+            a = lv[0];
+            b = lv[4];
+            c = lv[5];
+            d = lv[1];
+            break;
+        case 2:
+            a = lv[1];
+            b = lv[5];
+            c = lv[6];
+            d = lv[2];
+            break;
+        case 3:
+            a = lv[2];
+            b = lv[6];
+            c = lv[7];
+            d = lv[3];
+            break;
+        case 4:
+            a = lv[3];
+            b = lv[7];
+            c = lv[4];
+            d = lv[0];
+            break;
+        case 5:
+            a = lv[0];
+            b = lv[3];
+            c = lv[2];
+            d = lv[1];
+            break;
+        default:
+            a = lv[4];
+            b = lv[7];
+            c = lv[6];
+            d = lv[5];
+            break;
         }
         float ac_bd = a * c - b * d;
         if (ac_bd > -eps && ac_bd < eps) {
@@ -121,7 +151,7 @@ struct cell_worker {
                 {{2, 6}, {1, 5}, {0, 4}, {3, 7}},
                 {{3, 7}, {2, 6}, {1, 5}, {0, 4}},
             };
-            const int(*row)[2] = rows[edge];
+            const int (*row)[2] = rows[edge];
             t = lv[row[0][0]] / (lv[row[0][0]] - lv[row[0][1]] + eps);
             at = 0.0f;
             bt = lv[row[1][0]] + (lv[row[1][1]] - lv[row[1][0]]) * t;
@@ -130,10 +160,14 @@ struct cell_worker {
         }
 
         int test = 0;
-        if (at >= 0.0f) test += 1;
-        if (bt >= 0.0f) test += 2;
-        if (ct >= 0.0f) test += 4;
-        if (dt >= 0.0f) test += 8;
+        if (at >= 0.0f)
+            test += 1;
+        if (bt >= 0.0f)
+            test += 2;
+        if (ct >= 0.0f)
+            test += 4;
+        if (dt >= 0.0f)
+            test += 8;
 
         if (test == 5) {
             return (at * ct - bt * dt < eps) ? (s > 0) : false;
@@ -210,125 +244,163 @@ struct cell_worker {
     __host__ __device__ void big_switch(int case_num, int config) {
         int sub = 0;
         switch (case_num) {
-            case 1: add(mc33::TILING1, config, 1); break;
-            case 2: add(mc33::TILING2, config, 2); break;
+        case 1:
+            add(mc33::TILING1, config, 1);
+            break;
+        case 2:
+            add(mc33::TILING2, config, 2);
+            break;
+        case 3:
+            if (face_test(mc33::TEST3(luts, config))) {
+                add(mc33::TILING3_2, config, 4);
+            } else {
+                add(mc33::TILING3_1, config, 2);
+            }
+            break;
+        case 4:
+            if (interior_test(4, config, 0, mc33::TEST4(luts, config))) {
+                add(mc33::TILING4_1, config, 2);
+            } else {
+                add(mc33::TILING4_2, config, 6);
+            }
+            break;
+        case 5:
+            add(mc33::TILING5, config, 3);
+            break;
+        case 6:
+            if (face_test(mc33::TEST6(luts, config, 0))) {
+                add(mc33::TILING6_2, config, 5);
+            } else if (interior_test(6, config, 0,
+                                     mc33::TEST6(luts, config, 1))) {
+                add(mc33::TILING6_1_1, config, 3);
+            } else {
+                add(mc33::TILING6_1_2, config, 9);
+            }
+            break;
+        case 7:
+            if (face_test(mc33::TEST7(luts, config, 0)))
+                sub += 1;
+            if (face_test(mc33::TEST7(luts, config, 1)))
+                sub += 2;
+            if (face_test(mc33::TEST7(luts, config, 2)))
+                sub += 4;
+            switch (sub) {
+            case 0:
+                add(mc33::TILING7_1, config, 3);
+                break;
+            case 1:
+                add2(mc33::TILING7_2, config, 0, 5);
+                break;
+            case 2:
+                add2(mc33::TILING7_2, config, 1, 5);
+                break;
             case 3:
-                if (face_test(mc33::TEST3(luts, config))) {
-                    add(mc33::TILING3_2, config, 4);
-                } else {
-                    add(mc33::TILING3_1, config, 2);
-                }
+                add2(mc33::TILING7_3, config, 0, 9);
                 break;
             case 4:
-                if (interior_test(4, config, 0, mc33::TEST4(luts, config))) {
-                    add(mc33::TILING4_1, config, 2);
-                } else {
-                    add(mc33::TILING4_2, config, 6);
-                }
+                add2(mc33::TILING7_2, config, 2, 5);
                 break;
-            case 5: add(mc33::TILING5, config, 3); break;
+            case 5:
+                add2(mc33::TILING7_3, config, 1, 9);
+                break;
             case 6:
-                if (face_test(mc33::TEST6(luts, config, 0))) {
-                    add(mc33::TILING6_2, config, 5);
-                } else if (interior_test(6, config, 0,
-                                         mc33::TEST6(luts, config, 1))) {
-                    add(mc33::TILING6_1_1, config, 3);
+                add2(mc33::TILING7_3, config, 2, 9);
+                break;
+            default:
+                if (interior_test(7, config, sub,
+                                  mc33::TEST7(luts, config, 3))) {
+                    add(mc33::TILING7_4_2, config, 9);
                 } else {
-                    add(mc33::TILING6_1_2, config, 9);
+                    add(mc33::TILING7_4_1, config, 5);
                 }
                 break;
-            case 7:
-                if (face_test(mc33::TEST7(luts, config, 0))) sub += 1;
-                if (face_test(mc33::TEST7(luts, config, 1))) sub += 2;
-                if (face_test(mc33::TEST7(luts, config, 2))) sub += 4;
-                switch (sub) {
-                    case 0: add(mc33::TILING7_1, config, 3); break;
-                    case 1: add2(mc33::TILING7_2, config, 0, 5); break;
-                    case 2: add2(mc33::TILING7_2, config, 1, 5); break;
-                    case 3: add2(mc33::TILING7_3, config, 0, 9); break;
-                    case 4: add2(mc33::TILING7_2, config, 2, 5); break;
-                    case 5: add2(mc33::TILING7_3, config, 1, 9); break;
-                    case 6: add2(mc33::TILING7_3, config, 2, 9); break;
-                    default:
-                        if (interior_test(7, config, sub,
-                                          mc33::TEST7(luts, config, 3))) {
-                            add(mc33::TILING7_4_2, config, 9);
-                        } else {
-                            add(mc33::TILING7_4_1, config, 5);
-                        }
-                        break;
-                }
-                break;
-            case 8: add(mc33::TILING8, config, 2); break;
-            case 9: add(mc33::TILING9, config, 4); break;
-            case 10:
-                if (face_test(mc33::TEST10(luts, config, 0))) {
-                    if (face_test(mc33::TEST10(luts, config, 1))) {
-                        add(mc33::TILING10_1_1_, config, 4);
-                    } else {
-                        add(mc33::TILING10_2, config, 8);
-                    }
-                } else if (face_test(mc33::TEST10(luts, config, 1))) {
-                    add(mc33::TILING10_2_, config, 8);
-                } else if (interior_test(10, config, 0,
-                                         mc33::TEST10(luts, config, 2))) {
-                    add(mc33::TILING10_1_1, config, 4);
+            }
+            break;
+        case 8:
+            add(mc33::TILING8, config, 2);
+            break;
+        case 9:
+            add(mc33::TILING9, config, 4);
+            break;
+        case 10:
+            if (face_test(mc33::TEST10(luts, config, 0))) {
+                if (face_test(mc33::TEST10(luts, config, 1))) {
+                    add(mc33::TILING10_1_1_, config, 4);
                 } else {
-                    add(mc33::TILING10_1_2, config, 8);
+                    add(mc33::TILING10_2, config, 8);
                 }
-                break;
-            case 11: add(mc33::TILING11, config, 4); break;
-            case 12:
-                if (face_test(mc33::TEST12(luts, config, 0))) {
-                    if (face_test(mc33::TEST12(luts, config, 1))) {
-                        add(mc33::TILING12_1_1_, config, 4);
-                    } else {
-                        add(mc33::TILING12_2, config, 8);
-                    }
-                } else if (face_test(mc33::TEST12(luts, config, 1))) {
-                    add(mc33::TILING12_2_, config, 8);
-                } else if (interior_test(12, config, 0,
-                                         mc33::TEST12(luts, config, 2))) {
-                    add(mc33::TILING12_1_1, config, 4);
+            } else if (face_test(mc33::TEST10(luts, config, 1))) {
+                add(mc33::TILING10_2_, config, 8);
+            } else if (interior_test(10, config, 0,
+                                     mc33::TEST10(luts, config, 2))) {
+                add(mc33::TILING10_1_1, config, 4);
+            } else {
+                add(mc33::TILING10_1_2, config, 8);
+            }
+            break;
+        case 11:
+            add(mc33::TILING11, config, 4);
+            break;
+        case 12:
+            if (face_test(mc33::TEST12(luts, config, 0))) {
+                if (face_test(mc33::TEST12(luts, config, 1))) {
+                    add(mc33::TILING12_1_1_, config, 4);
                 } else {
-                    add(mc33::TILING12_1_2, config, 8);
+                    add(mc33::TILING12_2, config, 8);
                 }
-                break;
-            case 13:
-                if (face_test(mc33::TEST13(luts, config, 0))) sub += 1;
-                if (face_test(mc33::TEST13(luts, config, 1))) sub += 2;
-                if (face_test(mc33::TEST13(luts, config, 2))) sub += 4;
-                if (face_test(mc33::TEST13(luts, config, 3))) sub += 8;
-                if (face_test(mc33::TEST13(luts, config, 4))) sub += 16;
-                if (face_test(mc33::TEST13(luts, config, 5))) sub += 32;
-                sub = mc33::SUBCONFIG13(luts, sub);
+            } else if (face_test(mc33::TEST12(luts, config, 1))) {
+                add(mc33::TILING12_2_, config, 8);
+            } else if (interior_test(12, config, 0,
+                                     mc33::TEST12(luts, config, 2))) {
+                add(mc33::TILING12_1_1, config, 4);
+            } else {
+                add(mc33::TILING12_1_2, config, 8);
+            }
+            break;
+        case 13:
+            if (face_test(mc33::TEST13(luts, config, 0)))
+                sub += 1;
+            if (face_test(mc33::TEST13(luts, config, 1)))
+                sub += 2;
+            if (face_test(mc33::TEST13(luts, config, 2)))
+                sub += 4;
+            if (face_test(mc33::TEST13(luts, config, 3)))
+                sub += 8;
+            if (face_test(mc33::TEST13(luts, config, 4)))
+                sub += 16;
+            if (face_test(mc33::TEST13(luts, config, 5)))
+                sub += 32;
+            sub = mc33::SUBCONFIG13(luts, sub);
 
-                if (sub == 0) {
-                    add(mc33::TILING13_1, config, 4);
-                } else if (sub <= 6) {
-                    add2(mc33::TILING13_2, config, sub - 1, 6);
-                } else if (sub <= 18) {
-                    add2(mc33::TILING13_3, config, sub - 7, 10);
-                } else if (sub <= 22) {
-                    add2(mc33::TILING13_4, config, sub - 19, 12);
-                } else if (sub <= 26) {
-                    sub -= 23;
-                    if (interior_test(13, config, sub,
-                                      mc33::TEST13(luts, config, 6))) {
-                        add2(mc33::TILING13_5_1, config, sub, 6);
-                    } else {
-                        add2(mc33::TILING13_5_2, config, sub, 10);
-                    }
-                } else if (sub <= 38) {
-                    add2(mc33::TILING13_3_, config, sub - 27, 10);
-                } else if (sub <= 44) {
-                    add2(mc33::TILING13_2_, config, sub - 39, 6);
+            if (sub == 0) {
+                add(mc33::TILING13_1, config, 4);
+            } else if (sub <= 6) {
+                add2(mc33::TILING13_2, config, sub - 1, 6);
+            } else if (sub <= 18) {
+                add2(mc33::TILING13_3, config, sub - 7, 10);
+            } else if (sub <= 22) {
+                add2(mc33::TILING13_4, config, sub - 19, 12);
+            } else if (sub <= 26) {
+                sub -= 23;
+                if (interior_test(13, config, sub,
+                                  mc33::TEST13(luts, config, 6))) {
+                    add2(mc33::TILING13_5_1, config, sub, 6);
                 } else {
-                    add(mc33::TILING13_1_, config, 4);
+                    add2(mc33::TILING13_5_2, config, sub, 10);
                 }
-                break;
-            case 14: add(mc33::TILING14, config, 4); break;
-            default: break;
+            } else if (sub <= 38) {
+                add2(mc33::TILING13_3_, config, sub - 27, 10);
+            } else if (sub <= 44) {
+                add2(mc33::TILING13_2_, config, sub - 39, 6);
+            } else {
+                add(mc33::TILING13_1_, config, 4);
+            }
+            break;
+        case 14:
+            add(mc33::TILING14, config, 4);
+            break;
+        default:
+            break;
         }
     }
 };
@@ -382,10 +454,10 @@ Lewiner::run(float3 *v, const uint num_cells, const uint8_t *cases,
         *new thrust::device_vector<signed char>(
             mc33::tables, mc33::tables + mc33::table_size);
 
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_cells),
-                     process_cube_op(v, cell_indices, view, luts.data().get(),
-                                     level));
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_cells),
+        process_cube_op(v, cell_indices, view, luts.data().get(), level));
 }
 
 }   // namespace mc

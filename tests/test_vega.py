@@ -110,10 +110,7 @@ def test_vega_symmetry_invariance():
             if flips:
                 transformed = transformed.flip(flips)
             topology = extract_topology(transformed.contiguous(), "vega")
-            assert topology == reference, (
-                f"seed {seed}, permute {perm}, flip {flips}: "
-                f"{topology} != {reference}"
-            )
+            assert topology == reference, f"seed {seed}, permute {perm}, flip {flips}: {topology} != {reference}"
 
 
 def test_vega_mirror_regression():

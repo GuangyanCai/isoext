@@ -6,9 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'isoext'
-copyright = '2025, Guangyan Cai'
-author = 'Guangyan Cai'
+project = "isoext"
+copyright = "2025, Guangyan Cai"
+author = "Guangyan Cai"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -53,17 +53,16 @@ autodoc_member_order = "bysource"
 autodoc_typehints = "description"
 autodoc_docstring_signature = True  # Extract signatures from nanobind docstrings
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_static_path = ['_static']
-html_css_files = ['custom.css']
+html_theme = "furo"
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 html_theme_options = {
     "light_css_variables": {

@@ -16,6 +16,7 @@
   },
   {
    "cell_type": "markdown",
+   "id": "7fb27b941602401d91542211134fc71a",
    "metadata": {},
    "source": [
     "## Controls\n",
@@ -58,7 +59,7 @@
     "grid.set_values(torus(grid.get_points()))\n",
     "\n",
     "v, f = isoext.marching_cubes(grid)\n",
-    "print(f\"{v.shape[0]:,} vertices\")\n"
+    "print(f\"{v.shape[0]:,} vertices\")"
    ]
   },
   {
@@ -147,7 +148,7 @@
     }
    ],
    "source": [
-    "viewer.embed(v, f, color=\"goldenrod\", flat_shading=True, height=360)\n"
+    "viewer.embed(v, f, color=\"goldenrod\", flat_shading=True, height=360)"
    ]
   },
   {
@@ -206,7 +207,7 @@
     "small.set_values(torus(small.get_points()))\n",
     "\n",
     "v_small, f_small = isoext.marching_cubes(small)\n",
-    "viewer.embed(v_small, f_small, grid=small, wireframe=True, height=360)\n"
+    "viewer.embed(v_small, f_small, grid=small, wireframe=True, height=360)"
    ]
   },
   {

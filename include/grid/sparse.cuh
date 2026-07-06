@@ -34,8 +34,12 @@ class SparseGrid : public Grid {
     inline uint3 get_shape() const override { return shape; }
 
     inline GridView get_view() const override {
-        return {shape, aabb_min, aabb_max, values.data().get(),
-                cell_indices.data().get(), true};
+        return {shape,
+                aabb_min,
+                aabb_max,
+                values.data().get(),
+                cell_indices.data().get(),
+                true};
     }
 
     NDArray<float3> get_points() const override;

@@ -20,8 +20,8 @@
 // Custom methods can reuse any subset of these.
 
 // Corner-sign byte per cell; bit i is set when corner i lies below level.
-thrust::device_vector<uint8_t>
-compute_cell_cases(const GridView &view, uint num_cells, float level);
+thrust::device_vector<uint8_t> compute_cell_cases(const GridView &view,
+                                                  uint num_cells, float level);
 
 // Remove cells whose corners are all inside or all outside (case 0 or 255)
 // from cases, and return the grid cell index of each surviving cell.

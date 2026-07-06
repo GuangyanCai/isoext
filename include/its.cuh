@@ -28,7 +28,9 @@ struct Intersection {
     }
 };
 
-Intersection get_intersection(Grid *grid, float level, bool compute_normals = false);
+Intersection get_intersection(Grid *grid, float level,
+                              bool compute_normals = false);
 
-// Compute normals at intersection points using central differences on grid values
+// Compute normals at intersection points using central differences on grid
+// values
 void compute_intersection_normals(Intersection &its, Grid *grid);

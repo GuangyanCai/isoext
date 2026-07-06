@@ -35,7 +35,7 @@
     "import torch\n",
     "import isoext\n",
     "from isoext.sdf import CuboidSDF, get_sdf_normal\n",
-    "from isoext import viewer\n"
+    "from isoext import viewer"
    ]
   },
   {
@@ -93,7 +93,7 @@
     "print(f\"Vertices: {vertices.shape}\")\n",
     "print(f\"Faces: {faces.shape}\")\n",
     "\n",
-    "viewer.embed(vertices, faces, color=\"lightblue\", flat_shading=True)\n"
+    "viewer.embed(vertices, faces, color=\"lightblue\", flat_shading=True)"
    ]
   },
   {
@@ -133,7 +133,7 @@
     "# Step 1: Find edge-surface intersections\n",
     "intersection = isoext.get_intersection(grid, level=0.0)\n",
     "points = intersection.get_points()\n",
-    "print(f\"Intersection shape: {points.shape}\")\n"
+    "print(f\"Intersection shape: {points.shape}\")"
    ]
   },
   {
@@ -161,7 +161,7 @@
     "normals = get_sdf_normal(cube, points)\n",
     "intersection.set_normals(normals)\n",
     "\n",
-    "print(f\"Normals shape: {normals.shape}\")\n"
+    "print(f\"Normals shape: {normals.shape}\")"
    ]
   },
   {
@@ -212,9 +212,9 @@
     "vertices, faces = isoext.dual_contouring(grid, level=0.0, intersection=intersection)\n",
     "\n",
     "print(f\"Vertices: {vertices.shape}\")  # (N, 3) float32\n",
-    "print(f\"Faces: {faces.shape}\")        # (M, 3) int32\n",
+    "print(f\"Faces: {faces.shape}\")  # (M, 3) int32\n",
     "\n",
-    "viewer.embed(vertices, faces, color=\"salmon\", flat_shading=True)\n"
+    "viewer.embed(vertices, faces, color=\"salmon\", flat_shading=True)"
    ]
   },
   {
@@ -316,7 +316,7 @@
     "\n",
     "vertices, faces = isoext.dual_contouring(grid, intersection=its, clamp=False)\n",
     "print(f\"max vertex error: {cube(vertices).abs().max():.4f}\")\n",
-    "viewer.embed(vertices, faces, color=\"tomato\", flat_shading=True)\n"
+    "viewer.embed(vertices, faces, color=\"tomato\", flat_shading=True)"
    ]
   },
   {
@@ -377,7 +377,7 @@
     "\n",
     "vertices, faces = isoext.dual_contouring(grid, intersection=its, clamp=False)\n",
     "print(f\"max vertex error: {cube(vertices).abs().max():.4f}\")\n",
-    "viewer.embed(vertices, faces, color=\"gold\", flat_shading=True)\n"
+    "viewer.embed(vertices, faces, color=\"gold\", flat_shading=True)"
    ]
   },
   {
