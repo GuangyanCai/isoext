@@ -282,13 +282,13 @@
 </div>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nagae&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;vega&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">grid</span></code>: A <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> or <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> with values set</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: The iso-value to extract (default: 0.0)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code>: Algorithm variant (<code class="docutils literal notranslate"><span class="pre">&quot;nagae&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;lorensen&quot;</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code>: Algorithm variant (<code class="docutils literal notranslate"><span class="pre">&quot;vega&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;lewiner&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;nagae&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;lorensen&quot;</span></code>)</p></li>
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -310,7 +310,7 @@ Faces: torch.Size([18332, 3])
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/9f82c481f4cfb292.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/d80132206c99ae2e.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -320,11 +320,13 @@ Faces: torch.Size([18332, 3])
 </section>
 <section id="algorithm-variants">
 <h2>Algorithm Variants<a class="headerlink" href="#algorithm-variants" title="Link to this heading">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">method</span></code> argument selects between three variants that share the
+<p>The <code class="docutils literal notranslate"><span class="pre">method</span></code> argument selects between four variants that share the
 same interface:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> (default) resolves topological ambiguities by following
-the field’s interpolant.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vega</span></code> (default) resolves topological ambiguities by following the
+field’s interpolant, using the corrected interior test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> follows the interpolant with the older interior test;
+kept for comparison with other implementations.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> uses fixed tables; watertight and slightly faster.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is the original 1987 algorithm; ambiguous cells can
 leave small cracks.</p></li>
@@ -332,7 +334,7 @@ leave small cracks.</p></li>
 <p>See <a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a> for the differences in detail.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nagae&quot;</span><span class="p">,</span> <span class="s2">&quot;lorensen&quot;</span><span class="p">,</span> <span class="s2">&quot;lewiner&quot;</span><span class="p">]:</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nagae&quot;</span><span class="p">,</span> <span class="s2">&quot;lorensen&quot;</span><span class="p">,</span> <span class="s2">&quot;lewiner&quot;</span><span class="p">,</span> <span class="s2">&quot;vega&quot;</span><span class="p">]:</span>
     <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">:</span><span class="s2">9s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 </pre></div>
@@ -342,6 +344,7 @@ leave small cracks.</p></li>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>nagae     18,332 triangles
 lorensen  18,332 triangles
 lewiner   18,332 triangles
+vega      18,332 triangles
 </pre></div>
 </div>
 </div>

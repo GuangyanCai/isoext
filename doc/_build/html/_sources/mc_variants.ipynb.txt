@@ -7,7 +7,7 @@
    "source": [
     "# Marching Cubes Variants\n",
     "\n",
-    "All three variants walk the same grid and share one interface; they\n",
+    "All four variants walk the same grid and share one interface; they\n",
     "differ in how each cell's sign pattern is turned into triangles.\n",
     "This page shows where the differences appear. The example meshes are\n",
     "open surfaces, so they are rendered double-sided.\n"
@@ -19,10 +19,10 @@
    "id": "c28d90a7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:35.815202Z",
-     "iopub.status.busy": "2026-07-06T04:04:35.815111Z",
-     "iopub.status.idle": "2026-07-06T04:04:36.409362Z",
-     "shell.execute_reply": "2026-07-06T04:04:36.408569Z"
+     "iopub.execute_input": "2026-07-06T04:43:32.098256Z",
+     "iopub.status.busy": "2026-07-06T04:43:32.098188Z",
+     "iopub.status.idle": "2026-07-06T04:43:32.690141Z",
+     "shell.execute_reply": "2026-07-06T04:43:32.689719Z"
     }
    },
    "outputs": [],
@@ -45,8 +45,8 @@
     "the other two outside, the face admits two triangulations. The\n",
     "`lorensen` tables, built with reflections, can pick incompatible\n",
     "sides in neighboring cells, which leaves cracks. The `nagae` tables\n",
-    "avoid reflections and always produce closed meshes; so does\n",
-    "`lewiner`. Counting broken meshes over 50 random closed fields:\n"
+    "avoid reflections and always produce closed meshes; so do\n",
+    "`lewiner` and `vega`. Counting broken meshes over 50 random closed fields:\n"
    ]
   },
   {
@@ -55,10 +55,10 @@
    "id": "bf44022b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:36.410928Z",
-     "iopub.status.busy": "2026-07-06T04:04:36.410805Z",
-     "iopub.status.idle": "2026-07-06T04:04:36.884825Z",
-     "shell.execute_reply": "2026-07-06T04:04:36.884048Z"
+     "iopub.execute_input": "2026-07-06T04:43:32.691684Z",
+     "iopub.status.busy": "2026-07-06T04:43:32.691567Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.203579Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.202981Z"
     }
    },
    "outputs": [
@@ -66,12 +66,12 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "fields with broken meshes: {'lorensen': 49, 'nagae': 0, 'lewiner': 0}\n"
+      "fields with broken meshes: {'lorensen': 49, 'nagae': 0, 'lewiner': 0, 'vega': 0}\n"
      ]
     }
    ],
    "source": [
-    "open_meshes = {\"lorensen\": 0, \"nagae\": 0, \"lewiner\": 0}\n",
+    "open_meshes = {\"lorensen\": 0, \"nagae\": 0, \"lewiner\": 0, \"vega\": 0}\n",
     "for seed in range(50):\n",
     "    torch.manual_seed(seed)\n",
     "    values = gaussian_smooth(torch.randn(12, 12, 12, device=\"cuda\"), sigma=1.2)\n",
@@ -105,10 +105,10 @@
    "id": "2af8020e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:36.886424Z",
-     "iopub.status.busy": "2026-07-06T04:04:36.886342Z",
-     "iopub.status.idle": "2026-07-06T04:04:36.995341Z",
-     "shell.execute_reply": "2026-07-06T04:04:36.994442Z"
+     "iopub.execute_input": "2026-07-06T04:43:33.205123Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.205042Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.313553Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.313003Z"
     }
    },
    "outputs": [
@@ -127,7 +127,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7f26d0480e00>"
+       "<IPython.lib.display.IFrame at 0x799fe3c75ac0>"
       ]
      },
      "execution_count": 3,
@@ -161,10 +161,10 @@
    "id": "7ada0840",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:36.996638Z",
-     "iopub.status.busy": "2026-07-06T04:04:36.996541Z",
-     "iopub.status.idle": "2026-07-06T04:04:36.999465Z",
-     "shell.execute_reply": "2026-07-06T04:04:36.999229Z"
+     "iopub.execute_input": "2026-07-06T04:43:33.315331Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.315240Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.318453Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.318164Z"
     }
    },
    "outputs": [
@@ -183,7 +183,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7f2ad2328c80>"
+       "<IPython.lib.display.IFrame at 0x799fe3c74ef0>"
       ]
      },
      "execution_count": 4,
@@ -205,8 +205,8 @@
     "\n",
     "Closing the cracks still leaves a choice: are the pieces of surface\n",
     "in an ambiguous cell connected or separate? Fixed tables always\n",
-    "answer the same way; `lewiner` evaluates the interpolant of the\n",
-    "corner values and follows it. In the cell below the fixed table\n",
+    "answer the same way; `lewiner` and `vega` evaluate the\n",
+    "interpolant of the corner values and follow it. In the cell below the fixed table\n",
     "produces three separate pieces, while the interpolant connects two\n",
     "of them:\n"
    ]
@@ -217,10 +217,10 @@
    "id": "31a6ada8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:37.000547Z",
-     "iopub.status.busy": "2026-07-06T04:04:37.000475Z",
-     "iopub.status.idle": "2026-07-06T04:04:37.003585Z",
-     "shell.execute_reply": "2026-07-06T04:04:37.003362Z"
+     "iopub.execute_input": "2026-07-06T04:43:33.319461Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.319396Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.322420Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.322265Z"
     }
    },
    "outputs": [
@@ -246,7 +246,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7f26d0481f40>"
+       "<IPython.lib.display.IFrame at 0x79a0654b7020>"
       ]
      },
      "execution_count": 5,
@@ -272,10 +272,10 @@
    "id": "4e7e656d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:37.004428Z",
-     "iopub.status.busy": "2026-07-06T04:04:37.004366Z",
-     "iopub.status.idle": "2026-07-06T04:04:37.007069Z",
-     "shell.execute_reply": "2026-07-06T04:04:37.006862Z"
+     "iopub.execute_input": "2026-07-06T04:43:33.323634Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.323564Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.326447Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.326257Z"
     }
    },
    "outputs": [
@@ -283,7 +283,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "lewiner: 5 triangles\n"
+      "vega:    5 triangles\n"
      ]
     },
     {
@@ -293,7 +293,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/c4f5bb4e82f78d54.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/349bce8f1bb68a40.viser\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -301,7 +301,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7f26d0482900>"
+       "<IPython.lib.display.IFrame at 0x799fe3c76870>"
       ]
      },
      "execution_count": 6,
@@ -310,9 +310,9 @@
     }
    ],
    "source": [
-    "v, f = isoext.marching_cubes(cell, method=\"lewiner\")\n",
-    "print(f\"lewiner: {f.shape[0]} triangles\")\n",
-    "viewer.embed(v, f, color=\"tomato\", flat_shading=True, side=\"double\", height=300)\n"
+    "v, f = isoext.marching_cubes(cell, method=\"vega\")\n",
+    "print(f\"vega:    {f.shape[0]} triangles\")\n",
+    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, side=\"double\", height=300)\n"
    ]
   },
   {
@@ -326,11 +326,10 @@
     "(2003) and inherits its documented limitations: the interior test\n",
     "examines the interpolant on a single section instead of analyzing it\n",
     "fully, so it can misjudge tunnel connectivity in rare configurations,\n",
-    "and it is not invariant under reflections. The cell below shows the\n",
-    "second point: mirroring the values changes the extracted topology\n",
-    "from a tunnel into two separate sheets. Custodio et al. (2013)\n",
-    "document these issues and published corrections, which are not\n",
-    "included here; a corrected variant is planned. The meshes stay\n",
+    "and it is not invariant under reflections. Custodio et al. (2013)\n",
+    "document both issues. The field below triggers them at once:\n",
+    "`lewiner` connects the surface into a tunnel, and mirroring the\n",
+    "values changes its topology to two separate sheets. The meshes stay\n",
     "watertight and crack free either way.\n"
    ]
   },
@@ -340,10 +339,10 @@
    "id": "9bd5da6c",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:37.007728Z",
-     "iopub.status.busy": "2026-07-06T04:04:37.007662Z",
-     "iopub.status.idle": "2026-07-06T04:04:37.010744Z",
-     "shell.execute_reply": "2026-07-06T04:04:37.010401Z"
+     "iopub.execute_input": "2026-07-06T04:43:33.327483Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.327419Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.330265Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.330109Z"
     }
    },
    "outputs": [
@@ -351,7 +350,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "original: 9 triangles\n"
+      "lewiner, original: 6 triangles\n"
      ]
     },
     {
@@ -361,7 +360,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/19a826b0d23dfc70.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/6ba634562533dac3.viser\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -369,7 +368,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7f26d0482660>"
+       "<IPython.lib.display.IFrame at 0x799fe3c76d50>"
       ]
      },
      "execution_count": 7,
@@ -379,12 +378,12 @@
    ],
    "source": [
     "values = torch.tensor(\n",
-    "    [0.0625, -0.0625, 0.1875, 0.0625, 0.0625, 0.0625, -0.0625, -0.0625],\n",
+    "    [0.5625, -0.4375, 0.0625, 0.5625, 0.1875, 0.125, -0.4375, 0.125],\n",
     "    device=\"cuda\",\n",
     ").reshape(2, 2, 2)\n",
     "cell.set_values(values)\n",
     "v, f = isoext.marching_cubes(cell, method=\"lewiner\")\n",
-    "print(f\"original: {f.shape[0]} triangles\")\n",
+    "print(f\"lewiner, original: {f.shape[0]} triangles\")\n",
     "viewer.embed(v, f, color=\"tomato\", flat_shading=True, side=\"double\", height=300)\n"
    ]
   },
@@ -394,10 +393,10 @@
    "id": "fa721c27",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:37.011509Z",
-     "iopub.status.busy": "2026-07-06T04:04:37.011444Z",
-     "iopub.status.idle": "2026-07-06T04:04:37.014391Z",
-     "shell.execute_reply": "2026-07-06T04:04:37.014152Z"
+     "iopub.execute_input": "2026-07-06T04:43:33.331196Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.331132Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.333817Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.333609Z"
     }
    },
    "outputs": [
@@ -405,7 +404,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "mirrored: 3 triangles\n"
+      "lewiner, mirrored: 2 triangles\n"
      ]
     },
     {
@@ -415,7 +414,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/4c89e34c7054936f.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/ac2e76e819422532.viser\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -423,7 +422,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7f26d04832c0>"
+       "<IPython.lib.display.IFrame at 0x799fe3c77260>"
       ]
      },
      "execution_count": 8,
@@ -434,7 +433,119 @@
    "source": [
     "cell.set_values(values.permute(2, 1, 0).contiguous())  # mirrored field\n",
     "v, f = isoext.marching_cubes(cell, method=\"lewiner\")\n",
-    "print(f\"mirrored: {f.shape[0]} triangles\")\n",
+    "print(f\"lewiner, mirrored: {f.shape[0]} triangles\")\n",
+    "viewer.embed(v, f, color=\"gold\", flat_shading=True, side=\"double\", height=300)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5a61ba03",
+   "metadata": {},
+   "source": [
+    "The `vega` variant ports the implementation of Vega et al. (2019),\n",
+    "which replaces the interior test with one that analyzes the\n",
+    "interpolant fully. Here it extracts the two sheets the interpolant\n",
+    "actually contains, and mirroring the field does not change the\n",
+    "answer:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "e5c5de00",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-06T04:43:33.334727Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.334662Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.337265Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.337112Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "vega, original: 2 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/ede52abf250c174c.viser\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x799fe3c77ce0>"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cell.set_values(values)\n",
+    "v, f = isoext.marching_cubes(cell, method=\"vega\")\n",
+    "print(f\"vega, original: {f.shape[0]} triangles\")\n",
+    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, side=\"double\", height=300)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "5b613a3f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-06T04:43:33.338198Z",
+     "iopub.status.busy": "2026-07-06T04:43:33.338135Z",
+     "iopub.status.idle": "2026-07-06T04:43:33.340861Z",
+     "shell.execute_reply": "2026-07-06T04:43:33.340679Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "vega, mirrored: 2 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/52fc38688eb324c8.viser\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x799fe3c77cb0>"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cell.set_values(values.permute(2, 1, 0).contiguous())  # mirrored field\n",
+    "v, f = isoext.marching_cubes(cell, method=\"vega\")\n",
+    "print(f\"vega, mirrored: {f.shape[0]} triangles\")\n",
     "viewer.embed(v, f, color=\"gold\", flat_shading=True, side=\"double\", height=300)\n"
    ]
   },
@@ -445,11 +556,14 @@
    "source": [
     "## Choosing a Variant\n",
     "\n",
-    "`lewiner` is the default: watertight and topologically faithful to\n",
-    "the sampled field, at about 10% more time than the fixed tables.\n",
-    "Use `nagae` when that margin matters and the topology of ambiguous\n",
-    "cells does not. `lorensen` is included for reference and comparison\n",
-    "with other implementations.\n"
+    "`vega` is the default: watertight and topologically faithful to the\n",
+    "trilinear interpolant of the samples, at about 10% more time than\n",
+    "the fixed tables. `lewiner` also follows the interpolant but has the\n",
+    "limitations shown above; it is kept for comparison with other ports\n",
+    "of the same implementation, such as scikit-image's. Use `nagae` when\n",
+    "the margin matters and the topology of ambiguous cells does not.\n",
+    "`lorensen` is included for reference and comparison with other\n",
+    "implementations.\n"
    ]
   },
   {
@@ -470,7 +584,14 @@
     "[`luts/convert_mc33_luts.py`](https://github.com/GuangyanCai/isoext/blob/master/luts/convert_mc33_luts.py),\n",
     "rather than generated: MC33 tables couple triangulations with face\n",
     "and interior test descriptors, and re-deriving that machinery is\n",
-    "where historical implementations accumulated bugs.\n"
+    "where historical implementations accumulated bugs.\n",
+    "\n",
+    "The `vega` table is converted from the MC33_c_library of Vega et al.\n",
+    "(MIT) by\n",
+    "[`luts/convert_vega_luts.py`](https://github.com/GuangyanCai/isoext/blob/master/luts/convert_vega_luts.py).\n",
+    "The converter re-derives every offset the case dispatch can reach and\n",
+    "decodes the triangle strip at each one, so a conversion error fails\n",
+    "at generation time instead of on the GPU.\n"
    ]
   },
   {
@@ -491,7 +612,10 @@
     "  Graphics Tools, 2003)\n",
     "- Custodio, Etiene, Pesco and Silva, \"Practical considerations on\n",
     "  Marching Cubes 33 topological correctness\" (Computers & Graphics,\n",
-    "  2013)\n"
+    "  2013)\n",
+    "- Vega, Abache and Coll, \"A Fast and Memory-Saving Marching Cubes 33\n",
+    "  implementation with the correct interior test\" (Journal of Computer\n",
+    "  Graphics Techniques, 2019)\n"
    ]
   }
  ],

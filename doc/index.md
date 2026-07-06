@@ -11,7 +11,7 @@
           frameborder="0"></iframe>
   <p class="hero-caption">
     A power-8 Mandelbulb, extracted with <code>isoext.marching_cubes</code>:
-    219k vertices in about 2&nbsp;ms. Drag to rotate.
+    around 220k vertices in about 2&nbsp;ms. Drag to rotate.
   </p>
 </div>
 ```
@@ -42,7 +42,7 @@ Median extraction times for a sphere SDF on an RTX 5090:
 
 | Algorithm       | uniform 512³ | sparse 512³ |
 |-----------------|--------------|-------------|
-| marching_cubes  | 4.8 ms       | 1.4 ms      |
+| marching_cubes  | 5.4 ms       | 1.9 ms      |
 | dual_contouring | 7.0 ms       | 2.3 ms      |
 
 See {doc}`performance` for the full table and how to reproduce it.

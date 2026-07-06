@@ -3,6 +3,10 @@
 Run manually after changing the shapes:
 
     pixi run --environment doc python _hero.py
+
+The caption in index.md quotes rounded estimates (around 220k vertices,
+about 2 ms). Leave it alone unless the numbers printed here move well
+away from that.
 """
 
 import time

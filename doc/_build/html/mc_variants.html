@@ -265,7 +265,7 @@
         <article role="main" id="furo-main-content">
           <section id="marching-cubes-variants">
 <h1>Marching Cubes Variants<a class="headerlink" href="#marching-cubes-variants" title="Link to this heading">¶</a></h1>
-<p>All three variants walk the same grid and share one interface; they
+<p>All four variants walk the same grid and share one interface; they
 differ in how each cell’s sign pattern is turned into triangles.
 This page shows where the differences appear. The example meshes are
 open surfaces, so they are rendered double-sided.</p>
@@ -286,11 +286,11 @@ open surfaces, so they are rendered double-sided.</p>
 the other two outside, the face admits two triangulations. The
 <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> tables, built with reflections, can pick incompatible
 sides in neighboring cells, which leaves cracks. The <code class="docutils literal notranslate"><span class="pre">nagae</span></code> tables
-avoid reflections and always produce closed meshes; so does
-<code class="docutils literal notranslate"><span class="pre">lewiner</span></code>. Counting broken meshes over 50 random closed fields:</p>
+avoid reflections and always produce closed meshes; so do
+<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code>. Counting broken meshes over 50 random closed fields:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">open_meshes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lorensen&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;nagae&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;lewiner&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">open_meshes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lorensen&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;nagae&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;lewiner&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;vega&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
 <span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">gaussian_smooth</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
@@ -309,7 +309,7 @@ avoid reflections and always produce closed meshes; so does
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>fields with broken meshes: {&#39;lorensen&#39;: 49, &#39;nagae&#39;: 0, &#39;lewiner&#39;: 0}
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>fields with broken meshes: {&#39;lorensen&#39;: 49, &#39;nagae&#39;: 0, &#39;lewiner&#39;: 0, &#39;vega&#39;: 0}
 </pre></div>
 </div>
 </div>
@@ -370,8 +370,8 @@ shared face incompatibly on its two sides and leaves a slit:</p>
 <h2>Topology of Ambiguous Cells<a class="headerlink" href="#topology-of-ambiguous-cells" title="Link to this heading">¶</a></h2>
 <p>Closing the cracks still leaves a choice: are the pieces of surface
 in an ambiguous cell connected or separate? Fixed tables always
-answer the same way; <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> evaluates the interpolant of the
-corner values and follows it. In the cell below the fixed table
+answer the same way; <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code> evaluate the
+interpolant of the corner values and follow it. In the cell below the fixed table
 produces three separate pieces, while the interpolant connects two
 of them:</p>
 <div class="cell docutils container">
@@ -405,21 +405,21 @@ of them:</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lewiner&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lewiner: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;vega&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vega:    </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>lewiner: 5 triangles
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>vega:    5 triangles
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/c4f5bb4e82f78d54.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/349bce8f1bb68a40.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -432,34 +432,33 @@ of them:</p>
 (2003) and inherits its documented limitations: the interior test
 examines the interpolant on a single section instead of analyzing it
 fully, so it can misjudge tunnel connectivity in rare configurations,
-and it is not invariant under reflections. The cell below shows the
-second point: mirroring the values changes the extracted topology
-from a tunnel into two separate sheets. Custodio et al. (2013)
-document these issues and published corrections, which are not
-included here; a corrected variant is planned. The meshes stay
+and it is not invariant under reflections. Custodio et al. (2013)
+document both issues. The field below triggers them at once:
+<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> connects the surface into a tunnel, and mirroring the
+values changes its topology to two separate sheets. The meshes stay
 watertight and crack free either way.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-    <span class="p">[</span><span class="mf">0.0625</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0625</span><span class="p">,</span> <span class="mf">0.1875</span><span class="p">,</span> <span class="mf">0.0625</span><span class="p">,</span> <span class="mf">0.0625</span><span class="p">,</span> <span class="mf">0.0625</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0625</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0625</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">0.5625</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4375</span><span class="p">,</span> <span class="mf">0.0625</span><span class="p">,</span> <span class="mf">0.5625</span><span class="p">,</span> <span class="mf">0.1875</span><span class="p">,</span> <span class="mf">0.125</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4375</span><span class="p">,</span> <span class="mf">0.125</span><span class="p">],</span>
     <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lewiner&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;original: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lewiner, original: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>original: 9 triangles
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>lewiner, original: 6 triangles
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/19a826b0d23dfc70.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/6ba634562533dac3.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -470,20 +469,73 @@ watertight and crack free either way.</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">())</span>  <span class="c1"># mirrored field</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lewiner&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mirrored: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lewiner, mirrored: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>mirrored: 3 triangles
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>lewiner, mirrored: 2 triangles
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/4c89e34c7054936f.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/ac2e76e819422532.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">vega</span></code> variant ports the implementation of Vega et al. (2019),
+which replaces the interior test with one that analyzes the
+interpolant fully. Here it extracts the two sheets the interpolant
+actually contains, and mirroring the field does not change the
+answer:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;vega&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vega, original: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>vega, original: 2 triangles
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/ede52abf250c174c.viser"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">())</span>  <span class="c1"># mirrored field</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;vega&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;vega, mirrored: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>vega, mirrored: 2 triangles
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/52fc38688eb324c8.viser"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -494,11 +546,14 @@ watertight and crack free either way.</p>
 </section>
 <section id="choosing-a-variant">
 <h2>Choosing a Variant<a class="headerlink" href="#choosing-a-variant" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> is the default: watertight and topologically faithful to
-the sampled field, at about 10% more time than the fixed tables.
-Use <code class="docutils literal notranslate"><span class="pre">nagae</span></code> when that margin matters and the topology of ambiguous
-cells does not. <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is included for reference and comparison
-with other implementations.</p>
+<p><code class="docutils literal notranslate"><span class="pre">vega</span></code> is the default: watertight and topologically faithful to the
+trilinear interpolant of the samples, at about 10% more time than
+the fixed tables. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> also follows the interpolant but has the
+limitations shown above; it is kept for comparison with other ports
+of the same implementation, such as scikit-image’s. Use <code class="docutils literal notranslate"><span class="pre">nagae</span></code> when
+the margin matters and the topology of ambiguous cells does not.
+<code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is included for reference and comparison with other
+implementations.</p>
 </section>
 <section id="lookup-tables">
 <h2>Lookup Tables<a class="headerlink" href="#lookup-tables" title="Link to this heading">¶</a></h2>
@@ -513,6 +568,12 @@ distributed with scikit-image (BSD) by
 rather than generated: MC33 tables couple triangulations with face
 and interior test descriptors, and re-deriving that machinery is
 where historical implementations accumulated bugs.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">vega</span></code> table is converted from the MC33_c_library of Vega et al.
+(MIT) by
+<a class="reference external" href="https://github.com/GuangyanCai/isoext/blob/master/luts/convert_vega_luts.py"><code class="docutils literal notranslate"><span class="pre">luts/convert_vega_luts.py</span></code></a>.
+The converter re-derives every offset the case dispatch can reach and
+decodes the triangle strip at each one, so a conversion error fails
+at generation time instead of on the GPU.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
@@ -529,6 +590,9 @@ Graphics Tools, 2003)</p></li>
 <li><p>Custodio, Etiene, Pesco and Silva, “Practical considerations on
 Marching Cubes 33 topological correctness” (Computers &amp; Graphics,
 2013)</p></li>
+<li><p>Vega, Abache and Coll, “A Fast and Memory-Saving Marching Cubes 33
+implementation with the correct interior test” (Journal of Computer
+Graphics Techniques, 2019)</p></li>
 </ul>
 </section>
 </section>

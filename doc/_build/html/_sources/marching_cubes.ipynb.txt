@@ -14,10 +14,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:27.484138Z",
-     "iopub.status.busy": "2026-07-06T04:04:27.484065Z",
-     "iopub.status.idle": "2026-07-06T04:04:28.260741Z",
-     "shell.execute_reply": "2026-07-06T04:04:28.260472Z"
+     "iopub.execute_input": "2026-07-06T04:43:22.638400Z",
+     "iopub.status.busy": "2026-07-06T04:43:22.638309Z",
+     "iopub.status.idle": "2026-07-06T04:43:23.444614Z",
+     "shell.execute_reply": "2026-07-06T04:43:23.443878Z"
     }
    },
    "outputs": [],
@@ -39,12 +39,12 @@
     "## Basic Usage\n",
     "\n",
     "```python\n",
-    "vertices, faces = isoext.marching_cubes(grid, level=0.0, method=\"nagae\")\n",
+    "vertices, faces = isoext.marching_cubes(grid, level=0.0, method=\"vega\")\n",
     "```\n",
     "\n",
     "- `grid`: A `UniformGrid` or `SparseGrid` with values set\n",
     "- `level`: The iso-value to extract (default: 0.0)\n",
-    "- `method`: Algorithm variant (`\"nagae\"` or `\"lorensen\"`)\n"
+    "- `method`: Algorithm variant (`\"vega\"`, `\"lewiner\"`, `\"nagae\"`, or `\"lorensen\"`)\n"
    ]
   },
   {
@@ -52,10 +52,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:28.262527Z",
-     "iopub.status.busy": "2026-07-06T04:04:28.262398Z",
-     "iopub.status.idle": "2026-07-06T04:04:28.388373Z",
-     "shell.execute_reply": "2026-07-06T04:04:28.387996Z"
+     "iopub.execute_input": "2026-07-06T04:43:23.446202Z",
+     "iopub.status.busy": "2026-07-06T04:43:23.446074Z",
+     "iopub.status.idle": "2026-07-06T04:43:23.531381Z",
+     "shell.execute_reply": "2026-07-06T04:43:23.531008Z"
     }
    },
    "outputs": [
@@ -74,7 +74,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/9f82c481f4cfb292.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d80132206c99ae2e.viser\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -82,7 +82,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7ea6d49e9a30>"
+       "<IPython.lib.display.IFrame at 0x7b7f26d79880>"
       ]
      },
      "execution_count": 2,
@@ -105,11 +105,13 @@
    "source": [
     "## Algorithm Variants\n",
     "\n",
-    "The `method` argument selects between three variants that share the\n",
+    "The `method` argument selects between four variants that share the\n",
     "same interface:\n",
     "\n",
-    "- `lewiner` (default) resolves topological ambiguities by following\n",
-    "  the field's interpolant.\n",
+    "- `vega` (default) resolves topological ambiguities by following the\n",
+    "  field's interpolant, using the corrected interior test.\n",
+    "- `lewiner` follows the interpolant with the older interior test;\n",
+    "  kept for comparison with other implementations.\n",
     "- `nagae` uses fixed tables; watertight and slightly faster.\n",
     "- `lorensen` is the original 1987 algorithm; ambiguous cells can\n",
     "  leave small cracks.\n",
@@ -122,10 +124,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:28.405276Z",
-     "iopub.status.busy": "2026-07-06T04:04:28.405142Z",
-     "iopub.status.idle": "2026-07-06T04:04:28.410557Z",
-     "shell.execute_reply": "2026-07-06T04:04:28.410167Z"
+     "iopub.execute_input": "2026-07-06T04:43:23.544581Z",
+     "iopub.status.busy": "2026-07-06T04:43:23.544448Z",
+     "iopub.status.idle": "2026-07-06T04:43:23.551970Z",
+     "shell.execute_reply": "2026-07-06T04:43:23.551383Z"
     }
    },
    "outputs": [
@@ -135,12 +137,13 @@
      "text": [
       "nagae     18,332 triangles\n",
       "lorensen  18,332 triangles\n",
-      "lewiner   18,332 triangles\n"
+      "lewiner   18,332 triangles\n",
+      "vega      18,332 triangles\n"
      ]
     }
    ],
    "source": [
-    "for method in [\"nagae\", \"lorensen\", \"lewiner\"]:\n",
+    "for method in [\"nagae\", \"lorensen\", \"lewiner\", \"vega\"]:\n",
     "    v, f = isoext.marching_cubes(grid, method=method)\n",
     "    print(f\"{method:9s} {f.shape[0]:,} triangles\")\n"
    ]
@@ -159,10 +162,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:28.411946Z",
-     "iopub.status.busy": "2026-07-06T04:04:28.411874Z",
-     "iopub.status.idle": "2026-07-06T04:04:28.415335Z",
-     "shell.execute_reply": "2026-07-06T04:04:28.415125Z"
+     "iopub.execute_input": "2026-07-06T04:43:23.553087Z",
+     "iopub.status.busy": "2026-07-06T04:43:23.553004Z",
+     "iopub.status.idle": "2026-07-06T04:43:23.556195Z",
+     "shell.execute_reply": "2026-07-06T04:43:23.555982Z"
     }
    },
    "outputs": [
@@ -197,10 +200,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T04:04:28.416489Z",
-     "iopub.status.busy": "2026-07-06T04:04:28.416426Z",
-     "iopub.status.idle": "2026-07-06T04:04:28.430992Z",
-     "shell.execute_reply": "2026-07-06T04:04:28.430417Z"
+     "iopub.execute_input": "2026-07-06T04:43:23.557336Z",
+     "iopub.status.busy": "2026-07-06T04:43:23.557269Z",
+     "iopub.status.idle": "2026-07-06T04:43:23.571608Z",
+     "shell.execute_reply": "2026-07-06T04:43:23.571361Z"
     }
    },
    "outputs": [

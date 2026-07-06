@@ -7,18 +7,31 @@ classification, extraction, and vertex welding.
 
 ## Extraction time (median, ms)
 
-| Grid    | Algorithm        | 128³  | 512³  |
-|---------|------------------|-------|-------|
-| uniform | marching_cubes   | 0.55  | 4.8   |
-| uniform | get_intersection | 0.30  | 5.3   |
-| uniform | dual_contouring  | 0.82  | 7.0   |
-| sparse  | marching_cubes   | 0.44  | 1.4   |
-| sparse  | get_intersection | 0.17  | 0.53  |
-| sparse  | dual_contouring  | 0.78  | 2.3   |
+| Grid    | Algorithm           | 128³  | 512³  |
+|---------|---------------------|-------|-------|
+| uniform | marching_cubes      | 0.55  | 5.4   |
+| uniform | marching_tetrahedra | 0.68  | 6.7   |
+| uniform | surface_nets        | 0.81  | 6.9   |
+| uniform | dual_contouring     | 0.83  | 7.0   |
+| uniform | get_intersection    | 0.26  | 5.3   |
+| sparse  | marching_cubes      | 0.48  | 1.9   |
+| sparse  | marching_tetrahedra | 0.61  | 3.2   |
+| sparse  | surface_nets        | 0.73  | 2.2   |
+| sparse  | dual_contouring     | 0.75  | 2.3   |
+| sparse  | get_intersection    | 0.13  | 0.53  |
 
 Sparse grids only touch cells near the surface, so their cost scales with
 the surface area rather than the volume. At 512³ that is 300k cells
 instead of 134M.
+
+## Marching cubes variants (median, ms)
+
+| Variant  | uniform 512³ | sparse 512³ |
+|----------|--------------|-------------|
+| lorensen | 4.9          | 1.4         |
+| nagae    | 5.0          | 1.5         |
+| lewiner  | 5.5          | 2.0         |
+| vega     | 5.4          | 1.9         |
 
 ## Reproducing
 
