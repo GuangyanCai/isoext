@@ -20,13 +20,14 @@
 .. autofunction:: isoext.write_obj
 ```
 
+(api-viewer)=
 ## Viewer
 
 Interactive visualization built on [viser](https://viser.studio).
 
 ```{eval-rst}
 .. automodule:: isoext.viewer
-   :members: show, embed, add_mesh, serialize_scene, save_scene, copy_client
+   :members: show, embed, add_mesh, add_grid, serialize_scene, save_scene, copy_client
 ```
 
 ## Classes
