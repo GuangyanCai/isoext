@@ -6,17 +6,20 @@
    "source": [
     "# Dual Contouring\n",
     "\n",
-    "Dual Contouring extracts a **triangle mesh** with vertices placed optimally within each cell. Unlike Marching Cubes, it can preserve sharp features when given accurate surface normals.\n",
+    "Dual contouring is a dual extraction method: it places one vertex\n",
+    "inside each cell the surface crosses, at the point that best fits\n",
+    "the surface normals, which lets the mesh reproduce sharp edges and\n",
+    "corners that marching cubes rounds off. {doc}`how_it_works` covers\n",
+    "how the dual family works.\n",
     "\n",
-    "## Simple Usage\n",
-    "\n",
-    "For most cases, you can use the simple one-liner interface:\n",
+    "## Basic Usage\n",
     "\n",
     "```python\n",
     "vertices, faces = isoext.dual_contouring(grid, level=0.0)\n",
     "```\n",
     "\n",
-    "This automatically computes intersection points and normals from the grid values.\n"
+    "Called like this, the edge crossings and normals are estimated from\n",
+    "the grid values, which is enough for smooth surfaces:\n"
    ]
   },
   {
@@ -102,11 +105,11 @@
    "source": [
     "## Custom Normals for Sharp Features\n",
     "\n",
-    "For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:\n",
-    "\n",
-    "1. **Get intersections** — Call `get_intersection()` to get intersection points\n",
-    "2. **Compute normals** — Use SDF gradient for accurate surface normals\n",
-    "3. **Run dual contouring** — Pass the intersection with custom normals\n"
+    "The vertex placement is only as good as the normals. Estimated from\n",
+    "grid values they are smeared near sharp features; computed from the\n",
+    "SDF gradient they are exact. To supply your own, get the edge\n",
+    "crossings with `get_intersection`, attach normals to them, and pass\n",
+    "the result in:\n"
    ]
   },
   {

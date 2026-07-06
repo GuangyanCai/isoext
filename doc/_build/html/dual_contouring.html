@@ -279,14 +279,18 @@
         <article role="main" id="furo-main-content">
           <section id="dual-contouring">
 <h1>Dual Contouring<a class="headerlink" href="#dual-contouring" title="Link to this heading">¶</a></h1>
-<p>Dual Contouring extracts a <strong>triangle mesh</strong> with vertices placed optimally within each cell. Unlike Marching Cubes, it can preserve sharp features when given accurate surface normals.</p>
-<section id="simple-usage">
-<h2>Simple Usage<a class="headerlink" href="#simple-usage" title="Link to this heading">¶</a></h2>
-<p>For most cases, you can use the simple one-liner interface:</p>
+<p>Dual contouring is a dual extraction method: it places one vertex
+inside each cell the surface crosses, at the point that best fits
+the surface normals, which lets the mesh reproduce sharp edges and
+corners that marching cubes rounds off. <a class="reference internal" href="how_it_works.html"><span class="doc">How Iso-Surface Extraction Works</span></a> covers
+how the dual family works.</p>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This automatically computes intersection points and normals from the grid values.</p>
+<p>Called like this, the edge crossings and normals are estimated from
+the grid values, which is enough for smooth surfaces:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -333,12 +337,11 @@ Faces: torch.Size([12288, 3])
 </section>
 <section id="custom-normals-for-sharp-features">
 <h2>Custom Normals for Sharp Features<a class="headerlink" href="#custom-normals-for-sharp-features" title="Link to this heading">¶</a></h2>
-<p>For shapes with sharp features (like cubes), you can provide custom normals computed from the SDF gradient for better results:</p>
-<ol class="arabic simple">
-<li><p><strong>Get intersections</strong> — Call <code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code> to get intersection points</p></li>
-<li><p><strong>Compute normals</strong> — Use SDF gradient for accurate surface normals</p></li>
-<li><p><strong>Run dual contouring</strong> — Pass the intersection with custom normals</p></li>
-</ol>
+<p>The vertex placement is only as good as the normals. Estimated from
+grid values they are smeared near sharp features; computed from the
+SDF gradient they are exact. To supply your own, get the edge
+crossings with <code class="docutils literal notranslate"><span class="pre">get_intersection</span></code>, attach normals to them, and pass
+the result in:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 1: Find edge-surface intersections</span>
@@ -560,7 +563,7 @@ edges come out clean:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Dual Contouring</a><ul>
-<li><a class="reference internal" href="#simple-usage">Simple Usage</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
 <li><a class="reference internal" href="#custom-normals-for-sharp-features">Custom Normals for Sharp Features</a></li>
 <li><a class="reference internal" href="#refined-points-and-unclamped-vertices">Refined Points and Unclamped Vertices</a></li>
 <li><a class="reference internal" href="#references">References</a></li>

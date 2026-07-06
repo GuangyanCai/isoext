@@ -279,13 +279,11 @@
         <article role="main" id="furo-main-content">
           <section id="working-with-occupancy-grids">
 <h1>Working with Occupancy Grids<a class="headerlink" href="#working-with-occupancy-grids" title="Link to this heading">¶</a></h1>
-<p>While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from <strong>binary occupancy grids</strong>—voxel grids where each cell is either occupied (1) or empty (0).</p>
-<p>This is useful when:</p>
-<ul class="simple">
-<li><p>You have voxelized data from 3D scanning or segmentation</p></li>
-<li><p>Your data comes from a boolean CSG operation</p></li>
-<li><p>You want to convert a mesh to voxels and back</p></li>
-</ul>
+<p>isoext is built for scalar fields, but it also works on binary
+occupancy grids: voxel data where each sample is occupied (1) or
+empty (0), as produced by 3D scans, segmentation masks, or boolean
+voxel operations. Extraction works the same way; what changes is the
+choice of level and the need for smoothing.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -319,9 +317,12 @@
 </div>
 </div>
 </section>
-<section id="direct-extraction-jagged-result">
-<h2>Direct Extraction (Jagged Result)<a class="headerlink" href="#direct-extraction-jagged-result" title="Link to this heading">¶</a></h2>
-<p>You can run marching cubes directly on the binary grid using <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code> (the boundary between 0 and 1). However, the result will be <strong>jagged</strong> because there’s no gradient information—every surface point lands exactly on a voxel face:</p>
+<section id="direct-extraction">
+<h2>Direct Extraction<a class="headerlink" href="#direct-extraction" title="Link to this heading">¶</a></h2>
+<p>Marching cubes runs directly on the binary grid with <code class="docutils literal notranslate"><span class="pre">level=0.5</span></code>,
+halfway between empty and occupied. The result is jagged: with only
+two values there is nothing to interpolate, so every vertex lands
+exactly halfway across a voxel face.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">occupancy</span><span class="p">)</span>
@@ -350,7 +351,10 @@
 </section>
 <section id="smoothed-extraction">
 <h2>Smoothed Extraction<a class="headerlink" href="#smoothed-extraction" title="Link to this heading">¶</a></h2>
-<p>To get a smoother result, apply <strong>Gaussian smoothing</strong> before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:</p>
+<p>Gaussian smoothing before extraction turns the hard 0/1 steps into
+gradients the interpolation can work with. The mesh comes out
+smooth, at the cost of rounding any genuinely sharp corners in the
+data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Smooth the occupancy grid</span>
@@ -438,7 +442,7 @@
             <ul>
 <li><a class="reference internal" href="#">Working with Occupancy Grids</a><ul>
 <li><a class="reference internal" href="#creating-an-occupancy-grid">Creating an Occupancy Grid</a></li>
-<li><a class="reference internal" href="#direct-extraction-jagged-result">Direct Extraction (Jagged Result)</a></li>
+<li><a class="reference internal" href="#direct-extraction">Direct Extraction</a></li>
 <li><a class="reference internal" href="#smoothed-extraction">Smoothed Extraction</a></li>
 </ul>
 </li>

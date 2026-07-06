@@ -279,8 +279,10 @@
         <article role="main" id="furo-main-content">
           <section id="using-external-sdf-libraries">
 <h1>Using External SDF Libraries<a class="headerlink" href="#using-external-sdf-libraries" title="Link to this heading">¶</a></h1>
-<p>While <code class="docutils literal notranslate"><span class="pre">isoext</span></code> includes basic SDF primitives for convenience, you can use any SDF library to generate your scalar fields. One excellent option is <a class="reference external" href="https://github.com/fogleman/sdf"><code class="docutils literal notranslate"><span class="pre">sdf</span></code></a> by Michael Fogleman—a powerful Python library for constructing complex SDF.</p>
-<p>It can be installed by</p>
+<p>Any library that evaluates a field at 3D points can feed isoext. One
+option is <a class="reference external" href="https://github.com/fogleman/sdf"><code class="docutils literal notranslate"><span class="pre">sdf</span></code></a> by Michael
+Fogleman, a Python library for building complex SDFs, installed
+with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/fogleman/sdf
 </pre></div>
 </div>

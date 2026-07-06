@@ -279,8 +279,10 @@
         <article role="main" id="furo-main-content">
           <section id="sdf-utilities">
 <h1>SDF Utilities<a class="headerlink" href="#sdf-utilities" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">isoext.sdf</span></code> provides <strong>optional</strong> utilities for working with signed distance functions. These are convenient for testing and demos, but you can always compute values with your own code.</p>
-<p><strong>Note:</strong> These utilities are not required — see <a class="reference internal" href="grids.html"><span class="std std-doc">Working with Grids</span></a> for examples using raw PyTorch.</p>
+<p><code class="docutils literal notranslate"><span class="pre">isoext.sdf</span></code> is a small toolbox of signed distance functions for
+testing and demos. Nothing in the library requires it: extraction
+only sees the values you put on the grid, however you compute them.
+<a class="reference internal" href="grids.html"><span class="doc">Working with Grids</span></a> shows examples with raw PyTorch.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>

@@ -6,7 +6,7 @@
    "source": [
     "# Quick Start\n",
     "\n",
-    "Extract a complex surface in just a few lines of code.\n"
+    "Extract a surface in a few lines of code.\n"
    ]
   },
   {
@@ -110,18 +110,22 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## What just happened?\n",
+    "## What Just Happened\n",
     "\n",
-    "1. **Created a grid** — A 256³ lattice of points in 3D space\n",
-    "2. **Computed scalar values** — Evaluated a signed distance function at each point\n",
-    "3. **Extracted the surface** — Marching Cubes found where the scalar field equals zero\n",
+    "The example built a 256\u00b3 grid of sample points, evaluated a signed\n",
+    "distance function at each point, and ran marching cubes to mesh the\n",
+    "surface where the field crosses zero. {doc}`how_it_works` explains\n",
+    "the machinery behind that last step.\n",
     "\n",
-    "## Learn more\n",
+    "## Learn More\n",
     "\n",
-    "- [Working with Grids](grids.ipynb) — How to create grids and set values (including custom functions and neural networks)\n",
-    "- [Marching Cubes](marching_cubes.ipynb) — Triangular mesh extraction\n",
-    "- [Dual Contouring](dual_contouring.ipynb) — Triangle mesh extraction with sharp features\n",
-    "- [SDF Utilities](sdf_guide.ipynb) — Built-in shape primitives and CSG operations\n"
+    "- {doc}`grids` -- creating grids and setting values, including from\n",
+    "  neural networks\n",
+    "- {doc}`marching_cubes`, {doc}`marching_tetrahedra`,\n",
+    "  {doc}`dual_contouring` and {doc}`surface_nets` -- the extraction\n",
+    "  methods\n",
+    "- {doc}`sdf_guide` -- built-in shape primitives and CSG operations\n",
+    "- {doc}`viewer` -- viewing meshes and sharing scenes\n"
    ]
   },
   {

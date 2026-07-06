@@ -6,7 +6,10 @@
    "source": [
     "# Marching Cubes\n",
     "\n",
-    "Marching Cubes extracts a **triangular mesh** from a scalar field. It examines each cell in the grid and generates triangles where the iso-surface passes through.\n"
+    "Marching cubes is the workhorse of iso-surface extraction: it visits\n",
+    "every grid cell and cuts triangles out of it based on which corners\n",
+    "are inside the surface. It is the default choice for most fields;\n",
+    "{doc}`how_it_works` explains the mechanics.\n"
    ]
   },
   {
@@ -173,9 +176,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "level=-0.2: 4,728 vertices (radius ≈ 0.9)\n",
-      "level=+0.0: 9,168 vertices (radius ≈ 0.7)\n",
-      "level=+0.2: 15,072 vertices (radius ≈ 0.5)\n"
+      "level=-0.2: 4,728 vertices (radius \u2248 0.9)\n",
+      "level=+0.0: 9,168 vertices (radius \u2248 0.7)\n",
+      "level=+0.2: 15,072 vertices (radius \u2248 0.5)\n"
      ]
     }
    ],
@@ -183,7 +186,7 @@
     "# Extract at different iso-levels\n",
     "for level in [-0.2, 0.0, 0.2]:\n",
     "    v, f = isoext.marching_cubes(grid, level=level)\n",
-    "    print(f\"level={level:+.1f}: {v.shape[0]:,} vertices (radius ≈ {0.7 - level:.1f})\")"
+    "    print(f\"level={level:+.1f}: {v.shape[0]:,} vertices (radius \u2248 {0.7 - level:.1f})\")"
    ]
   },
   {

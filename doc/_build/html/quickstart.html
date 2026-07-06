@@ -279,7 +279,7 @@
         <article role="main" id="furo-main-content">
           <section id="quick-start">
 <h1>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h1>
-<p>Extract a complex surface in just a few lines of code.</p>
+<p>Extract a surface in a few lines of code.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
@@ -346,20 +346,22 @@
 notebook, so the rendered page stays interactive without a running server.</p>
 </section>
 <section id="what-just-happened">
-<h2>What just happened?<a class="headerlink" href="#what-just-happened" title="Link to this heading">¶</a></h2>
-<ol class="arabic simple">
-<li><p><strong>Created a grid</strong> — A 256³ lattice of points in 3D space</p></li>
-<li><p><strong>Computed scalar values</strong> — Evaluated a signed distance function at each point</p></li>
-<li><p><strong>Extracted the surface</strong> — Marching Cubes found where the scalar field equals zero</p></li>
-</ol>
+<h2>What Just Happened<a class="headerlink" href="#what-just-happened" title="Link to this heading">¶</a></h2>
+<p>The example built a 256³ grid of sample points, evaluated a signed
+distance function at each point, and ran marching cubes to mesh the
+surface where the field crosses zero. <a class="reference internal" href="how_it_works.html"><span class="doc">How Iso-Surface Extraction Works</span></a> explains
+the machinery behind that last step.</p>
 </section>
 <section id="learn-more">
-<h2>Learn more<a class="headerlink" href="#learn-more" title="Link to this heading">¶</a></h2>
+<h2>Learn More<a class="headerlink" href="#learn-more" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="grids.html"><span class="std std-doc">Working with Grids</span></a> — How to create grids and set values (including custom functions and neural networks)</p></li>
-<li><p><a class="reference internal" href="marching_cubes.html"><span class="std std-doc">Marching Cubes</span></a> — Triangular mesh extraction</p></li>
-<li><p><a class="reference internal" href="dual_contouring.html"><span class="std std-doc">Dual Contouring</span></a> — Triangle mesh extraction with sharp features</p></li>
-<li><p><a class="reference internal" href="sdf_guide.html"><span class="std std-doc">SDF Utilities</span></a> — Built-in shape primitives and CSG operations</p></li>
+<li><p><a class="reference internal" href="grids.html"><span class="doc">Working with Grids</span></a> – creating grids and setting values, including from
+neural networks</p></li>
+<li><p><a class="reference internal" href="marching_cubes.html"><span class="doc">Marching Cubes</span></a>, <a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching Tetrahedra</span></a>,
+<a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> and <a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> – the extraction
+methods</p></li>
+<li><p><a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a> – built-in shape primitives and CSG operations</p></li>
+<li><p><a class="reference internal" href="viewer.html"><span class="doc">Viewer</span></a> – viewing meshes and sharing scenes</p></li>
 </ul>
 </section>
 </section>
@@ -421,8 +423,8 @@ notebook, so the rendered page stays interactive without a running server.</p>
             <ul>
 <li><a class="reference internal" href="#">Quick Start</a><ul>
 <li><a class="reference internal" href="#interactive-viewing">Interactive viewing</a></li>
-<li><a class="reference internal" href="#what-just-happened">What just happened?</a></li>
-<li><a class="reference internal" href="#learn-more">Learn more</a></li>
+<li><a class="reference internal" href="#what-just-happened">What Just Happened</a></li>
+<li><a class="reference internal" href="#learn-more">Learn More</a></li>
 </ul>
 </li>
 </ul>

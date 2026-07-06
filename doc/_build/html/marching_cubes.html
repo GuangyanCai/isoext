@@ -279,7 +279,10 @@
         <article role="main" id="furo-main-content">
           <section id="marching-cubes">
 <h1>Marching Cubes<a class="headerlink" href="#marching-cubes" title="Link to this heading">¶</a></h1>
-<p>Marching Cubes extracts a <strong>triangular mesh</strong> from a scalar field. It examines each cell in the grid and generates triangles where the iso-surface passes through.</p>
+<p>Marching cubes is the workhorse of iso-surface extraction: it visits
+every grid cell and cuts triangles out of it based on which corners
+are inside the surface. It is the default choice for most fields;
+<a class="reference internal" href="how_it_works.html"><span class="doc">How Iso-Surface Extraction Works</span></a> explains the mechanics.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>

@@ -279,12 +279,11 @@
         <article role="main" id="furo-main-content">
           <section id="working-with-grids">
 <h1>Working with Grids<a class="headerlink" href="#working-with-grids" title="Link to this heading">¶</a></h1>
-<p>Grids are the foundation of iso-surface extraction. They define <strong>where</strong> in 3D space we sample scalar values, and <strong>store</strong> those values for the extraction algorithms.</p>
-<p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> provides two grid types:</p>
-<ul class="simple">
-<li><p><strong>UniformGrid</strong> — Dense regular lattice, simple and fast</p></li>
-<li><p><strong>SparseGrid</strong> — Only stores active cells, memory-efficient for large sparse domains</p></li>
-</ul>
+<p>A grid defines where in space the scalar field is sampled and stores
+the sampled values for extraction. There are two grid types:
+<code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> samples a dense regular lattice, and <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code>
+stores only the cells you add, which saves memory when the surface
+occupies a small part of a large volume.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -331,7 +330,8 @@ Points: 262,144
 </section>
 <section id="getting-point-positions">
 <h3>Getting Point Positions<a class="headerlink" href="#getting-point-positions" title="Link to this heading">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">get_points()</span></code> returns the 3D coordinates of all grid points as a PyTorch tensor. This is essential for computing your scalar field values.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_points()</span></code> returns the coordinates of all grid points as a
+PyTorch tensor on the GPU. Evaluate your field at these points.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
@@ -360,12 +360,11 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 </section>
 <section id="setting-values">
 <h3>Setting Values<a class="headerlink" href="#setting-values" title="Link to this heading">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">set_values()</span></code> stores your scalar field on the grid. The values can come from <strong>anywhere</strong> — you’re not limited to the built-in SDF utilities.</p>
-<p>The iso-surface is extracted where values equal zero:</p>
-<ul class="simple">
-<li><p><strong>Negative</strong> values → inside the surface</p></li>
-<li><p><strong>Positive</strong> values → outside the surface</p></li>
-</ul>
+<p><code class="docutils literal notranslate"><span class="pre">set_values()</span></code> stores your scalar field on the grid. The values can
+come from anywhere: a formula, an SDF, a network, a simulation. The
+convention is that negative values are inside the surface and
+positive values outside, so the surface sits where the values cross
+the level, zero by default.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Simple sphere using raw PyTorch</span>
@@ -491,13 +490,10 @@ dots corners outside. Pass the grid to <code class="docutils literal notranslate
 </section>
 <section id="sparsegrid">
 <h2>SparseGrid<a class="headerlink" href="#sparsegrid" title="Link to this heading">¶</a></h2>
-<p>For large domains where the surface occupies only a small region, <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> saves memory by only storing active cells.</p>
-<p>This is useful for:</p>
-<ul class="simple">
-<li><p>High-resolution extraction in large scenes</p></li>
-<li><p>Adaptive refinement workflows</p></li>
-<li><p>Memory-constrained applications</p></li>
-</ul>
+<p>A <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> stores only the cells you add. When the surface
+occupies a thin shell of a large volume – a high-resolution scene,
+an adaptive refinement loop – that shell is all that costs memory
+and time.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a sparse grid with the same logical resolution</span>
@@ -523,14 +519,10 @@ After adding: 1000 active cells
 </div>
 <section id="sparsegrid-workflow">
 <h3>SparseGrid Workflow<a class="headerlink" href="#sparsegrid-workflow" title="Link to this heading">¶</a></h3>
-<p>With <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code>, you work with cells explicitly:</p>
-<ol class="arabic simple">
-<li><p><strong>Add cells</strong> where you expect the surface</p></li>
-<li><p><strong>Get points</strong> for those cells</p></li>
-<li><p><strong>Compute and set values</strong></p></li>
-<li><p><strong>Optionally filter</strong> to cells that actually cross the surface</p></li>
-<li><p><strong>Extract</strong> the mesh</p></li>
-</ol>
+<p>Cells are managed explicitly: add candidate cells, evaluate the
+field at their corner points, keep the cells the surface actually
+crosses, set the values, and extract. The example below does one
+pass of that:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Complete SparseGrid example</span>
@@ -636,13 +628,10 @@ surface and the rest of the volume is empty.</p>
 </section>
 <section id="summary">
 <h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
-<p><strong>Key points:</strong></p>
-<ul class="simple">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">get_points()</span></code> to get coordinates for computing your scalar field</p></li>
-<li><p>Values can come from anywhere: math formulas, SDFs, neural networks, simulations</p></li>
-<li><p>Negative values = inside, positive = outside, zero = surface</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> for most cases, <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> for large sparse domains</p></li>
-</ul>
+<p>Evaluate your field at <code class="docutils literal notranslate"><span class="pre">get_points()</span></code>, store it with <code class="docutils literal notranslate"><span class="pre">set_values()</span></code>,
+and extract; values below the level count as inside. <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code>
+is the default choice, and <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> pays off when the surface is
+small compared to the volume.</p>
 </section>
 </section>
 
