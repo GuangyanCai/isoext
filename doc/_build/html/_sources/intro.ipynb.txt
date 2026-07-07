@@ -249,7 +249,7 @@
     "uses 256 and produces hundreds of thousands of triangles. The\n",
     "extraction methods differ in where they place the vertices and how\n",
     "they connect them: each method's page explains its algorithm, and\n",
-    "{doc}`how_it_works` compares them side by side.\n"
+    "{doc}`method_comparisons` compares them side by side.\n"
    ]
   },
   {

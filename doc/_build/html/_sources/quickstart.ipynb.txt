@@ -92,10 +92,10 @@
    "source": [
     "## What Just Happened\n",
     "\n",
-    "The example built a 256³ grid of sample points, evaluated a signed\n",
+    "The example built a 256\u00b3 grid of sample points, evaluated a signed\n",
     "distance function at each point, and ran marching cubes to mesh the\n",
     "surface where the field crosses zero. If any of those words are new,\n",
-    "{doc}`intro` explains them from scratch; {doc}`how_it_works`\n",
+    "{doc}`intro` explains them from scratch; {doc}`method_comparisons`\n",
     "compares the methods.\n"
    ]
   },

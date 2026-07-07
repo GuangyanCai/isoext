@@ -31,7 +31,7 @@ meshes. `isoext` is a growing collection of iso-surface extraction
 methods that turn such fields into triangle meshes on the GPU. The field values come in as a PyTorch tensor and the
 mesh comes back as tensors, so it fits directly into training loops and
 other GPU pipelines. {doc}`intro` explains the concepts from
-scratch, and {doc}`how_it_works` compares the methods.
+scratch, and {doc}`method_comparisons` compares the methods.
 
 ## Features
 
@@ -113,7 +113,7 @@ dual_marching_cubes
 :caption: In Depth
 :hidden:
 
-how_it_works
+method_comparisons
 mc_variants
 ```
 
