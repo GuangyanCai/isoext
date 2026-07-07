@@ -83,6 +83,7 @@ Median extraction times for a sphere SDF on an RTX 5090:
 | marching_tetrahedra | 6.7 ms       | 3.2 ms      |
 | dual_contouring     | 7.0 ms       | 2.3 ms      |
 | surface_nets        | 6.9 ms       | 2.2 ms      |
+| dual_marching_cubes | 9.0 ms       | 3.5 ms      |
 
 See {doc}`performance` for the full table and how to reproduce it.
 

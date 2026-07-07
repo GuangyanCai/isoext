@@ -7,7 +7,7 @@
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>isoext documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=55bf9381" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -383,10 +383,36 @@ operations, and gradient and smoothing utilities (<a class="reference internal" 
 <td><p>6.9 ms</p></td>
 <td><p>2.2 ms</p></td>
 </tr>
+<tr class="row-even"><td><p>dual_marching_cubes</p></td>
+<td><p>9.0 ms</p></td>
+<td><p>3.5 ms</p></td>
+</tr>
 </tbody>
 </table>
 </div>
 <p>See <a class="reference internal" href="performance.html"><span class="doc">Performance</span></a> for the full table and how to reproduce it.</p>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">¶</a></h2>
+<p>isoext builds on:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://pytorch.org">PyTorch</a> — fields and meshes are exchanged as
+torch tensors</p></li>
+<li><p><a class="reference external" href="https://github.com/wjakob/nanobind">nanobind</a> — Python bindings for
+the CUDA core</p></li>
+<li><p><a class="reference external" href="https://developer.nvidia.com/thrust">Thrust</a> — GPU primitives used
+throughout the extraction pipeline</p></li>
+<li><p><a class="reference external" href="https://viser.studio">viser</a> — powers the interactive viewer</p></li>
+<li><p><a class="reference external" href="https://github.com/scikit-build/scikit-build-core">scikit-build-core</a>
+— the build system</p></li>
+</ul>
+<p>Two marching cubes variants adapt existing implementations: the
+<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> lookup tables are converted from
+<a class="reference external" href="https://scikit-image.org">scikit-image</a>, and the <code class="docutils literal notranslate"><span class="pre">vega</span></code> variant is a
+port of <a class="reference external" href="https://github.com/dvega68/MC33_c_library">MC33_c_library</a> by
+David Vega (MIT License).</p>
+<p>The algorithms themselves come from published papers, cited on each
+method’s documentation page and collected in <a class="reference internal" href="references.html"><span class="doc">References</span></a>.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
@@ -452,7 +478,8 @@ operations, and gradient and smoothing utilities (<a class="reference internal" 
 <li><a class="reference internal" href="#">isoext</a><ul>
 <li><a class="reference internal" href="#features">Features</a></li>
 <li><a class="reference internal" href="#quick-example">Quick Example</a></li>
-<li><a class="reference internal" href="#performance">Performance</a><ul>
+<li><a class="reference internal" href="#performance">Performance</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a><ul>
 </ul>
 </li>
 </ul>
