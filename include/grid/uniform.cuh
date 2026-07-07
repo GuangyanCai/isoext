@@ -38,7 +38,8 @@ class UniformGrid : public Grid {
 
     thrust::device_vector<uint> get_cell_indices() const override;
 
-    std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+    std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>,
+               thrust::device_vector<uint2>>
     get_dual_quads(const NDArray<uint2> &edges,
                    const NDArray<bool> &is_out) const override;
 };

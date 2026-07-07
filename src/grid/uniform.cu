@@ -57,7 +57,8 @@ UniformGrid::get_cell_indices() const {
     return cell_indices;
 }
 
-std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>,
+           thrust::device_vector<uint2>>
 UniformGrid::get_dual_quads(const NDArray<uint2> &edges,
                             const NDArray<bool> &is_out) const {
     // Copy edges and is_out
@@ -79,5 +80,5 @@ UniformGrid::get_dual_quads(const NDArray<uint2> &edges,
     thrust::device_vector<int4> edge_neighbors_dv =
         get_edge_neighbors(edges_dv, shape);
 
-    return {edge_neighbors_dv, is_out_dv};
+    return {edge_neighbors_dv, is_out_dv, edges_dv};
 }
