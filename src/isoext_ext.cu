@@ -1,4 +1,5 @@
 #include "dc.cuh"
+#include "dmc.cuh"
 #include "grid/sparse.cuh"
 #include "grid/uniform.cuh"
 #include "its.cuh"
@@ -481,6 +482,45 @@ NB_MODULE(isoext_ext, m) {
         "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n"
         "    clamp: Keep each vertex inside its cell. Disabling follows sharp\n"
         "        features more closely but can produce self-intersections.\n\n"
+        "Returns:\n"
+        "    A tuple (vertices, faces) where vertices is an (N, 3) float32 "
+        "tensor\n"
+        "    and faces is an (M, 3) int32 tensor of triangle indices.");
+
+    m.def(
+        "dual_marching_cubes",
+        [](Grid *grid, float level, std::string method,
+           std::optional<Intersection> its_opt) {
+            Intersection its = its_opt.has_value()
+                                   ? std::move(its_opt.value())
+                                   : get_intersection(grid, level, false);
+            auto [v, f] = dual_marching_cubes(grid, its, level, method);
+            return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+        },
+        "grid"_a, "level"_a = 0.f, "method"_a = "vega",
+        "intersection"_a = nb::none(),
+        "Extract an iso-surface using dual marching cubes.\n\n"
+        "The dual of the marching cubes mesh: the chosen variant's tables\n"
+        "triangulate each cell, every connected patch of that triangulation\n"
+        "becomes one vertex, and every crossed grid edge yields a quad\n"
+        "connecting the four adjacent cells' patch vertices. When the\n"
+        "intersection carries normals, patch vertices are placed by the\n"
+        "same QEF as dual contouring, which reproduces sharp features;\n"
+        "without normals the centroid of the patch's crossings is used.\n"
+        "Cells crossed by several surface sheets get one vertex per sheet,\n"
+        "which avoids the connectivity defects of dual contouring. The\n"
+        "mesh ends half a cell short of the grid boundary.\n\n"
+        "Args:\n"
+        "    grid: The input grid containing scalar values.\n"
+        "    level: The iso-value. Default is 0.0.\n"
+        "    method: The marching cubes variant used on the dual grid.\n"
+        "        Options are 'vega' (default), 'lewiner', 'nagae', or\n"
+        "        'lorensen'.\n"
+        "    intersection: Optional Intersection data from "
+        "get_intersection().\n"
+        "        Attach normals to it (e.g. from the SDF gradient) to get\n"
+        "        sharp features. If not provided, intersections are computed\n"
+        "        automatically and vertices are placed at centroids.\n\n"
         "Returns:\n"
         "    A tuple (vertices, faces) where vertices is an (N, 3) float32 "
         "tensor\n"

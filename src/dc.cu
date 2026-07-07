@@ -193,7 +193,7 @@ struct place_centroid_vertex_op {
 std::pair<NDArray<float3>, NDArray<int>>
 build_dual_mesh(Grid *grid, const Intersection &its,
                 const thrust::device_vector<float3> &dual_v) {
-    auto [dual_quads_dv, is_out_dv] =
+    auto [dual_quads_dv, is_out_dv, dedup_edges_dv] =
         grid->get_dual_quads(its.edges, its.is_out);
 
     uint num_quads = dual_quads_dv.size();
@@ -224,16 +224,9 @@ build_dual_mesh(Grid *grid, const Intersection &its,
 
 }   // anonymous namespace
 
-std::pair<NDArray<float3>, NDArray<int>>
-dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
-                float svd_tol, bool clamp) {
-    // No cell intersects the surface: return an empty mesh instead of
-    // running the QEF solver on an empty batch.
-    if (its.cell_indices.size() == 0) {
-        return {NDArray<float3>({0}), NDArray<int>({0, 3})};
-    }
-
-    // Place one dual vertex in every cell crossed by the surface.
+thrust::device_vector<float3>
+place_dual_vertices(Grid *grid, const Intersection &its, float reg,
+                    float svd_tol, bool clamp) {
     uint num_active_cells = its.cell_indices.size();
     thrust::device_vector<float3> dual_v(num_active_cells);
     thrust::for_each(
@@ -243,7 +236,32 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
                              its.normals.data(), its.cell_offsets.data(),
                              its.cell_indices.data(), grid->get_view(), reg,
                              svd_tol, clamp));
+    return dual_v;
+}
 
+thrust::device_vector<float3>
+place_centroid_vertices(const Intersection &its) {
+    uint num_active_cells = its.cell_indices.size();
+    thrust::device_vector<float3> dual_v(num_active_cells);
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_active_cells),
+                     place_centroid_vertex_op(dual_v.data().get(),
+                                              its.points.data(),
+                                              its.cell_offsets.data()));
+    return dual_v;
+}
+
+std::pair<NDArray<float3>, NDArray<int>>
+dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
+                float svd_tol, bool clamp) {
+    // No cell intersects the surface: return an empty mesh instead of
+    // running the QEF solver on an empty batch.
+    if (its.cell_indices.size() == 0) {
+        return {NDArray<float3>({0}), NDArray<int>({0, 3})};
+    }
+
+    thrust::device_vector<float3> dual_v =
+        place_dual_vertices(grid, its, reg, svd_tol, clamp);
     return build_dual_mesh(grid, its, dual_v);
 }
 
@@ -253,13 +271,6 @@ surface_nets(Grid *grid, const Intersection &its, float level) {
         return {NDArray<float3>({0}), NDArray<int>({0, 3})};
     }
 
-    uint num_active_cells = its.cell_indices.size();
-    thrust::device_vector<float3> dual_v(num_active_cells);
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_active_cells),
-                     place_centroid_vertex_op(dual_v.data().get(),
-                                              its.points.data(),
-                                              its.cell_offsets.data()));
-
+    thrust::device_vector<float3> dual_v = place_centroid_vertices(its);
     return build_dual_mesh(grid, its, dual_v);
 }

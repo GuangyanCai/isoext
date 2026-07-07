@@ -75,6 +75,7 @@ def benchmark_grid(grid, label, iters, results):
         "marching_tets": lambda: isoext.marching_tetrahedra(grid),
         "get_intersection": lambda: isoext.get_intersection(grid, compute_normals=True),
         "dual_contouring": lambda: isoext.dual_contouring(grid),
+        "dual_marching_cubes": lambda: isoext.dual_marching_cubes(grid),
         "surface_nets": lambda: isoext.surface_nets(grid),
     }
     for algo, fn in cases.items():
