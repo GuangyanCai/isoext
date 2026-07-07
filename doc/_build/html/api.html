@@ -212,7 +212,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How Iso-Surface Extraction Works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">Method Comparisons</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
@@ -558,6 +558,22 @@ previous segments.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_label">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_label" title="Link to this definition">¶</a></dt>
+<dd><p>Draw a text label, e.g. to caption the meshes of a composed scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – The label text.</p></li>
+<li><p><strong>position</strong> – The label position as a (3,) tensor, list or tuple.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name. Defaults to a unique name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.add_arrows">
 <span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_arrows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.45,</span> <span class="pre">0.45,</span> <span class="pre">0.45)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_arrows" title="Link to this definition">¶</a></dt>
 <dd><p>Draw arrows as line shafts with cone heads, e.g. for normals.</p>
@@ -678,7 +694,7 @@ refreshed whenever the installed viser ships a different build.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.embed">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_static'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">420</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.embed" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_static'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">420</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.embed" title="Link to this definition">¶</a></dt>
 <dd><p>Display a mesh as a self-contained interactive scene in a notebook.</p>
 <p>Unlike show, which starts a live server, this writes static assets –
 the viser client to root/viser/ and the serialized scene to
@@ -693,6 +709,9 @@ without a mesh.</p></li>
 <li><p><strong>faces</strong> (<em>Tensor</em><em> | </em><em>None</em>) – (M, 3) tensor of triangle indices.</p></li>
 <li><p><strong>root</strong> – Directory for the static assets, relative to the notebook.</p></li>
 <li><p><strong>height</strong> (<em>int</em>) – Height of the embedded viewer in pixels.</p></li>
+<li><p><strong>frame</strong> – Optional (N, 3) tensor of points that define the initial
+camera framing, for scenes composed with draw= whose extent
+the mesh alone does not describe.</p></li>
 <li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh; pass grid= (and optionally
 grid_level=) to overlay the grid’s edges and corner signs, and
 draw= to add extra elements with add_points and add_lines.</p></li>
@@ -1006,6 +1025,7 @@ against the exact SDF.</p>
 <li><a class="reference internal" href="#isoext.viewer.add_grid"><code class="docutils literal notranslate"><span class="pre">add_grid()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.add_points"><code class="docutils literal notranslate"><span class="pre">add_points()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.add_lines"><code class="docutils literal notranslate"><span class="pre">add_lines()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_label"><code class="docutils literal notranslate"><span class="pre">add_label()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.add_arrows"><code class="docutils literal notranslate"><span class="pre">add_arrows()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.add_planes"><code class="docutils literal notranslate"><span class="pre">add_planes()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
