@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "isoext"
-version = "0.7.0"
+version = "1.0.0"
 description = "GPU-accelerated iso-surface extraction for PyTorch"
 readme = "README.md"
 requires-python = ">=3.10"
