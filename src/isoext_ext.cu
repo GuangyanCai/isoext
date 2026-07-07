@@ -141,7 +141,7 @@ NB_MODULE(isoext_ext, m) {
         "grid"_a, "level"_a = 0.f,
         "Extract an iso-surface using the marching tetrahedra algorithm.\n\n"
         "Each cell is split into 6 tetrahedra, which have no ambiguous sign\n"
-        "configurations, so the mesh is watertight and consistent by\n"
+        "configurations, so the mesh is closed and consistent by\n"
         "construction. Produces roughly 2-3x more triangles than marching\n"
         "cubes on the same grid.\n\n"
         "Args:\n"
@@ -191,7 +191,10 @@ NB_MODULE(isoext_ext, m) {
             "default_value"_a = FMAX,
             "Create a uniform grid.\n\n"
             "Args:\n"
-            "    shape: The number of cells in each dimension (x, y, z).\n"
+            "    shape: The number of sample points in each dimension (x, y, "
+            "z);\n"
+            "        the grid has one fewer cell than points along each "
+            "axis.\n"
             "    aabb_min: The minimum corner of the bounding box. Default is "
             "[-1, -1, -1].\n"
             "    aabb_max: The maximum corner of the bounding box. Default is "
@@ -242,8 +245,9 @@ NB_MODULE(isoext_ext, m) {
             "default_value"_a = std::numeric_limits<float>::max(),
             "Create a sparse grid.\n\n"
             "Args:\n"
-            "    shape: The maximum number of cells in each dimension (x, y, "
-            "z).\n"
+            "    shape: The number of sample points in each dimension (x, y, "
+            "z);\n"
+            "        cells may be added anywhere in the implied lattice.\n"
             "    aabb_min: The minimum corner of the bounding box. Default is "
             "[-1, -1, -1].\n"
             "    aabb_max: The maximum corner of the bounding box. Default is "
@@ -554,9 +558,8 @@ NB_MODULE(isoext_ext, m) {
 
     m.doc() =
         "GPU-accelerated iso-surface extraction algorithms.\n\n"
-        "This module provides implementations of Marching Cubes and Dual "
-        "Contouring\n"
-        "for extracting surfaces from scalar fields stored on uniform or "
-        "sparse grids.\n"
-        "All operations run on CUDA and use PyTorch tensors for data exchange.";
+        "Marching cubes, marching tetrahedra, surface nets, dual contouring\n"
+        "and dual marching cubes, extracting surfaces from scalar fields\n"
+        "stored on uniform or sparse grids. All operations run on CUDA and\n"
+        "use PyTorch tensors for data exchange.";
 }

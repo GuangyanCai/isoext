@@ -66,7 +66,7 @@ pixi run --environment doc doc-serve
 
 Python source is in `src/isoext/`:
 - `sdf.py` - SDF primitives and operations
-- `utils.py` - Utilities (make_grid, write_obj, gaussian_smooth)
+- `utils.py` - Utilities (write_obj, gaussian_smooth)
 - `viewer.py` - Interactive viewing and scene export (viser)
 - `__init__.py` - Package exports
 

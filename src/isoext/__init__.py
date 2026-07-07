@@ -3,6 +3,9 @@ import importlib.util
 if importlib.util.find_spec("torch") is None:
     raise ImportError("PyTorch is required but not installed. Please install PyTorch with CUDA support.\n")
 
+from importlib.metadata import version as _version
+
+from . import sdf
 from .isoext_ext import (
     Intersection,
     SparseGrid,
@@ -14,7 +17,9 @@ from .isoext_ext import (
     marching_tetrahedra,
     surface_nets,
 )
-from .utils import gaussian_smooth, make_grid, write_obj
+from .utils import gaussian_smooth, write_obj
+
+__version__ = _version("isoext")
 
 __all__ = [
     "Intersection",
@@ -26,7 +31,7 @@ __all__ = [
     "get_intersection",
     "marching_cubes",
     "marching_tetrahedra",
-    "make_grid",
+    "sdf",
     "surface_nets",
     "write_obj",
 ]

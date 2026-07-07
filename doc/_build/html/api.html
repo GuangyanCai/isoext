@@ -310,7 +310,7 @@ and faces is an (M, 3) int32 tensor of triangle indices.</p>
 <span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">marching_tetrahedra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.marching_tetrahedra" title="Link to this definition">¶</a></dt>
 <dd><p>Extract an iso-surface using the marching tetrahedra algorithm.</p>
 <p>Each cell is split into 6 tetrahedra, which have no ambiguous sign
-configurations, so the mesh is watertight and consistent by
+configurations, so the mesh is closed and consistent by
 construction. Produces roughly 2-3x more triangles than marching
 cubes on the same grid.</p>
 <dl class="field-list simple">
@@ -435,27 +435,6 @@ points using linear interpolation.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="isoext.make_grid">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">make_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aabb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cuda'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.make_grid" title="Link to this definition">¶</a></dt>
-<dd><p>Create a uniform grid from an axis-aligned bounding box.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>aabb</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Axis-aligned bounding box as [x_min, y_min, z_min, x_max, y_max, z_max]</p></li>
-<li><p><strong>res</strong> (<em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em>) – Resolution, either a single int or list of 3 ints for [x_res, y_res, z_res]</p></li>
-<li><p><strong>device</strong> (<em>str</em>) – Device to create the grid on (default: “cuda”)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Grid tensor with shape (x_res, y_res, z_res, 3)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>Tensor</em></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="isoext.gaussian_smooth">
 <span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">gaussian_smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.gaussian_smooth" title="Link to this definition">¶</a></dt>
 <dd><p>Smooth a 3D scalar field using a Gaussian filter.</p>
@@ -464,7 +443,7 @@ points using linear interpolation.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>field</strong> (<em>Tensor</em>) – Input scalar field with shape (X, Y, Z)</p></li>
 <li><p><strong>sigma</strong> (<em>float</em>) – Standard deviation of the Gaussian kernel (default: 1.0)</p></li>
-<li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of the kernel. If None, uses ceil(6 * sigma) | 1 to ensure odd size.</p></li>
+<li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of the kernel. If None, uses int(6 * sigma) | 1 to ensure odd size.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -478,18 +457,229 @@ points using linear interpolation.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.write_obj">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">write_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.write_obj" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">write_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.write_obj" title="Link to this definition">¶</a></dt>
 <dd><p>Write vertices and faces to an OBJ file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>obj_path</strong> (<em>str</em>) – Path to the output OBJ file</p></li>
-<li><p><strong>v</strong> (<em>Tensor</em>) – Tensor of vertices with shape (N, 3)</p></li>
-<li><p><strong>f</strong> (<em>Tensor</em>) – Tensor of face indices with shape (M, 3)</p></li>
+<li><p><strong>vertices</strong> (<em>Tensor</em>) – Tensor of vertices with shape (N, 3)</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>) – Tensor of face indices with shape (M, 3)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="sdf-toolbox">
+<h2>SDF Toolbox<a class="headerlink" href="#sdf-toolbox" title="Link to this heading">¶</a></h2>
+<p>Signed distance functions and helpers for building test fields; the
+<a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a> page shows them in use.</p>
+<dl class="py class" id="module-isoext.sdf">
+<dt class="sig sig-object py" id="isoext.sdf.SDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SDF</span></span><a class="headerlink" href="#isoext.sdf.SDF" title="Link to this definition">¶</a></dt>
+<dd><p>Abstract base class for Signed Distance Functions.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.SDFProtocol">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SDFProtocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.SDFProtocol" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol for SDF callable objects.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.SphereSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SphereSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.SphereSDF" title="Link to this definition">¶</a></dt>
+<dd><p>SDF for a sphere centered at the origin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>radius</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.TorusSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">TorusSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TorusSDF" title="Link to this definition">¶</a></dt>
+<dd><p>SDF for a torus in the xy-plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> (<em>float</em>) – Major radius (distance from center to tube center)</p></li>
+<li><p><strong>r</strong> (<em>float</em>) – Minor radius (tube radius)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.CuboidSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">CuboidSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.CuboidSDF" title="Link to this definition">¶</a></dt>
+<dd><p>SDF for an axis-aligned cuboid centered at the origin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Full lengths in x, y, z directions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.MandelbulbSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">MandelbulbSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.MandelbulbSDF" title="Link to this definition">¶</a></dt>
+<dd><p>Distance estimator for the Mandelbulb fractal.</p>
+<p>The values estimate the distance to the fractal surface; they are not an
+exact SDF. Fewer iterations give a smoother, blobbier shape. The bulb
+fits inside a sphere of radius about 1.2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>power</strong> (<em>float</em>) – Exponent of the iteration; 8 is the classic Mandelbulb.</p></li>
+<li><p><strong>iterations</strong> (<em>int</em>) – Number of fractal iterations.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.UnionOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">UnionOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.UnionOp" title="Link to this definition">¶</a></dt>
+<dd><p>Union operation combining multiple SDFs (minimum distance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.IntersectionOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">IntersectionOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.IntersectionOp" title="Link to this definition">¶</a></dt>
+<dd><p>Intersection operation combining multiple SDFs (maximum distance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.NegationOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">NegationOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.NegationOp" title="Link to this definition">¶</a></dt>
+<dd><p>Negation operation (inverts SDF, creating inverse shape).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.SmoothUnionOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SmoothUnionOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.SmoothUnionOp" title="Link to this definition">¶</a></dt>
+<dd><p>Smooth union operation combining multiple SDFs with blending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a><em>]</em>) – List of SDFs to combine</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Blending parameter (smaller values = sharper transition)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.TranslationOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">TranslationOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TranslationOp" title="Link to this definition">¶</a></dt>
+<dd><p>Translation operation (moves SDF by an offset).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a>)</p></li>
+<li><p><strong>offset</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.RotationOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">RotationOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.RotationOp" title="Link to this definition">¶</a></dt>
+<dd><p>Rotation operation (rotates SDF around an axis).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a>) – SDF to rotate</p></li>
+<li><p><strong>axis</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Rotation axis as [x, y, z]</p></li>
+<li><p><strong>angle</strong> (<em>float</em>) – Rotation angle</p></li>
+<li><p><strong>use_degree</strong> (<em>bool</em>) – If True, angle is in degrees; if False, in radians</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.sdf.get_sdf_grad">
+<span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">get_sdf_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.get_sdf_grad" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the gradient of an SDF at given points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDFProtocol" title="isoext.sdf.SDFProtocol"><em>SDFProtocol</em></a>) – SDF function to evaluate</p></li>
+<li><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gradient tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.sdf.get_sdf_normal">
+<span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">get_sdf_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.get_sdf_normal" title="Link to this definition">¶</a></dt>
+<dd><p>Compute normalized gradient (surface normal) of an SDF at given points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDFProtocol" title="isoext.sdf.SDFProtocol"><em>SDFProtocol</em></a>) – SDF function to evaluate</p></li>
+<li><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized gradient tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.sdf.project_to_surface">
+<span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">project_to_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.project_to_surface" title="Link to this definition">¶</a></dt>
+<dd><p>Project points onto the zero level set of an SDF with Newton steps.</p>
+<p>Useful for refining the linearly interpolated intersection points from
+get_intersection before running dual contouring; more accurate points
+give sharper features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDFProtocol" title="isoext.sdf.SDFProtocol"><em>SDFProtocol</em></a>) – SDF function to evaluate</p></li>
+<li><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p></li>
+<li><p><strong>iters</strong> (<em>int</em>) – Number of Newton steps</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Projected points tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1053,9 +1243,26 @@ against the exact SDF.</p>
 <li><a class="reference internal" href="#isoext.surface_nets"><code class="docutils literal notranslate"><span class="pre">surface_nets()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.dual_marching_cubes"><code class="docutils literal notranslate"><span class="pre">dual_marching_cubes()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.get_intersection"><code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code></a></li>
-<li><a class="reference internal" href="#isoext.make_grid"><code class="docutils literal notranslate"><span class="pre">make_grid()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.gaussian_smooth"><code class="docutils literal notranslate"><span class="pre">gaussian_smooth()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.write_obj"><code class="docutils literal notranslate"><span class="pre">write_obj()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sdf-toolbox">SDF Toolbox</a><ul>
+<li><a class="reference internal" href="#isoext.sdf.SDF"><code class="docutils literal notranslate"><span class="pre">SDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.SDFProtocol"><code class="docutils literal notranslate"><span class="pre">SDFProtocol</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.SphereSDF"><code class="docutils literal notranslate"><span class="pre">SphereSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.TorusSDF"><code class="docutils literal notranslate"><span class="pre">TorusSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.CuboidSDF"><code class="docutils literal notranslate"><span class="pre">CuboidSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.MandelbulbSDF"><code class="docutils literal notranslate"><span class="pre">MandelbulbSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.UnionOp"><code class="docutils literal notranslate"><span class="pre">UnionOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.IntersectionOp"><code class="docutils literal notranslate"><span class="pre">IntersectionOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.NegationOp"><code class="docutils literal notranslate"><span class="pre">NegationOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.SmoothUnionOp"><code class="docutils literal notranslate"><span class="pre">SmoothUnionOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.TranslationOp"><code class="docutils literal notranslate"><span class="pre">TranslationOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.RotationOp"><code class="docutils literal notranslate"><span class="pre">RotationOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.get_sdf_grad"><code class="docutils literal notranslate"><span class="pre">get_sdf_grad()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.get_sdf_normal"><code class="docutils literal notranslate"><span class="pre">get_sdf_normal()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.project_to_surface"><code class="docutils literal notranslate"><span class="pre">project_to_surface()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#viewer">Viewer</a><ul>

@@ -78,29 +78,6 @@ def test_marching_cubes_empty_result():
     assert f.is_cuda
 
 
-def test_marching_cubes_with_make_grid():
-    """Test marching cubes using make_grid utility."""
-    from isoext.utils import make_grid
-
-    def sphere_sdf(x):
-        return x.norm(dim=-1) - 0.5
-
-    res = 16
-    grid_tensor = make_grid([-1, -1, -1, 1, 1, 1], res=res, device="cuda")
-    sdf = sphere_sdf(grid_tensor)
-
-    # Create UniformGrid and set values
-    grid = isoext.UniformGrid([res, res, res], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
-    grid.set_values(sdf)
-
-    v, f = isoext.marching_cubes(grid, level=0.0)
-
-    assert v.shape[1] == 3
-    assert f.shape[1] == 3
-    assert len(v) > 0
-    assert len(f) > 0
-
-
 def test_marching_cubes_non_uniform_resolution(sphere):
     """Test marching cubes with non-uniform resolution (different resolutions for each dimension)."""
     # Use different resolutions for x, y, z dimensions

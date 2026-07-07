@@ -15,11 +15,19 @@
 
 .. autofunction:: isoext.get_intersection
 
-.. autofunction:: isoext.make_grid
-
 .. autofunction:: isoext.gaussian_smooth
 
 .. autofunction:: isoext.write_obj
+```
+
+## SDF Toolbox
+
+Signed distance functions and helpers for building test fields; the
+{doc}`sdf_guide` page shows them in use.
+
+```{eval-rst}
+.. automodule:: isoext.sdf
+   :members: SDF, SphereSDF, TorusSDF, CuboidSDF, MandelbulbSDF, UnionOp, IntersectionOp, NegationOp, SmoothUnionOp, TranslationOp, RotationOp, get_sdf_grad, get_sdf_normal, project_to_surface, SDFProtocol
 ```
 
 (api-viewer)=
