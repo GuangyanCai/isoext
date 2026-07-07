@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
@@ -278,22 +279,14 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="method-comparisons">
+          <section class="tex2jax_ignore mathjax_ignore" id="method-comparisons">
 <h1>Method Comparisons<a class="headerlink" href="#method-comparisons" title="Link to this heading">¶</a></h1>
-<p>Many shapes enter a program as a scalar field rather than a mesh: a
-signed distance function, the output of a neural network, a CT scan,
-the level set of a fluid simulation. The field gives a value at any
-point, and the shape is an iso-surface: the set of points where the
-value equals some level, usually zero. Most of the graphics stack,
-though, consumes triangle meshes – renderers, physics engines, 3D
-printers, mesh-based losses. Iso-surface extraction converts one
-representation into the other: sample the field on a grid, then
-build a mesh of the level set.</p>
-<p>The catch is that the field is only known at the grid corners.
-Every extraction method reconstructs the surface from those samples,
-and they all answer the same two questions: where do the mesh
-vertices go, and how are they connected? The answers split the
-methods into two families, primal and dual.</p>
+<p>The field is only known at the grid corners, and every extraction
+method reconstructs the surface from those samples. They all answer
+the same two questions: where do the mesh vertices go, and how are
+they connected? Each method’s page explains its own answer. The
+comparisons below put the answers side by side, on fields of a few
+cells where every vertex is visible.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -304,323 +297,25 @@ methods into two families, primal and dual.</p>
 </div>
 </div>
 </div>
-<section id="where-the-surface-crosses-an-edge">
-<h2>Where the Surface Crosses an Edge<a class="headerlink" href="#where-the-surface-crosses-an-edge" title="Link to this heading">¶</a></h2>
-<p>Everything starts on the grid edges. If an edge’s two endpoint
-values straddle the level – one above, one below – the surface
-crosses that edge exactly once, and linear interpolation says where:
-with level-relative endpoint values <code class="docutils literal notranslate"><span class="pre">va</span></code> and <code class="docutils literal notranslate"><span class="pre">vb</span></code>, the crossing sits
-at the fraction <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">va</span> <span class="pre">/</span> <span class="pre">(va</span> <span class="pre">-</span> <span class="pre">vb)</span></code> of the way from <code class="docutils literal notranslate"><span class="pre">a</span></code> to <code class="docutils literal notranslate"><span class="pre">b</span></code>. A
-corner value near zero pulls the crossing toward that corner. Every
-method on this page places geometry using these crossing points;
-<code class="docutils literal notranslate"><span class="pre">isoext.get_intersection</span></code> computes them directly.</p>
-<p>Below, a single cell with one corner inside (red). The surface
-crosses the three edges that connect it to outside corners (blue),
-and the gold dots are the interpolated crossings – closer to the
-red corner on the edges whose outside value is large:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-
-<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
-<span class="n">crossings</span> <span class="o">=</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">crossings</span><span class="p">)</span><span class="si">}</span><span class="s2"> crossings:&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">crossings</span><span class="o">.</span><span class="n">tolist</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="p">])</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.09</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3 crossings:
-   [-1.0, -1.0, 0.25]
-   [-1.0, 0.11, -1.0]
-   [-0.09, -1.0, -1.0]
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/12dbc1d399b4f327.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-</section>
-<section id="primal-marching-cubes">
-<h2>Primal: Marching Cubes<a class="headerlink" href="#primal-marching-cubes" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="marching_cubes.html"><span class="doc">Marching cubes</span></a> visits every cell
-independently. Each of a cell’s 8 corners is either inside or
-outside, giving 256 possible sign patterns, and a lookup table maps
-each pattern to a set of triangles whose vertices are the edge
-crossings. For the pattern above the table produces a single
-triangle that cuts the inside corner off – its three vertices are
-exactly the three gold dots:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangle(s)&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span>
-    <span class="n">v</span><span class="p">,</span>
-    <span class="n">f</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span>
-    <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-    <span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span>
-    <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.09</span><span class="p">),</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1 triangle(s)
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/a4e4f7ad4da39440.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-<p>With more corners inside, the patterns get richer, and some of them
-admit more than one valid triangulation. How the table variants
-resolve those choices – and what goes wrong when they do it badly
-– is the subject of <a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a>.</p>
-</section>
-<section id="marching-tetrahedra-simpler-cells-no-choices">
-<h2>Marching Tetrahedra: Simpler Cells, No Choices<a class="headerlink" href="#marching-tetrahedra-simpler-cells-no-choices" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching tetrahedra</span></a> runs the same
-recipe on simpler cells. Each cube is split into six tetrahedra that
-all share the cube’s main diagonal. The purple lines below are the
-extra edges the split introduces: one diagonal per face, plus the
-main diagonal itself:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">corners</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="n">tets</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
-<span class="p">]</span>  <span class="c1"># the split used by src/mt.cu</span>
-<span class="n">edges</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tets</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)}</span>
-<span class="n">diagonals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">corners</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">corners</span><span class="p">[</span><span class="n">b</span><span class="p">]])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">edges</span> <span class="k">if</span> <span class="nb">bin</span><span class="p">(</span><span class="n">a</span> <span class="o">^</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">diagonals</span><span class="p">)</span><span class="si">}</span><span class="s2"> diagonal edges&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">diagonals</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>7 diagonal edges
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/928e6e253e831f02.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-<p>A tetrahedron has 4 corners and only 16 sign patterns, each
-producing one or two triangles with no choices to make, so the mesh
-is consistent by construction. The price shows on the same field as
-before: the surface now also crosses the diagonals, and one triangle
-becomes six:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangle(s)&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span>
-    <span class="n">v</span><span class="p">,</span>
-    <span class="n">f</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;mediumpurple&quot;</span><span class="p">,</span>
-    <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-    <span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span>
-    <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">diagonals</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">),</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>6 triangle(s)
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/92c2dd426432bc62.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-</section>
-<section id="dual-vertices-inside-cells">
-<h2>Dual: Vertices Inside Cells<a class="headerlink" href="#dual-vertices-inside-cells" title="Link to this heading">¶</a></h2>
-<p>The dual methods swap the roles of cells and edges. Instead of
-putting vertices on the grid edges and triangles inside each cell,
-<a class="reference internal" href="surface_nets.html"><span class="doc">surface nets</span></a> and
-<a class="reference internal" href="dual_contouring.html"><span class="doc">dual contouring</span></a> put one vertex <em>inside</em>
-each cell the surface crosses. The connectivity comes from the
-crossed edges: every crossed edge is surrounded by four cells, and
-their four vertices are joined into a quad that straddles the edge.</p>
-<p>Below, a flat field crosses every vertical edge of a 2x2x1 block of
-cells (gold dots). Only the central edge has four cells around it,
-so the mesh is exactly one quad – two triangles – connecting the
-four cell vertices around that edge. The other crossings sit on
-boundary edges with fewer neighbors and get no face:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
-<span class="n">block</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">get_points</span><span class="p">()[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>  <span class="c1"># a flat surface at z = 0</span>
-
-<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">surface_nets</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span>
-    <span class="n">v</span><span class="p">,</span>
-    <span class="n">f</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;seagreen&quot;</span><span class="p">,</span>
-    <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
-    <span class="n">grid</span><span class="o">=</span><span class="n">block</span><span class="p">,</span>
-    <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">(),</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.07</span><span class="p">),</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 triangles
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/0373df8b4a43e3fd.viser&initialCameraPosition=1.711,1.711,1.198&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-<p>That leaves each cell one decision: where inside the cell does the
-vertex go? The two methods answer differently.</p>
-<ul class="simple">
-<li><p><strong>Surface nets</strong> places it at the centroid of the cell’s edge
-crossings. It needs nothing but the crossings.</p></li>
-<li><p><strong>Dual contouring</strong> uses the surface normal at each crossing.
-Every crossing plus its normal defines a tangent plane, and the
-vertex is placed to minimize the total squared distance to all of
-those planes (a least-squares problem known as the <strong>QEF</strong>). If the
-cell contains a sharp corner, the planes are the corner’s faces,
-and their intersection point <em>is</em> the corner. For this to be
-exact, the crossings are first refined from their interpolated
-estimates onto the true surface with <code class="docutils literal notranslate"><span class="pre">project_to_surface</span></code>, the
-same recipe <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> uses for sharp features.</p></li>
-</ul>
-<p>A third dual method, <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">dual marching cubes</span></a>, refines the recipe: it places one vertex per
-connected surface piece within the cell instead of one per cell, so
-a cell crossed by two sheets gets two vertices. The comparisons at
-the end of this page show why that matters.</p>
-<p>The cell below contains the corner of a tilted box, modeled as the
-intersection of three half-spaces meeting at (0.2, 0.25, 0.3). The
-gold dots are the crossings, the arrows their normals, and each
-translucent square is a piece of the tangent plane they define,
-drawn large enough to reach their common intersection. Surface nets
-puts the vertex at their centroid (green), inside the box and away
-from the feature. The QEF solution (red) is the point closest to all
-three planes, which here is their exact intersection: the corner.
-When the crossings do not pin down all three axes, on flat faces or
-straight creases, the QEF is degenerate, and real implementations
-regularize it toward the centroid; see <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a>.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Three tilted half-spaces whose faces meet at one point.</span>
-<span class="n">planes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">],</span>
-            <span class="p">[</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
-            <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
-        <span class="p">],</span>
-        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span>
-    <span class="p">),</span>
-    <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">corner</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-<span class="n">corner_box</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">((</span><span class="n">p</span> <span class="o">-</span> <span class="n">corner</span><span class="p">)</span> <span class="o">@</span> <span class="n">planes</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="n">corner_cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="n">corner_cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">corner_box</span><span class="p">(</span><span class="n">corner_cell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
-
-<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">corner_cell</span><span class="p">)</span>
-<span class="n">crossings</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">corner_box</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
-<span class="n">normals</span> <span class="o">=</span> <span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">corner_box</span><span class="p">,</span> <span class="n">crossings</span><span class="p">)</span>
-
-<span class="n">centroid</span> <span class="o">=</span> <span class="n">crossings</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="c1"># The QEF: minimize the squared distances to the tangent planes.</span>
-<span class="n">qef</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">normals</span><span class="p">,</span> <span class="p">(</span><span class="n">normals</span> <span class="o">*</span> <span class="n">crossings</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;surface nets vertex: </span><span class="si">{</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dual contouring vertex: </span><span class="si">{</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">qef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># Draw each tangent plane spanning from its crossing to the intersection.</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span>
-    <span class="n">grid</span><span class="o">=</span><span class="n">corner_cell</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span>
-    <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="p">(</span>
-        <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.09</span><span class="p">),</span>
-        <span class="n">viewer</span><span class="o">.</span><span class="n">add_arrows</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">*</span> <span class="n">normals</span><span class="p">),</span>
-        <span class="n">viewer</span><span class="o">.</span><span class="n">add_planes</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">(</span><span class="n">crossings</span> <span class="o">+</span> <span class="n">qef</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
-        <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">centroid</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;seagreen&quot;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.13</span><span class="p">),</span>
-        <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">qef</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.13</span><span class="p">),</span>
-    <span class="p">),</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>surface nets vertex: [-0.57, -0.55, -0.61]
-dual contouring vertex: [0.2, 0.25, 0.3]
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="360"
-            src="_static/viser/index.html?playbackPath=../scenes/3b8a1a8a08aeef97.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-<p>Zooming out one step, the two families are easy to tell apart. The
-smallest possible sphere – one inside sample surrounded by outside
-samples on 2x2x2 cells – comes out as an octahedron under marching
-cubes, with its 6 vertices on the grid edges, and as a cube under
-surface nets, with its 8 vertices inside the cells:</p>
+<section id="two-families">
+<h2>Two Families<a class="headerlink" href="#two-families" title="Link to this heading">¶</a></h2>
+<p>Every method places its geometry using the edge crossings:
+wherever a grid edge runs from an inside corner to an outside one,
+the surface crosses it, at a point interpolated from the two corner
+values. The primal methods,
+<a class="reference internal" href="marching_cubes.html"><span class="doc">Marching Cubes</span></a> and <a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching Tetrahedra</span></a>, put their
+vertices at the crossings themselves and cut triangles out of each
+cell by table lookup. The dual methods put one vertex inside each
+crossed cell – <a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> at the centroid of the cell’s
+crossings, <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> at the point its normals single
+out, and <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> one per surface piece rather
+than one per cell – and join them with one quad around each crossed
+edge.</p>
+<p>The families are easy to tell apart on the smallest possible sphere.
+One inside sample on 2x2x2 cells comes out as an octahedron under
+marching cubes, with its 6 vertices on the grid edges, and as a cube
+under surface nets, with its 8 vertices inside the cells. The two
+meshes are duals of each other:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tiny</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
@@ -640,7 +335,7 @@ surface nets, with its 8 vertices inside the cells:</p>
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/06c04f5893f46748.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/3ef8986a8f63f85a.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -663,7 +358,7 @@ surface nets, with its 8 vertices inside the cells:</p>
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/feaef167f6b3820e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/fbb1e6a38a279c8e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -859,7 +554,7 @@ dual_marching_cubes   24 vertices,  36 triangles
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/28dc246054673d52.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/5f90c801215536cc.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -869,11 +564,11 @@ dual_marching_cubes   24 vertices,  36 triangles
 </section>
 <section id="sharp-features">
 <h3>Sharp Features<a class="headerlink" href="#sharp-features" title="Link to this heading">¶</a></h3>
-<p>The tilted corner from the dual placement demo, now extracted. With
-refined crossings and SDF normals, both dual methods put a vertex
-exactly on the corner point; marching cubes cannot leave the grid
-edges and chamfers it – its nearest vertex is a full cell away from
-the true corner:</p>
+<p>A tilted box corner (<a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> shows how the QEF finds
+it). With refined crossings and SDF normals, both dual methods put a
+vertex exactly on the corner point; marching cubes cannot leave the
+grid edges and chamfers it, leaving its nearest vertex a full cell
+away from the true corner:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">planes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span>
@@ -910,7 +605,7 @@ dual_marching_cubes   11 vertices,  10 triangles
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/4e05322a54a24243.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/1bcf4fe221eb2d88.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -946,7 +641,7 @@ dual_marching_cubes   14 vertices,  24 triangles
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/968f619fae63ae71.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/ef261017c97b1018.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -1026,10 +721,7 @@ behind every method are collected in <a class="reference internal" href="referen
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Method Comparisons</a><ul>
-<li><a class="reference internal" href="#where-the-surface-crosses-an-edge">Where the Surface Crosses an Edge</a></li>
-<li><a class="reference internal" href="#primal-marching-cubes">Primal: Marching Cubes</a></li>
-<li><a class="reference internal" href="#marching-tetrahedra-simpler-cells-no-choices">Marching Tetrahedra: Simpler Cells, No Choices</a></li>
-<li><a class="reference internal" href="#dual-vertices-inside-cells">Dual: Vertices Inside Cells</a></li>
+<li><a class="reference internal" href="#two-families">Two Families</a></li>
 <li><a class="reference internal" href="#how-the-methods-relate">How the Methods Relate</a></li>
 <li><a class="reference internal" href="#seeing-the-failure-cases">Seeing the Failure Cases</a><ul>
 <li><a class="reference internal" href="#pinches">Pinches</a></li>

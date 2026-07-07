@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Tetrahedra" href="marching_tetrahedra.html"><link rel="prev" title="Quick Start" href="quickstart.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Tetrahedra" href="marching_tetrahedra.html"><link rel="prev" title="What Is Iso-Surface Extraction?" href="intro.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Marching Cubes - isoext documentation</title>
@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
@@ -278,7 +279,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="marching-cubes">
+          <section class="tex2jax_ignore mathjax_ignore" id="marching-cubes">
 <h1>Marching Cubes<a class="headerlink" href="#marching-cubes" title="Link to this heading">¶</a></h1>
 <p>Marching cubes is the workhorse of iso-surface extraction: it visits
 every grid cell and cuts triangles out of it based on which corners
@@ -329,6 +330,53 @@ Faces: torch.Size([18332, 3])
             width="100%"
             height="420"
             src="_static/viser/index.html?playbackPath=../scenes/d80132206c99ae2e.viser&initialCameraPosition=1.382,1.382,0.968&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h2>
+<p>Marching cubes visits every cell independently. Each of a cell’s 8
+corners is either inside or outside the surface, giving 256 possible
+sign patterns, and a lookup table maps each pattern to a set of
+triangles. The triangle vertices sit on the cell’s edges. If one end of an
+edge is inside the surface and the other is outside, the surface has
+to cross that edge somewhere in between, and interpolating the two
+values estimates where: with level-relative endpoint values <span class="math notranslate nohighlight">\(v_a\)</span>
+and <span class="math notranslate nohighlight">\(v_b\)</span>, the crossing sits at the fraction <span class="math notranslate nohighlight">\(t = v_a / (v_a - v_b)\)</span>
+of the way along the edge. An endpoint whose value is close to zero
+is close to the surface, so it pulls the crossing toward itself.</p>
+<p>The simplest pattern has one corner inside (the red dot below). The
+surface crosses the three edges connecting it to outside corners,
+the gold dots are the interpolated crossings, and the table cuts the
+corner off with a single triangle through them:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+    <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">crossings</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangle(s)&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+             <span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.09</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1 triangle(s)
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/0510b7a061a7acbb.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -423,14 +471,14 @@ level=+0.2: 15,072 vertices (radius ≈ 0.5)
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="quickstart.html">
+          <a class="prev-page" href="intro.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Quick Start</div>
+                <div class="title">What Is Iso-Surface Extraction?</div>
                 
               </div>
             </a>
@@ -466,6 +514,7 @@ level=+0.2: 15,072 vertices (radius ≈ 0.5)
             <ul>
 <li><a class="reference internal" href="#">Marching Cubes</a><ul>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
 <li><a class="reference internal" href="#algorithm-variants">Algorithm Variants</a></li>
 <li><a class="reference internal" href="#iso-level">Iso-Level</a></li>
 <li><a class="reference internal" href="#saving-meshes">Saving Meshes</a></li>
@@ -484,5 +533,7 @@ level=+0.2: 15,072 vertices (radius ≈ 0.5)
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

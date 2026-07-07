@@ -25,12 +25,13 @@ controls and how to open one from your own code.
 
 An iso-surface is the set of points where a 3D scalar field equals a
 chosen value: the shape described by a signed distance function, or the
-boundary of a density volume. `isoext` is a growing collection of
-iso-surface extraction methods that turn such fields into triangle
-meshes on the GPU. The field values come in as a PyTorch tensor and the
+boundary of a density volume. Fields like these come from neural
+networks, simulations and scans, while most tools consume triangle
+meshes. `isoext` is a growing collection of iso-surface extraction
+methods that turn such fields into triangle meshes on the GPU. The field values come in as a PyTorch tensor and the
 mesh comes back as tensors, so it fits directly into training loops and
-other GPU pipelines. {doc}`how_it_works` explains and compares the
-methods.
+other GPU pipelines. {doc}`intro` explains the concepts from
+scratch, and {doc}`how_it_works` compares the methods.
 
 ## Features
 
@@ -92,6 +93,7 @@ See {doc}`performance` for the full table and how to reproduce it.
 
 installation
 quickstart
+intro
 ```
 
 ```{toctree}

@@ -2,26 +2,17 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "ea1a0b11",
+   "id": "d0f825a1",
    "metadata": {},
    "source": [
     "# Method Comparisons\n",
     "\n",
-    "Many shapes enter a program as a scalar field rather than a mesh: a\n",
-    "signed distance function, the output of a neural network, a CT scan,\n",
-    "the level set of a fluid simulation. The field gives a value at any\n",
-    "point, and the shape is an iso-surface: the set of points where the\n",
-    "value equals some level, usually zero. Most of the graphics stack,\n",
-    "though, consumes triangle meshes -- renderers, physics engines, 3D\n",
-    "printers, mesh-based losses. Iso-surface extraction converts one\n",
-    "representation into the other: sample the field on a grid, then\n",
-    "build a mesh of the level set.\n",
-    "\n",
-    "The catch is that the field is only known at the grid corners.\n",
-    "Every extraction method reconstructs the surface from those samples,\n",
-    "and they all answer the same two questions: where do the mesh\n",
-    "vertices go, and how are they connected? The answers split the\n",
-    "methods into two families, primal and dual.\n"
+    "The field is only known at the grid corners, and every extraction\n",
+    "method reconstructs the surface from those samples. They all answer\n",
+    "the same two questions: where do the mesh vertices go, and how are\n",
+    "they connected? Each method's page explains its own answer. The\n",
+    "comparisons below put the answers side by side, on fields of a few\n",
+    "cells where every vertex is visible.\n"
    ]
   },
   {
@@ -30,10 +21,10 @@
    "id": "93a19ae2",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:56.009842Z",
-     "iopub.status.busy": "2026-07-07T05:01:56.009761Z",
-     "iopub.status.idle": "2026-07-07T05:01:56.696235Z",
-     "shell.execute_reply": "2026-07-07T05:01:56.695675Z"
+     "iopub.execute_input": "2026-07-07T05:57:46.334236Z",
+     "iopub.status.busy": "2026-07-07T05:57:46.334149Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.027084Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.026334Z"
     }
    },
    "outputs": [],
@@ -46,538 +37,41 @@
   },
   {
    "cell_type": "markdown",
-   "id": "d9586e4f",
+   "id": "91574c2b",
    "metadata": {},
    "source": [
-    "## Where the Surface Crosses an Edge\n",
+    "## Two Families\n",
     "\n",
-    "Everything starts on the grid edges. If an edge's two endpoint\n",
-    "values straddle the level -- one above, one below -- the surface\n",
-    "crosses that edge exactly once, and linear interpolation says where:\n",
-    "with level-relative endpoint values `va` and `vb`, the crossing sits\n",
-    "at the fraction `t = va / (va - vb)` of the way from `a` to `b`. A\n",
-    "corner value near zero pulls the crossing toward that corner. Every\n",
-    "method on this page places geometry using these crossing points;\n",
-    "`isoext.get_intersection` computes them directly.\n",
+    "Every method places its geometry using the edge crossings:\n",
+    "wherever a grid edge runs from an inside corner to an outside one,\n",
+    "the surface crosses it, at a point interpolated from the two corner\n",
+    "values. The primal methods,\n",
+    "{doc}`marching_cubes` and {doc}`marching_tetrahedra`, put their\n",
+    "vertices at the crossings themselves and cut triangles out of each\n",
+    "cell by table lookup. The dual methods put one vertex inside each\n",
+    "crossed cell -- {doc}`surface_nets` at the centroid of the cell's\n",
+    "crossings, {doc}`dual_contouring` at the point its normals single\n",
+    "out, and {doc}`dual_marching_cubes` one per surface piece rather\n",
+    "than one per cell -- and join them with one quad around each crossed\n",
+    "edge.\n",
     "\n",
-    "Below, a single cell with one corner inside (red). The surface\n",
-    "crosses the three edges that connect it to outside corners (blue),\n",
-    "and the gold dots are the interpolated crossings -- closer to the\n",
-    "red corner on the edges whose outside value is large:\n"
+    "The families are easy to tell apart on the smallest possible sphere.\n",
+    "One inside sample on 2x2x2 cells comes out as an octahedron under\n",
+    "marching cubes, with its 6 vertices on the grid edges, and as a cube\n",
+    "under surface nets, with its 8 vertices inside the cells. The two\n",
+    "meshes are duals of each other:\n"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": 2,
-   "id": "d9dd76a7",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:56.697666Z",
-     "iopub.status.busy": "2026-07-07T05:01:56.697537Z",
-     "iopub.status.idle": "2026-07-07T05:01:56.932224Z",
-     "shell.execute_reply": "2026-07-07T05:01:56.931964Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "3 crossings:\n",
-      "   [-1.0, -1.0, 0.25]\n",
-      "   [-1.0, 0.11, -1.0]\n",
-      "   [-0.09, -1.0, -1.0]\n"
-     ]
-    },
-    {
-     "data": {
-      "text/html": [
-       "\n",
-       "        <iframe\n",
-       "            width=\"100%\"\n",
-       "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/12dbc1d399b4f327.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
-       "            frameborder=\"0\"\n",
-       "            allowfullscreen\n",
-       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
-       "        ></iframe>\n",
-       "        "
-      ],
-      "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f6cc1051c0>"
-      ]
-     },
-     "execution_count": 2,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "cell = isoext.UniformGrid([2, 2, 2])\n",
-    "cell.set_values(torch.tensor([-0.5, 0.3, 0.4, 0.5, 0.6, 0.4, 0.3, 0.2], device=\"cuda\").reshape(2, 2, 2))\n",
-    "\n",
-    "its = isoext.get_intersection(cell)\n",
-    "crossings = its.get_points()\n",
-    "print(f\"{len(crossings)} crossings:\")\n",
-    "for p in crossings.tolist():\n",
-    "    print(\"  \", [round(x, 2) for x in p])\n",
-    "viewer.embed(grid=cell, height=300, draw=lambda s: viewer.add_points(s, crossings, point_size=0.09))"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "f701eea4",
-   "metadata": {},
-   "source": [
-    "## Primal: Marching Cubes\n",
-    "\n",
-    "{doc}`Marching cubes <marching_cubes>` visits every cell\n",
-    "independently. Each of a cell's 8 corners is either inside or\n",
-    "outside, giving 256 possible sign patterns, and a lookup table maps\n",
-    "each pattern to a set of triangles whose vertices are the edge\n",
-    "crossings. For the pattern above the table produces a single\n",
-    "triangle that cuts the inside corner off -- its three vertices are\n",
-    "exactly the three gold dots:\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 3,
-   "id": "4b090390",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:56.933544Z",
-     "iopub.status.busy": "2026-07-07T05:01:56.933464Z",
-     "iopub.status.idle": "2026-07-07T05:01:56.985093Z",
-     "shell.execute_reply": "2026-07-07T05:01:56.984501Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "1 triangle(s)\n"
-     ]
-    },
-    {
-     "data": {
-      "text/html": [
-       "\n",
-       "        <iframe\n",
-       "            width=\"100%\"\n",
-       "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/a4e4f7ad4da39440.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
-       "            frameborder=\"0\"\n",
-       "            allowfullscreen\n",
-       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
-       "        ></iframe>\n",
-       "        "
-      ],
-      "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f4719512b0>"
-      ]
-     },
-     "execution_count": 3,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "v, f = isoext.marching_cubes(cell)\n",
-    "print(f\"{f.shape[0]} triangle(s)\")\n",
-    "viewer.embed(\n",
-    "    v,\n",
-    "    f,\n",
-    "    color=\"steelblue\",\n",
-    "    flat_shading=True,\n",
-    "    side=\"double\",\n",
-    "    height=300,\n",
-    "    grid=cell,\n",
-    "    draw=lambda s: viewer.add_points(s, crossings, point_size=0.09),\n",
-    ")"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "0945eb14",
-   "metadata": {},
-   "source": [
-    "With more corners inside, the patterns get richer, and some of them\n",
-    "admit more than one valid triangulation. How the table variants\n",
-    "resolve those choices -- and what goes wrong when they do it badly\n",
-    "-- is the subject of {doc}`mc_variants`.\n",
-    "\n",
-    "## Marching Tetrahedra: Simpler Cells, No Choices\n",
-    "\n",
-    "{doc}`Marching tetrahedra <marching_tetrahedra>` runs the same\n",
-    "recipe on simpler cells. Each cube is split into six tetrahedra that\n",
-    "all share the cube's main diagonal. The purple lines below are the\n",
-    "extra edges the split introduces: one diagonal per face, plus the\n",
-    "main diagonal itself:\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 4,
-   "id": "2b3c5db8",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:56.986451Z",
-     "iopub.status.busy": "2026-07-07T05:01:56.986336Z",
-     "iopub.status.idle": "2026-07-07T05:01:56.991205Z",
-     "shell.execute_reply": "2026-07-07T05:01:56.990881Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "7 diagonal edges\n"
-     ]
-    },
-    {
-     "data": {
-      "text/html": [
-       "\n",
-       "        <iframe\n",
-       "            width=\"100%\"\n",
-       "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/928e6e253e831f02.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
-       "            frameborder=\"0\"\n",
-       "            allowfullscreen\n",
-       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
-       "        ></iframe>\n",
-       "        "
-      ],
-      "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f838fea2a0>"
-      ]
-     },
-     "execution_count": 4,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "corners = cell.get_points().reshape(8, 3)\n",
-    "tets = [\n",
-    "    [0, 4, 6, 7],\n",
-    "    [0, 5, 4, 7],\n",
-    "    [0, 6, 2, 7],\n",
-    "    [0, 2, 3, 7],\n",
-    "    [0, 1, 5, 7],\n",
-    "    [0, 3, 1, 7],\n",
-    "]  # the split used by src/mt.cu\n",
-    "edges = {tuple(sorted((t[i], t[j]))) for t in tets for i in range(4) for j in range(i + 1, 4)}\n",
-    "diagonals = torch.stack([torch.stack([corners[a], corners[b]]) for a, b in edges if bin(a ^ b).count(\"1\") > 1])\n",
-    "print(f\"{len(diagonals)} diagonal edges\")\n",
-    "viewer.embed(grid=cell, height=300, draw=lambda s: viewer.add_lines(s, diagonals, color=\"orchid\"))"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "1e44497c",
-   "metadata": {},
-   "source": [
-    "A tetrahedron has 4 corners and only 16 sign patterns, each\n",
-    "producing one or two triangles with no choices to make, so the mesh\n",
-    "is consistent by construction. The price shows on the same field as\n",
-    "before: the surface now also crosses the diagonals, and one triangle\n",
-    "becomes six:\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "1c0f4d3e",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:56.992611Z",
-     "iopub.status.busy": "2026-07-07T05:01:56.992539Z",
-     "iopub.status.idle": "2026-07-07T05:01:56.999007Z",
-     "shell.execute_reply": "2026-07-07T05:01:56.998794Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "6 triangle(s)\n"
-     ]
-    },
-    {
-     "data": {
-      "text/html": [
-       "\n",
-       "        <iframe\n",
-       "            width=\"100%\"\n",
-       "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/92c2dd426432bc62.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
-       "            frameborder=\"0\"\n",
-       "            allowfullscreen\n",
-       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
-       "        ></iframe>\n",
-       "        "
-      ],
-      "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f4719526c0>"
-      ]
-     },
-     "execution_count": 5,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "v, f = isoext.marching_tetrahedra(cell)\n",
-    "print(f\"{f.shape[0]} triangle(s)\")\n",
-    "viewer.embed(\n",
-    "    v,\n",
-    "    f,\n",
-    "    color=\"mediumpurple\",\n",
-    "    flat_shading=True,\n",
-    "    side=\"double\",\n",
-    "    height=300,\n",
-    "    grid=cell,\n",
-    "    draw=lambda s: viewer.add_lines(s, diagonals, color=\"orchid\"),\n",
-    ")"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "613f6c81",
-   "metadata": {},
-   "source": [
-    "## Dual: Vertices Inside Cells\n",
-    "\n",
-    "The dual methods swap the roles of cells and edges. Instead of\n",
-    "putting vertices on the grid edges and triangles inside each cell,\n",
-    "{doc}`surface nets <surface_nets>` and\n",
-    "{doc}`dual contouring <dual_contouring>` put one vertex *inside*\n",
-    "each cell the surface crosses. The connectivity comes from the\n",
-    "crossed edges: every crossed edge is surrounded by four cells, and\n",
-    "their four vertices are joined into a quad that straddles the edge.\n",
-    "\n",
-    "Below, a flat field crosses every vertical edge of a 2x2x1 block of\n",
-    "cells (gold dots). Only the central edge has four cells around it,\n",
-    "so the mesh is exactly one quad -- two triangles -- connecting the\n",
-    "four cell vertices around that edge. The other crossings sit on\n",
-    "boundary edges with fewer neighbors and get no face:\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 6,
-   "id": "e8e0679b",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.000210Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.000139Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.015591Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.015243Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "2 triangles\n"
-     ]
-    },
-    {
-     "data": {
-      "text/html": [
-       "\n",
-       "        <iframe\n",
-       "            width=\"100%\"\n",
-       "            height=\"300\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/0373df8b4a43e3fd.viser&initialCameraPosition=1.711,1.711,1.198&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
-       "            frameborder=\"0\"\n",
-       "            allowfullscreen\n",
-       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
-       "        ></iframe>\n",
-       "        "
-      ],
-      "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f6cf245010>"
-      ]
-     },
-     "execution_count": 6,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "block = isoext.UniformGrid([3, 3, 2], aabb_min=[-1, -1, -0.5], aabb_max=[1, 1, 0.5])\n",
-    "block.set_values(block.get_points()[..., 2])  # a flat surface at z = 0\n",
-    "\n",
-    "v, f = isoext.surface_nets(block)\n",
-    "its = isoext.get_intersection(block)\n",
-    "print(f\"{f.shape[0]} triangles\")\n",
-    "viewer.embed(\n",
-    "    v,\n",
-    "    f,\n",
-    "    color=\"seagreen\",\n",
-    "    flat_shading=True,\n",
-    "    side=\"double\",\n",
-    "    height=300,\n",
-    "    grid=block,\n",
-    "    draw=lambda s: viewer.add_points(s, its.get_points(), point_size=0.07),\n",
-    ")"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "a5c26fd8",
-   "metadata": {},
-   "source": [
-    "That leaves each cell one decision: where inside the cell does the\n",
-    "vertex go? The two methods answer differently.\n",
-    "\n",
-    "- **Surface nets** places it at the centroid of the cell's edge\n",
-    "  crossings. It needs nothing but the crossings.\n",
-    "- **Dual contouring** uses the surface normal at each crossing.\n",
-    "  Every crossing plus its normal defines a tangent plane, and the\n",
-    "  vertex is placed to minimize the total squared distance to all of\n",
-    "  those planes (a least-squares problem known as the **QEF**). If the\n",
-    "  cell contains a sharp corner, the planes are the corner's faces,\n",
-    "  and their intersection point *is* the corner. For this to be\n",
-    "  exact, the crossings are first refined from their interpolated\n",
-    "  estimates onto the true surface with `project_to_surface`, the\n",
-    "  same recipe {doc}`dual_contouring` uses for sharp features.\n",
-    "\n",
-    "A third dual method, {doc}`dual marching cubes\n",
-    "<dual_marching_cubes>`, refines the recipe: it places one vertex per\n",
-    "connected surface piece within the cell instead of one per cell, so\n",
-    "a cell crossed by two sheets gets two vertices. The comparisons at\n",
-    "the end of this page show why that matters.\n",
-    "\n",
-    "The cell below contains the corner of a tilted box, modeled as the\n",
-    "intersection of three half-spaces meeting at (0.2, 0.25, 0.3). The\n",
-    "gold dots are the crossings, the arrows their normals, and each\n",
-    "translucent square is a piece of the tangent plane they define,\n",
-    "drawn large enough to reach their common intersection. Surface nets\n",
-    "puts the vertex at their centroid (green), inside the box and away\n",
-    "from the feature. The QEF solution (red) is the point closest to all\n",
-    "three planes, which here is their exact intersection: the corner.\n",
-    "When the crossings do not pin down all three axes, on flat faces or\n",
-    "straight creases, the QEF is degenerate, and real implementations\n",
-    "regularize it toward the centroid; see {doc}`dual_contouring`.\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 7,
-   "id": "063bd4c7",
-   "metadata": {
-    "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.017018Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.016941Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.345879Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.345611Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "surface nets vertex: [-0.57, -0.55, -0.61]\n",
-      "dual contouring vertex: [0.2, 0.25, 0.3]\n"
-     ]
-    },
-    {
-     "data": {
-      "text/html": [
-       "\n",
-       "        <iframe\n",
-       "            width=\"100%\"\n",
-       "            height=\"360\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/3b8a1a8a08aeef97.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
-       "            frameborder=\"0\"\n",
-       "            allowfullscreen\n",
-       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
-       "        ></iframe>\n",
-       "        "
-      ],
-      "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f467a1a9f0>"
-      ]
-     },
-     "execution_count": 7,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
-   "source": [
-    "# Three tilted half-spaces whose faces meet at one point.\n",
-    "planes = torch.nn.functional.normalize(\n",
-    "    torch.tensor(\n",
-    "        [\n",
-    "            [1.0, 0.3, -0.2],\n",
-    "            [-0.25, 1.0, 0.3],\n",
-    "            [0.2, -0.3, 1.0],\n",
-    "        ],\n",
-    "        device=\"cuda\",\n",
-    "    ),\n",
-    "    dim=-1,\n",
-    ")\n",
-    "corner = torch.tensor([0.2, 0.25, 0.3], device=\"cuda\")\n",
-    "corner_box = lambda p: ((p - corner) @ planes.T).amax(dim=-1)\n",
-    "\n",
-    "corner_cell = isoext.UniformGrid([2, 2, 2])\n",
-    "corner_cell.set_values(corner_box(corner_cell.get_points()))\n",
-    "\n",
-    "its = isoext.get_intersection(corner_cell)\n",
-    "crossings = project_to_surface(corner_box, its.get_points())\n",
-    "normals = get_sdf_normal(corner_box, crossings)\n",
-    "\n",
-    "centroid = crossings.mean(dim=0, keepdim=True)\n",
-    "# The QEF: minimize the squared distances to the tangent planes.\n",
-    "qef = torch.linalg.lstsq(normals, (normals * crossings).sum(-1)).solution[None]\n",
-    "print(f\"surface nets vertex: {[round(x, 2) for x in centroid[0].tolist()]}\")\n",
-    "print(f\"dual contouring vertex: {[round(x, 2) for x in qef[0].tolist()]}\")\n",
-    "\n",
-    "# Draw each tangent plane spanning from its crossing to the intersection.\n",
-    "viewer.embed(\n",
-    "    grid=corner_cell,\n",
-    "    height=360,\n",
-    "    draw=lambda s: (\n",
-    "        viewer.add_points(s, crossings, point_size=0.09),\n",
-    "        viewer.add_arrows(s, crossings, 0.45 * normals),\n",
-    "        viewer.add_planes(s, (crossings + qef) / 2, normals, size=1.0, opacity=0.3),\n",
-    "        viewer.add_points(s, centroid, color=\"seagreen\", point_size=0.13),\n",
-    "        viewer.add_points(s, qef, color=\"crimson\", point_size=0.13),\n",
-    "    ),\n",
-    ")"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "0d1b463e",
-   "metadata": {},
-   "source": [
-    "Zooming out one step, the two families are easy to tell apart. The\n",
-    "smallest possible sphere -- one inside sample surrounded by outside\n",
-    "samples on 2x2x2 cells -- comes out as an octahedron under marching\n",
-    "cubes, with its 6 vertices on the grid edges, and as a cube under\n",
-    "surface nets, with its 8 vertices inside the cells:\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 8,
    "id": "9faf61d9",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.347557Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.347431Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.352371Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.352145Z"
+     "iopub.execute_input": "2026-07-07T05:57:47.028870Z",
+     "iopub.status.busy": "2026-07-07T05:57:47.028748Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.311680Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.311057Z"
     }
    },
    "outputs": [
@@ -595,7 +89,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"320\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/06c04f5893f46748.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/3ef8986a8f63f85a.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -603,10 +97,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f838fea960>"
+       "<IPython.lib.display.IFrame at 0x7563d3f56f60>"
       ]
      },
-     "execution_count": 8,
+     "execution_count": 2,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -622,14 +116,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": 3,
    "id": "24216c58",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.353121Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.353052Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.357453Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.357206Z"
+     "iopub.execute_input": "2026-07-07T05:57:47.313208Z",
+     "iopub.status.busy": "2026-07-07T05:57:47.313075Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.320942Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.320708Z"
     }
    },
    "outputs": [
@@ -647,7 +141,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"320\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/feaef167f6b3820e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/fbb1e6a38a279c8e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -655,10 +149,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f4680c94f0>"
+       "<IPython.lib.display.IFrame at 0x7563d3e8bef0>"
       ]
      },
-     "execution_count": 9,
+     "execution_count": 3,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -741,14 +235,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": 4,
    "id": "2170533b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.358321Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.358249Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.361062Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.360780Z"
+     "iopub.execute_input": "2026-07-07T05:57:47.322417Z",
+     "iopub.status.busy": "2026-07-07T05:57:47.322349Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.325129Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.324877Z"
     }
    },
    "outputs": [],
@@ -805,14 +299,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 5,
    "id": "0da3cf29",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.362098Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.362020Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.373540Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.372897Z"
+     "iopub.execute_input": "2026-07-07T05:57:47.326104Z",
+     "iopub.status.busy": "2026-07-07T05:57:47.326034Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.343257Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.343005Z"
     }
    },
    "outputs": [
@@ -832,7 +326,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"320\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/28dc246054673d52.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/5f90c801215536cc.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -840,10 +334,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f467b956a0>"
+       "<IPython.lib.display.IFrame at 0x7567a44e2ba0>"
       ]
      },
-     "execution_count": 11,
+     "execution_count": 5,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -864,23 +358,23 @@
    "source": [
     "### Sharp Features\n",
     "\n",
-    "The tilted corner from the dual placement demo, now extracted. With\n",
-    "refined crossings and SDF normals, both dual methods put a vertex\n",
-    "exactly on the corner point; marching cubes cannot leave the grid\n",
-    "edges and chamfers it -- its nearest vertex is a full cell away from\n",
-    "the true corner:\n"
+    "A tilted box corner ({doc}`dual_contouring` shows how the QEF finds\n",
+    "it). With refined crossings and SDF normals, both dual methods put a\n",
+    "vertex exactly on the corner point; marching cubes cannot leave the\n",
+    "grid edges and chamfers it, leaving its nearest vertex a full cell\n",
+    "away from the true corner:\n"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": 6,
    "id": "8301bd05",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.374977Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.374905Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.398322Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.397710Z"
+     "iopub.execute_input": "2026-07-07T05:57:47.344700Z",
+     "iopub.status.busy": "2026-07-07T05:57:47.344629Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.631163Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.630663Z"
     }
    },
    "outputs": [
@@ -900,7 +394,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"320\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/4e05322a54a24243.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/1bcf4fe221eb2d88.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -908,10 +402,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f467783680>"
+       "<IPython.lib.display.IFrame at 0x7563c275a3f0>"
       ]
      },
-     "execution_count": 12,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -957,14 +451,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
+   "execution_count": 7,
    "id": "71c72010",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:01:57.399270Z",
-     "iopub.status.busy": "2026-07-07T05:01:57.399182Z",
-     "iopub.status.idle": "2026-07-07T05:01:57.409359Z",
-     "shell.execute_reply": "2026-07-07T05:01:57.408959Z"
+     "iopub.execute_input": "2026-07-07T05:57:47.632560Z",
+     "iopub.status.busy": "2026-07-07T05:57:47.632430Z",
+     "iopub.status.idle": "2026-07-07T05:57:47.641699Z",
+     "shell.execute_reply": "2026-07-07T05:57:47.641518Z"
     }
    },
    "outputs": [
@@ -984,7 +478,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"320\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/968f619fae63ae71.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/ef261017c97b1018.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -992,10 +486,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x71f467c885f0>"
+       "<IPython.lib.display.IFrame at 0x7563d3e99520>"
       ]
      },
-     "execution_count": 13,
+     "execution_count": 7,
      "metadata": {},
      "output_type": "execute_result"
     }

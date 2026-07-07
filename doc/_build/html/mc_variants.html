@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
@@ -278,12 +279,13 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="marching-cubes-variants">
+          <section class="tex2jax_ignore mathjax_ignore" id="marching-cubes-variants">
 <h1>Marching Cubes Variants<a class="headerlink" href="#marching-cubes-variants" title="Link to this heading">¶</a></h1>
 <p>Marching cubes turns each cell’s corner signs into triangles by
 table lookup. Some sign patterns have more than one valid
 triangulation, and the four variants differ in how they pick one.
-This page shows the consequences. The example meshes are open
+The consequences range from cracked meshes to wrong topology, shown
+below on fields of a few cells. The example meshes are open
 surfaces, so they are rendered double-sided; the overlays show the
 grid, with red dots for corners inside the surface and blue dots for
 corners outside.</p>

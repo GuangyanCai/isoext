@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
@@ -278,7 +279,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="surface-nets">
+          <section class="tex2jax_ignore mathjax_ignore" id="surface-nets">
 <h1>Surface Nets<a class="headerlink" href="#surface-nets" title="Link to this heading">¶</a></h1>
 <p>Surface nets (<span class="bibtex-citation" id="id1">Gibson [<a class="reference internal" href="#id7" title="Sarah F. F. Gibson. Constrained elastic surface nets: generating smooth surfaces from binary segmented data. In Medical Image Computing and Computer-Assisted Intervention (MICCAI '98), LNCS 1496, 888–898. Springer, 1998. doi:10.1007/BFb0056277.">1998</a>]</span>) is a dual method: instead of cutting triangles out of
 each cell the way marching cubes does, it places one vertex inside
@@ -325,6 +326,48 @@ the mesh comes out smooth and evenly tessellated.</p>
 </div>
 </div>
 </section>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h2>
+<p>One vertex goes inside each cell the surface crosses, at the
+centroid of the points where the surface crosses the cell’s edges.
+The connectivity comes from the crossed edges: every crossed edge is
+surrounded by four cells, and their four vertices are joined into a
+quad that straddles the edge.</p>
+<p>Below, a flat field crosses every vertical edge of a 2x2x1 block of
+cells (gold dots). Only the central edge has four cells around it,
+so the mesh is exactly one quad, two triangles, connecting the four
+cell vertices around that edge. The other crossings sit on boundary
+edges with fewer neighbors and get no face:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">block</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">block</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">get_points</span><span class="p">()[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>  <span class="c1"># a flat surface at z = 0</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">surface_nets</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+<span class="n">crossings</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">block</span><span class="p">)</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;seagreen&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+             <span class="n">grid</span><span class="o">=</span><span class="n">block</span><span class="p">,</span>
+             <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.07</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 triangles
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/92ba03774dff01db.viser&initialCameraPosition=1.711,1.711,1.198&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
 <section id="a-smooth-field">
 <h2>A Smooth Field<a class="headerlink" href="#a-smooth-field" title="Link to this heading">¶</a></h2>
 <p>Because the vertex placement only uses where the surface crosses the
@@ -353,7 +396,7 @@ here:</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/6c0cacc45119d344.viser&initialCameraPosition=2.096,2.101,1.441&initialCameraLookAt=-0.005,0.000,-0.030&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/20331a15f9e3035e.viser&initialCameraPosition=2.096,2.101,1.441&initialCameraLookAt=-0.005,0.000,-0.030&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -394,7 +437,7 @@ otherwise. See <a class="reference internal" href="dual_contouring.html"><span c
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/56f648fbd166cc72.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/d623d211d254c60f.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -417,7 +460,7 @@ otherwise. See <a class="reference internal" href="dual_contouring.html"><span c
         <iframe
             width="100%"
             height="300"
-            src="_static/viser/index.html?playbackPath=../scenes/ca243954d5194b35.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/c9ce4ae36859b202.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -495,6 +538,7 @@ otherwise. See <a class="reference internal" href="dual_contouring.html"><span c
             <ul>
 <li><a class="reference internal" href="#">Surface Nets</a><ul>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
 <li><a class="reference internal" href="#a-smooth-field">A Smooth Field</a></li>
 <li><a class="reference internal" href="#versus-dual-contouring">Versus Dual Contouring</a></li>
 <li><a class="reference internal" href="#references">References</a></li>

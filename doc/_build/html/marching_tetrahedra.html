@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
@@ -278,7 +279,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="marching-tetrahedra">
+          <section class="tex2jax_ignore mathjax_ignore" id="marching-tetrahedra">
 <h1>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">¶</a></h1>
 <p>Marching tetrahedra splits every cell into six tetrahedra and extracts
 the surface per tetrahedron. A tetrahedron has no ambiguous sign
@@ -288,7 +289,8 @@ cubes, with worse triangle shapes and a slight directional grain from
 the cell split. The method goes back to <span class="bibtex-citation" id="id1">Doi and Koide [<a class="reference internal" href="#id4" title="Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. IEICE Transactions on Information and Systems, E74-D(1):214–224, 1991.">1991</a>]</span>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
 </pre></div>
@@ -331,6 +333,71 @@ marching_cubes:      4,508 triangles
         </div></div>
 </div>
 </section>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h2>
+<p>Each cube is split into six tetrahedra that all share the cube’s
+main diagonal. The purple lines below are the extra edges the split
+introduces: one diagonal per face, plus the main diagonal itself:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+    <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">corners</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">tets</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span>  <span class="c1"># the split used by src/mt.cu</span>
+<span class="n">edges</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tets</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)}</span>
+<span class="n">diagonals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">corners</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">corners</span><span class="p">[</span><span class="n">b</span><span class="p">]])</span>
+                         <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">edges</span> <span class="k">if</span> <span class="nb">bin</span><span class="p">(</span><span class="n">a</span> <span class="o">^</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+             <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">diagonals</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/3f547271512f9bf4.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<p>A tetrahedron has 4 corners and only 16 sign patterns, each
+producing one or two triangles with no choices to make, so the mesh
+is consistent by construction. The price shows on a field with one
+corner inside: the surface also crosses the diagonals, and marching
+cubes’ single triangle becomes six:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangle(s)&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;mediumpurple&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+             <span class="n">grid</span><span class="o">=</span><span class="n">cell</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">viewer</span><span class="o">.</span><span class="n">add_lines</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">diagonals</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orchid&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>6 triangle(s)
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="300"
+            src="_static/viser/index.html?playbackPath=../scenes/5ebafcc47248188f.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
 <section id="tessellation">
 <h2>Tessellation<a class="headerlink" href="#tessellation" title="Link to this heading">¶</a></h2>
 <p>The wireframes on a coarse grid show where the extra triangles go and
@@ -351,7 +418,7 @@ first, marching tetrahedra second.</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/bcb84fae47ae4b4f.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/e741d1cb901ee6eb.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -370,7 +437,7 @@ first, marching tetrahedra second.</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/df2fc4b01bd96805.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/b8a62a0e56547394.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -455,6 +522,7 @@ budget, marching cubes gives cleaner triangles.</p>
             <ul>
 <li><a class="reference internal" href="#">Marching Tetrahedra</a><ul>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
 <li><a class="reference internal" href="#tessellation">Tessellation</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to Use It</a></li>
 <li><a class="reference internal" href="#references">References</a></li>

@@ -27,17 +27,17 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:44.406132Z",
-     "iopub.status.busy": "2026-07-06T19:51:44.406042Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.110273Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.109428Z"
+     "iopub.execute_input": "2026-07-07T05:57:42.723023Z",
+     "iopub.status.busy": "2026-07-07T05:57:42.722943Z",
+     "iopub.status.idle": "2026-07-07T05:57:43.404999Z",
+     "shell.execute_reply": "2026-07-07T05:57:43.404212Z"
     }
    },
    "outputs": [],
    "source": [
     "import torch\n",
     "import isoext\n",
-    "from isoext.sdf import CuboidSDF, get_sdf_normal\n",
+    "from isoext.sdf import CuboidSDF, get_sdf_normal, project_to_surface\n",
     "from isoext import viewer"
    ]
   },
@@ -46,10 +46,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:45.111922Z",
-     "iopub.status.busy": "2026-07-06T19:51:45.111797Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.408941Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.408728Z"
+     "iopub.execute_input": "2026-07-07T05:57:43.406764Z",
+     "iopub.status.busy": "2026-07-07T05:57:43.406632Z",
+     "iopub.status.idle": "2026-07-07T05:57:43.684077Z",
+     "shell.execute_reply": "2026-07-07T05:57:43.683457Z"
     }
    },
    "outputs": [
@@ -76,7 +76,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7cdb0db7bb60>"
+       "<IPython.lib.display.IFrame at 0x75706039be90>"
       ]
      },
      "execution_count": 2,
@@ -103,6 +103,104 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "## How It Works\n",
+    "\n",
+    "Like surface nets, dual contouring puts one vertex inside each\n",
+    "crossed cell and one quad around each crossed edge (see\n",
+    "{doc}`surface_nets`). The difference is where the vertex goes. Every\n",
+    "edge crossing together with its surface normal defines a tangent\n",
+    "plane, and the vertex is placed to minimize the total squared\n",
+    "distance to all of the cell's planes, a least-squares problem known\n",
+    "as the QEF. If the cell contains a sharp corner, the planes are the\n",
+    "corner's faces and their intersection point is the corner itself.\n",
+    "\n",
+    "The cell below contains the corner of a tilted box. The gold dots\n",
+    "are the crossings, the arrows their normals, and each translucent\n",
+    "square is a piece of the tangent plane it defines, drawn large\n",
+    "enough to reach their common intersection. The centroid of the\n",
+    "crossings (green) sits away from the feature; the QEF solution (red)\n",
+    "is the corner. When the crossings do not pin down all three axes, on\n",
+    "flat faces or straight creases, the QEF is degenerate and the solver\n",
+    "regularizes it toward the centroid.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:43.698969Z",
+     "iopub.status.busy": "2026-07-07T05:57:43.698783Z",
+     "iopub.status.idle": "2026-07-07T05:57:44.060491Z",
+     "shell.execute_reply": "2026-07-07T05:57:44.059861Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "centroid: [-0.6, -0.59, -0.64]\n",
+      "qef:      [0.1, 0.15, 0.2]\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"340\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/c8514aba05f8bda2.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7570603aa360>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "planes = torch.nn.functional.normalize(torch.tensor([\n",
+    "    [1.0, 0.3, -0.2],\n",
+    "    [-0.25, 1.0, 0.3],\n",
+    "    [0.2, -0.3, 1.0],\n",
+    "], device=\"cuda\"), dim=-1)\n",
+    "corner = torch.tensor([0.1, 0.15, 0.2], device=\"cuda\")\n",
+    "corner_box = lambda q: ((q - corner) @ planes.T).amax(dim=-1)\n",
+    "\n",
+    "corner_cell = isoext.UniformGrid([2, 2, 2])\n",
+    "corner_cell.set_values(corner_box(corner_cell.get_points()))\n",
+    "\n",
+    "its = isoext.get_intersection(corner_cell)\n",
+    "crossings = project_to_surface(corner_box, its.get_points())\n",
+    "normals = get_sdf_normal(corner_box, crossings)\n",
+    "\n",
+    "centroid = crossings.mean(dim=0, keepdim=True)\n",
+    "qef = torch.linalg.lstsq(normals, (normals * crossings).sum(-1)).solution[None]\n",
+    "print(f\"centroid: {[round(x, 2) for x in centroid[0].tolist()]}\")\n",
+    "print(f\"qef:      {[round(x, 2) for x in qef[0].tolist()]}\")\n",
+    "\n",
+    "viewer.embed(grid=corner_cell, height=340, draw=lambda s: (\n",
+    "    viewer.add_points(s, crossings, point_size=0.09),\n",
+    "    viewer.add_arrows(s, crossings, 0.45 * normals),\n",
+    "    viewer.add_planes(s, (crossings + qef) / 2, normals, size=1.0, opacity=0.3),\n",
+    "    viewer.add_points(s, centroid, color=\"seagreen\", point_size=0.13),\n",
+    "    viewer.add_points(s, qef, color=\"crimson\", point_size=0.13),\n",
+    "))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "## Custom Normals for Sharp Features\n",
     "\n",
     "The vertex placement is only as good as the normals. Estimated from\n",
@@ -114,13 +212,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:45.426705Z",
-     "iopub.status.busy": "2026-07-06T19:51:45.426505Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.429473Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.429208Z"
+     "iopub.execute_input": "2026-07-07T05:57:44.062080Z",
+     "iopub.status.busy": "2026-07-07T05:57:44.061946Z",
+     "iopub.status.idle": "2026-07-07T05:57:44.064252Z",
+     "shell.execute_reply": "2026-07-07T05:57:44.063936Z"
     }
    },
    "outputs": [
@@ -141,13 +239,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:45.430349Z",
-     "iopub.status.busy": "2026-07-06T19:51:45.430277Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.696134Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.695392Z"
+     "iopub.execute_input": "2026-07-07T05:57:44.065690Z",
+     "iopub.status.busy": "2026-07-07T05:57:44.065626Z",
+     "iopub.status.idle": "2026-07-07T05:57:44.118119Z",
+     "shell.execute_reply": "2026-07-07T05:57:44.117448Z"
     }
    },
    "outputs": [
@@ -169,13 +267,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:45.697471Z",
-     "iopub.status.busy": "2026-07-06T19:51:45.697330Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.709157Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.708747Z"
+     "iopub.execute_input": "2026-07-07T05:57:44.119699Z",
+     "iopub.status.busy": "2026-07-07T05:57:44.119623Z",
+     "iopub.status.idle": "2026-07-07T05:57:44.128882Z",
+     "shell.execute_reply": "2026-07-07T05:57:44.128716Z"
     }
    },
    "outputs": [
@@ -194,7 +292,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/addd76f03945e2c6.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/2482ad14345c0c5a.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -202,10 +300,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7cdb07cee780>"
+       "<IPython.lib.display.IFrame at 0x75706039b2c0>"
       ]
      },
-     "execution_count": 5,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -266,13 +364,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:45.710348Z",
-     "iopub.status.busy": "2026-07-06T19:51:45.710246Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.806499Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.805958Z"
+     "iopub.execute_input": "2026-07-07T05:57:44.130521Z",
+     "iopub.status.busy": "2026-07-07T05:57:44.130458Z",
+     "iopub.status.idle": "2026-07-07T05:57:44.149754Z",
+     "shell.execute_reply": "2026-07-07T05:57:44.149403Z"
     }
    },
    "outputs": [
@@ -290,7 +388,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/feb4d841aa51a80f.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/abd1d95f4823f96c.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -298,10 +396,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7cdb0c164080>"
+       "<IPython.lib.display.IFrame at 0x7570603a8650>"
       ]
      },
-     "execution_count": 6,
+     "execution_count": 7,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -333,13 +431,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 8,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:51:45.807401Z",
-     "iopub.status.busy": "2026-07-06T19:51:45.807321Z",
-     "iopub.status.idle": "2026-07-06T19:51:45.818684Z",
-     "shell.execute_reply": "2026-07-06T19:51:45.818395Z"
+     "iopub.execute_input": "2026-07-07T05:57:44.151319Z",
+     "iopub.status.busy": "2026-07-07T05:57:44.151250Z",
+     "iopub.status.idle": "2026-07-07T05:57:44.160142Z",
+     "shell.execute_reply": "2026-07-07T05:57:44.159489Z"
     }
    },
    "outputs": [
@@ -357,7 +455,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/78d62cc830e7ee21.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/4fe40c8e4bbbc8d7.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -365,10 +463,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7cdb07aaedb0>"
+       "<IPython.lib.display.IFrame at 0x75741350e660>"
       ]
      },
-     "execution_count": 7,
+     "execution_count": 8,
      "metadata": {},
      "output_type": "execute_result"
     }

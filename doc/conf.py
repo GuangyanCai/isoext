@@ -20,6 +20,9 @@ extensions = [
     "sphinxcontrib.bibtex",
 ]
 
+# MyST settings
+myst_enable_extensions = ["dollarmath"]
+
 # MyST-NB settings
 nb_execution_mode = "off"  # Don't execute notebooks during build (requires GPU)
 

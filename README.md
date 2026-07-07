@@ -15,6 +15,7 @@ An iso-surface is the set of points where a 3D scalar field equals a chosen valu
   - **Marching Tetrahedra** — ambiguity-free extraction by splitting cells into tetrahedra
   - **Dual Contouring** — sharp feature preservation from surface normals
   - **Surface Nets** — smooth dual meshes without needing normals
+  - **Dual Marching Cubes** — sharp features with one vertex per surface sheet, so crossing sheets stay separate
 - **Grids**
   - Dense uniform grids for full volumes
   - Sparse grids that only store cells near the surface, so memory scales with area instead of volume

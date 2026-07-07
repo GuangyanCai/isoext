@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
@@ -278,7 +279,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="dual-marching-cubes">
+          <section class="tex2jax_ignore mathjax_ignore" id="dual-marching-cubes">
 <h1>Dual Marching Cubes<a class="headerlink" href="#dual-marching-cubes" title="Link to this heading">¶</a></h1>
 <p>Dual marching cubes extracts the dual of the marching cubes mesh
 (<span class="bibtex-citation" id="id1">Nielson [<a class="reference internal" href="#id11" title="Gregory M. Nielson. Dual marching cubes. In IEEE Visualization 2004, 489–496. 2004. doi:10.1109/VISUAL.2004.28.">2004</a>]</span>). The chosen marching cubes variant
@@ -416,14 +417,6 @@ vertex to each:</p>
         </div></div>
 </div>
 </section>
-<section id="limitations">
-<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
-<p>The mesh ends half a cell short of the grid boundary, where crossed
-edges have fewer than four cells around them. Where a tunnel passes
-through a cell face, four quads share one edge and the mesh is not
-manifold there; <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> shows the case. Triangle shapes
-and speed are close to dual contouring’s (<a class="reference internal" href="performance.html"><span class="doc">Performance</span></a>).</p>
-</section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id2">
@@ -496,7 +489,6 @@ and speed are close to dual contouring’s (<a class="reference internal" href="
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
 <li><a class="reference internal" href="#sharp-features">Sharp Features</a></li>
 <li><a class="reference internal" href="#patches">Patches</a></li>
-<li><a class="reference internal" href="#limitations">Limitations</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>

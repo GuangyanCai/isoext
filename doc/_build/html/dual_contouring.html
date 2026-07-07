@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
@@ -278,7 +279,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="dual-contouring">
+          <section class="tex2jax_ignore mathjax_ignore" id="dual-contouring">
 <h1>Dual Contouring<a class="headerlink" href="#dual-contouring" title="Link to this heading">¶</a></h1>
 <p>Dual contouring is a dual extraction method: it places one vertex
 inside each cell the surface crosses, at the point that best fits
@@ -296,7 +297,7 @@ the grid values, which is enough for smooth surfaces:</p>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">get_sdf_normal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">get_sdf_normal</span><span class="p">,</span> <span class="n">project_to_surface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 </pre></div>
 </div>
@@ -329,6 +330,73 @@ Faces: torch.Size([12288, 3])
             width="100%"
             height="420"
             src="_static/viser/index.html?playbackPath=../scenes/12fca5502d9cf198.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h2>
+<p>Like surface nets, dual contouring puts one vertex inside each
+crossed cell and one quad around each crossed edge (see
+<a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a>). The difference is where the vertex goes. Every
+edge crossing together with its surface normal defines a tangent
+plane, and the vertex is placed to minimize the total squared
+distance to all of the cell’s planes, a least-squares problem known
+as the QEF. If the cell contains a sharp corner, the planes are the
+corner’s faces and their intersection point is the corner itself.</p>
+<p>The cell below contains the corner of a tilted box. The gold dots
+are the crossings, the arrows their normals, and each translucent
+square is a piece of the tangent plane it defines, drawn large
+enough to reach their common intersection. The centroid of the
+crossings (green) sits away from the feature; the QEF solution (red)
+is the corner. When the crossings do not pin down all three axes, on
+flat faces or straight creases, the QEF is degenerate and the solver
+regularizes it toward the centroid.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">planes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span>
+    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">],</span>
+    <span class="p">[</span><span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+<span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">corner</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">corner_box</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="p">((</span><span class="n">q</span> <span class="o">-</span> <span class="n">corner</span><span class="p">)</span> <span class="o">@</span> <span class="n">planes</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">corner_cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">corner_cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">corner_box</span><span class="p">(</span><span class="n">corner_cell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+
+<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">corner_cell</span><span class="p">)</span>
+<span class="n">crossings</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">corner_box</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<span class="n">normals</span> <span class="o">=</span> <span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">corner_box</span><span class="p">,</span> <span class="n">crossings</span><span class="p">)</span>
+
+<span class="n">centroid</span> <span class="o">=</span> <span class="n">crossings</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">qef</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">normals</span><span class="p">,</span> <span class="p">(</span><span class="n">normals</span> <span class="o">*</span> <span class="n">crossings</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">solution</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;centroid: </span><span class="si">{</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">centroid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;qef:      </span><span class="si">{</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">qef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">corner_cell</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">340</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="p">(</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.09</span><span class="p">),</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_arrows</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="p">,</span> <span class="mf">0.45</span> <span class="o">*</span> <span class="n">normals</span><span class="p">),</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_planes</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">(</span><span class="n">crossings</span> <span class="o">+</span> <span class="n">qef</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">centroid</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;seagreen&quot;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.13</span><span class="p">),</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">qef</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.13</span><span class="p">),</span>
+<span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>centroid: [-0.6, -0.59, -0.64]
+qef:      [0.1, 0.15, 0.2]
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="340"
+            src="_static/viser/index.html?playbackPath=../scenes/c8514aba05f8bda2.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -395,7 +463,7 @@ Faces: torch.Size([12288, 3])
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/addd76f03945e2c6.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/2482ad14345c0c5a.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -453,7 +521,7 @@ the error – look along an edge and it comes out slightly serrated:</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/feb4d841aa51a80f.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/abd1d95f4823f96c.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -483,7 +551,7 @@ edges come out clean:</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/78d62cc830e7ee21.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/4fe40c8e4bbbc8d7.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -565,6 +633,7 @@ edges come out clean:</p>
             <ul>
 <li><a class="reference internal" href="#">Dual Contouring</a><ul>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
 <li><a class="reference internal" href="#custom-normals-for-sharp-features">Custom Normals for Sharp Features</a></li>
 <li><a class="reference internal" href="#refined-points-and-unclamped-vertices">Refined Points and Unclamped Vertices</a></li>
 <li><a class="reference internal" href="#references">References</a></li>

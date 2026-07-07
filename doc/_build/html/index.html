@@ -202,6 +202,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
@@ -278,7 +279,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="isoext">
+          <section class="tex2jax_ignore mathjax_ignore" id="isoext">
 <h1>isoext<a class="headerlink" href="#isoext" title="Link to this heading">¶</a></h1>
 <p><a class="reference external" href="https://badge.fury.io/py/isoext"><img alt="PyPI version" src="https://badge.fury.io/py/isoext.svg?" /></a>
 <a class="reference external" href="https://github.com/GuangyanCai/isoext"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-isoext-blue?logo=github" /></a>
@@ -299,12 +300,13 @@ controls and how to open one from your own code.</p>
 </div>
 <p>An iso-surface is the set of points where a 3D scalar field equals a
 chosen value: the shape described by a signed distance function, or the
-boundary of a density volume. <code class="docutils literal notranslate"><span class="pre">isoext</span></code> is a growing collection of
-iso-surface extraction methods that turn such fields into triangle
-meshes on the GPU. The field values come in as a PyTorch tensor and the
+boundary of a density volume. Fields like these come from neural
+networks, simulations and scans, while most tools consume triangle
+meshes. <code class="docutils literal notranslate"><span class="pre">isoext</span></code> is a growing collection of iso-surface extraction
+methods that turn such fields into triangle meshes on the GPU. The field values come in as a PyTorch tensor and the
 mesh comes back as tensors, so it fits directly into training loops and
-other GPU pipelines. <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> explains and compares the
-methods.</p>
+other GPU pipelines. <a class="reference internal" href="intro.html"><span class="doc">What Is Iso-Surface Extraction?</span></a> explains the concepts from
+scratch, and <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> compares the methods.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
 <ul class="simple">

@@ -10,7 +10,8 @@
     "Marching cubes turns each cell's corner signs into triangles by\n",
     "table lookup. Some sign patterns have more than one valid\n",
     "triangulation, and the four variants differ in how they pick one.\n",
-    "This page shows the consequences. The example meshes are open\n",
+    "The consequences range from cracked meshes to wrong topology, shown\n",
+    "below on fields of a few cells. The example meshes are open\n",
     "surfaces, so they are rendered double-sided; the overlays show the\n",
     "grid, with red dots for corners inside the surface and blue dots for\n",
     "corners outside.\n"

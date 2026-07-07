@@ -21,14 +21,15 @@
    "id": "bd2f95e8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:41:46.811446Z",
-     "iopub.status.busy": "2026-07-06T19:41:46.811365Z",
-     "iopub.status.idle": "2026-07-06T19:41:47.501663Z",
-     "shell.execute_reply": "2026-07-06T19:41:47.501100Z"
+     "iopub.execute_input": "2026-07-07T05:57:35.786113Z",
+     "iopub.status.busy": "2026-07-07T05:57:35.786039Z",
+     "iopub.status.idle": "2026-07-07T05:57:36.552278Z",
+     "shell.execute_reply": "2026-07-07T05:57:36.551645Z"
     }
    },
    "outputs": [],
    "source": [
+    "import torch\n",
     "import isoext\n",
     "from isoext import viewer\n",
     "from isoext.sdf import SphereSDF"
@@ -51,10 +52,10 @@
    "id": "727fbd3d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:41:47.503200Z",
-     "iopub.status.busy": "2026-07-06T19:41:47.503065Z",
-     "iopub.status.idle": "2026-07-06T19:41:47.774641Z",
-     "shell.execute_reply": "2026-07-06T19:41:47.774092Z"
+     "iopub.execute_input": "2026-07-07T05:57:36.553737Z",
+     "iopub.status.busy": "2026-07-07T05:57:36.553609Z",
+     "iopub.status.idle": "2026-07-07T05:57:36.825025Z",
+     "shell.execute_reply": "2026-07-07T05:57:36.824642Z"
     }
    },
    "outputs": [
@@ -81,7 +82,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e2f1fe7bf50>"
+       "<IPython.lib.display.IFrame at 0x79933273fe00>"
       ]
      },
      "execution_count": 2,
@@ -104,6 +105,132 @@
   },
   {
    "cell_type": "markdown",
+   "id": "cc182b5b",
+   "metadata": {},
+   "source": [
+    "## How It Works\n",
+    "\n",
+    "Each cube is split into six tetrahedra that all share the cube's\n",
+    "main diagonal. The purple lines below are the extra edges the split\n",
+    "introduces: one diagonal per face, plus the main diagonal itself:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "ad865625",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:36.826377Z",
+     "iopub.status.busy": "2026-07-07T05:57:36.826231Z",
+     "iopub.status.idle": "2026-07-07T05:57:36.841841Z",
+     "shell.execute_reply": "2026-07-07T05:57:36.841073Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/3f547271512f9bf4.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x799332751130>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cell = isoext.UniformGrid([2, 2, 2])\n",
+    "cell.set_values(torch.tensor(\n",
+    "    [-0.5, 0.3, 0.4, 0.5, 0.6, 0.4, 0.3, 0.2], device=\"cuda\"\n",
+    ").reshape(2, 2, 2))\n",
+    "\n",
+    "corners = cell.get_points().reshape(8, 3)\n",
+    "tets = [[0, 4, 6, 7], [0, 5, 4, 7], [0, 6, 2, 7],\n",
+    "        [0, 2, 3, 7], [0, 1, 5, 7], [0, 3, 1, 7]]  # the split used by src/mt.cu\n",
+    "edges = {tuple(sorted((t[i], t[j]))) for t in tets for i in range(4) for j in range(i + 1, 4)}\n",
+    "diagonals = torch.stack([torch.stack([corners[a], corners[b]])\n",
+    "                         for a, b in edges if bin(a ^ b).count(\"1\") > 1])\n",
+    "viewer.embed(grid=cell, height=300,\n",
+    "             draw=lambda s: viewer.add_lines(s, diagonals, color=\"orchid\"))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e8abcc7b",
+   "metadata": {},
+   "source": [
+    "A tetrahedron has 4 corners and only 16 sign patterns, each\n",
+    "producing one or two triangles with no choices to make, so the mesh\n",
+    "is consistent by construction. The price shows on a field with one\n",
+    "corner inside: the surface also crosses the diagonals, and marching\n",
+    "cubes' single triangle becomes six:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "7405febd",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:36.843043Z",
+     "iopub.status.busy": "2026-07-07T05:57:36.842954Z",
+     "iopub.status.idle": "2026-07-07T05:57:36.847624Z",
+     "shell.execute_reply": "2026-07-07T05:57:36.847444Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "6 triangle(s)\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/5ebafcc47248188f.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x799332751d90>"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "v, f = isoext.marching_tetrahedra(cell)\n",
+    "print(f\"{f.shape[0]} triangle(s)\")\n",
+    "viewer.embed(v, f, color=\"mediumpurple\", flat_shading=True, side=\"double\", height=300,\n",
+    "             grid=cell, draw=lambda s: viewer.add_lines(s, diagonals, color=\"orchid\"))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
    "id": "b7e8f088",
    "metadata": {},
    "source": [
@@ -116,14 +243,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 5,
    "id": "d8cf7b65",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:41:47.776059Z",
-     "iopub.status.busy": "2026-07-06T19:41:47.775926Z",
-     "iopub.status.idle": "2026-07-06T19:41:47.780619Z",
-     "shell.execute_reply": "2026-07-06T19:41:47.780417Z"
+     "iopub.execute_input": "2026-07-07T05:57:36.848992Z",
+     "iopub.status.busy": "2026-07-07T05:57:36.848926Z",
+     "iopub.status.idle": "2026-07-07T05:57:36.852394Z",
+     "shell.execute_reply": "2026-07-07T05:57:36.852220Z"
     }
    },
    "outputs": [
@@ -134,7 +261,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/bcb84fae47ae4b4f.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/e741d1cb901ee6eb.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -142,10 +269,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e2f1fe7b410>"
+       "<IPython.lib.display.IFrame at 0x799332751d00>"
       ]
      },
-     "execution_count": 3,
+     "execution_count": 5,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -160,14 +287,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 6,
    "id": "7a6ebf4e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-06T19:41:47.782030Z",
-     "iopub.status.busy": "2026-07-06T19:41:47.781966Z",
-     "iopub.status.idle": "2026-07-06T19:41:47.786815Z",
-     "shell.execute_reply": "2026-07-06T19:41:47.786022Z"
+     "iopub.execute_input": "2026-07-07T05:57:36.853859Z",
+     "iopub.status.busy": "2026-07-07T05:57:36.853792Z",
+     "iopub.status.idle": "2026-07-07T05:57:36.857824Z",
+     "shell.execute_reply": "2026-07-07T05:57:36.857542Z"
     }
    },
    "outputs": [
@@ -178,7 +305,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/df2fc4b01bd96805.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/b8a62a0e56547394.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -186,10 +313,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7e32f02f9e50>"
+       "<IPython.lib.display.IFrame at 0x799332751c70>"
       ]
      },
-     "execution_count": 4,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }

@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Cubes" href="marching_cubes.html"><link rel="prev" title="Installation" href="installation.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="What Is Iso-Surface Extraction?" href="intro.html"><link rel="prev" title="Installation" href="installation.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Quick Start - isoext documentation</title>
@@ -202,6 +202,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
@@ -278,22 +279,22 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="quick-start">
+          <section class="tex2jax_ignore mathjax_ignore" id="quick-start">
 <h1>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h1>
 <p>Extract a surface in a few lines of code.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span><span class="p">,</span> <span class="n">TorusSDF</span><span class="p">,</span> <span class="n">UnionOp</span><span class="p">,</span> <span class="n">IntersectionOp</span><span class="p">,</span> <span class="n">NegationOp</span><span class="p">,</span> <span class="n">RotationOp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 
-<span class="c1"># Create a high-resolution grid</span>
+<span class="c1"># A high-resolution grid of sample points</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">])</span>
 
-<span class="c1"># Build a complex shape: sphere with three interlocking toroidal tunnels</span>
+<span class="c1"># A shape built with CSG: a sphere with three interlocking toroidal tunnels</span>
 <span class="n">sphere</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
 <span class="n">torus</span> <span class="o">=</span> <span class="n">TorusSDF</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
-
 <span class="n">shape</span> <span class="o">=</span> <span class="n">IntersectionOp</span><span class="p">(</span>
     <span class="p">[</span>
         <span class="n">sphere</span><span class="p">,</span>
@@ -309,7 +310,7 @@
     <span class="p">]</span>
 <span class="p">)</span>
 
-<span class="c1"># Evaluate and extract</span>
+<span class="c1"># Evaluate the shape at every grid point and extract the surface</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">shape</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
@@ -333,33 +334,35 @@
         ></iframe>
         </div></div>
 </div>
-<section id="interactive-viewing">
-<h2>Interactive viewing<a class="headerlink" href="#interactive-viewing" title="Link to this heading">¶</a></h2>
-<p>Outside of these docs, <code class="docutils literal notranslate"><span class="pre">isoext.viewer</span></code> can also open a live viewer in your browser:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
-
-<span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>  <span class="c1"># prints the URL it serves on</span>
-<span class="c1"># ... inspect the mesh in the browser ...</span>
-<span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">viewer.embed</span></code>, used above, instead records the scene to a static file next to the
-notebook, so the rendered page stays interactive without a running server.</p>
-</section>
 <section id="what-just-happened">
 <h2>What Just Happened<a class="headerlink" href="#what-just-happened" title="Link to this heading">¶</a></h2>
 <p>The example built a 256³ grid of sample points, evaluated a signed
 distance function at each point, and ran marching cubes to mesh the
-surface where the field crosses zero. <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> explains
-the machinery behind that last step.</p>
+surface where the field crosses zero. If any of those words are new,
+<a class="reference internal" href="intro.html"><span class="doc">What Is Iso-Surface Extraction?</span></a> explains them from scratch; <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a>
+compares the methods.</p>
+</section>
+<section id="interactive-viewing">
+<h2>Interactive Viewing<a class="headerlink" href="#interactive-viewing" title="Link to this heading">¶</a></h2>
+<p>Outside of these docs, <code class="docutils literal notranslate"><span class="pre">isoext.viewer</span></code> can also open a live viewer
+in your browser:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">server</span> <span class="o">=</span> <span class="n">viewer</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>  <span class="c1"># prints the URL it serves on</span>
+<span class="c1"># ... inspect the mesh in the browser ...</span>
+<span class="n">server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">viewer.embed</span></code>, used above, instead records the scene to a static
+file next to the notebook, so the rendered page stays interactive
+without a running server.</p>
 </section>
 <section id="learn-more">
 <h2>Learn More<a class="headerlink" href="#learn-more" title="Link to this heading">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference internal" href="intro.html"><span class="doc">What Is Iso-Surface Extraction?</span></a> – what iso-surface extraction is, from zero</p></li>
 <li><p><a class="reference internal" href="grids.html"><span class="doc">Working with Grids</span></a> – creating grids and setting values, including from
 neural networks</p></li>
 <li><p><a class="reference internal" href="marching_cubes.html"><span class="doc">Marching Cubes</span></a>, <a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching Tetrahedra</span></a>,
-<a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a>, <a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> and
+<a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a>, <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> and
 <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> – the extraction methods</p></li>
 <li><p><a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a> – built-in shape primitives and CSG operations</p></li>
 <li><p><a class="reference internal" href="viewer.html"><span class="doc">Viewer</span></a> – viewing meshes and sharing scenes</p></li>
@@ -372,12 +375,12 @@ neural networks</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="marching_cubes.html">
+          <a class="next-page" href="intro.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Marching Cubes</div>
+                <div class="title">What Is Iso-Surface Extraction?</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -423,8 +426,8 @@ neural networks</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Quick Start</a><ul>
-<li><a class="reference internal" href="#interactive-viewing">Interactive viewing</a></li>
 <li><a class="reference internal" href="#what-just-happened">What Just Happened</a></li>
+<li><a class="reference internal" href="#interactive-viewing">Interactive Viewing</a></li>
 <li><a class="reference internal" href="#learn-more">Learn More</a></li>
 </ul>
 </li>
