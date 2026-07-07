@@ -45,6 +45,8 @@ methods.
     from surface normals
   - {doc}`Surface Nets <surface_nets>` — smooth dual meshes without
     needing normals
+  - {doc}`Dual Marching Cubes <dual_marching_cubes>` — sharp features
+    with one vertex per surface sheet, so crossing sheets stay separate
 - {doc}`Grids <grids>`
   - Dense uniform grids for full volumes
   - Sparse grids that only store cells near the surface, so memory scales
@@ -99,8 +101,9 @@ quickstart
 
 marching_cubes
 marching_tetrahedra
-dual_contouring
 surface_nets
+dual_contouring
+dual_marching_cubes
 ```
 
 ```{toctree}

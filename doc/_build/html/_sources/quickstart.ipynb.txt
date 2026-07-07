@@ -122,8 +122,8 @@
     "- {doc}`grids` -- creating grids and setting values, including from\n",
     "  neural networks\n",
     "- {doc}`marching_cubes`, {doc}`marching_tetrahedra`,\n",
-    "  {doc}`dual_contouring` and {doc}`surface_nets` -- the extraction\n",
-    "  methods\n",
+    "  {doc}`dual_contouring`, {doc}`surface_nets` and\n",
+    "  {doc}`dual_marching_cubes` -- the extraction methods\n",
     "- {doc}`sdf_guide` -- built-in shape primitives and CSG operations\n",
     "- {doc}`viewer` -- viewing meshes and sharing scenes\n"
    ]

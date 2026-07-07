@@ -1,0 +1,301 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "e12cbf7e",
+   "metadata": {},
+   "source": [
+    "# Dual Marching Cubes\n",
+    "\n",
+    "Dual marching cubes extracts the dual of the marching cubes mesh\n",
+    "({cite:t}`nielson2004`). The chosen marching cubes variant\n",
+    "triangulates each cell, every connected piece of that triangulation\n",
+    "becomes one vertex, and every crossed grid edge yields a quad\n",
+    "connecting the vertices of the four cells around it. A cell crossed\n",
+    "by several surface sheets gets one vertex per sheet, which avoids\n",
+    "dual contouring's pinches, and the topology follows the variant's\n",
+    "tables. {doc}`how_it_works` compares the methods in detail.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "23da82a3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:44:41.227607Z",
+     "iopub.status.busy": "2026-07-07T05:44:41.227532Z",
+     "iopub.status.idle": "2026-07-07T05:44:41.904325Z",
+     "shell.execute_reply": "2026-07-07T05:44:41.903589Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import torch\n",
+    "import isoext\n",
+    "from isoext import viewer\n",
+    "from isoext.sdf import CuboidSDF, RotationOp, get_sdf_normal, project_to_surface\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ee160eac",
+   "metadata": {},
+   "source": [
+    "## Basic Usage\n",
+    "\n",
+    "```python\n",
+    "vertices, faces = isoext.dual_marching_cubes(grid, level=0.0, method=\"vega\")\n",
+    "```\n",
+    "\n",
+    "- `grid`: A `UniformGrid` or `SparseGrid` with values set\n",
+    "- `level`: The iso-value to extract (default: 0.0)\n",
+    "- `method`: The marching cubes variant that triangulates the cells\n",
+    "  (`\"vega\"`, `\"lewiner\"`, `\"nagae\"`, or `\"lorensen\"`)\n",
+    "- `intersection`: Optional edge crossings from `get_intersection`;\n",
+    "  attach normals to them for sharp features\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "b06683e9",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:44:41.906120Z",
+     "iopub.status.busy": "2026-07-07T05:44:41.905992Z",
+     "iopub.status.idle": "2026-07-07T05:44:42.177656Z",
+     "shell.execute_reply": "2026-07-07T05:44:42.177303Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "11,954 vertices, 23,904 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/69737c62568f218a.viser&initialCameraPosition=1.580,1.580,1.106&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cede15b2c0>"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "grid = isoext.UniformGrid([64, 64, 64])\n",
+    "grid.set_values(grid.get_points().norm(dim=-1) - 0.8)  # Sphere\n",
+    "\n",
+    "vertices, faces = isoext.dual_marching_cubes(grid)\n",
+    "print(f\"{vertices.shape[0]:,} vertices, {faces.shape[0]:,} triangles\")\n",
+    "viewer.embed(vertices, faces, color=\"crimson\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "64ad2311",
+   "metadata": {},
+   "source": [
+    "## Sharp Features\n",
+    "\n",
+    "Vertex placement works like dual contouring's: without normals, each\n",
+    "vertex is the centroid of its patch's edge crossings; with normals,\n",
+    "it is the QEF minimizer, which lands on sharp edges and corners. The\n",
+    "recipe is the same as on the {doc}`dual_contouring` page:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "a5e684e9",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:44:42.179753Z",
+     "iopub.status.busy": "2026-07-07T05:44:42.179619Z",
+     "iopub.status.idle": "2026-07-07T05:44:42.529222Z",
+     "shell.execute_reply": "2026-07-07T05:44:42.528668Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "max vertex error: 0.0073\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/068fe94d1842563c.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cede15b500>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cube = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)\n",
+    "grid = isoext.UniformGrid([48, 48, 48])\n",
+    "grid.set_values(cube(grid.get_points()))\n",
+    "\n",
+    "its = isoext.get_intersection(grid)\n",
+    "points = project_to_surface(cube, its.get_points())\n",
+    "its.set_points(points)\n",
+    "its.set_normals(get_sdf_normal(cube, points))\n",
+    "\n",
+    "vertices, faces = isoext.dual_marching_cubes(grid, intersection=its)\n",
+    "print(f\"max vertex error: {cube(vertices).abs().max():.4f}\")\n",
+    "viewer.embed(vertices, faces, color=\"crimson\", flat_shading=True)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "52835a21",
+   "metadata": {},
+   "source": [
+    "## Patches\n",
+    "\n",
+    "A patch is one connected piece of a cell's triangulation. Most cells\n",
+    "have one. A cell crossed by two sheets has two, and gets two\n",
+    "vertices, so the sheets stay separate. The smallest field that shows\n",
+    "this has two inside samples at opposite corners of the center cell:\n",
+    "the mesh comes out as two pieces, each the dual of the octahedron\n",
+    "marching cubes would extract, and the center cell contributes one\n",
+    "vertex to each:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "3b0ed570",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:44:42.530595Z",
+     "iopub.status.busy": "2026-07-07T05:44:42.530448Z",
+     "iopub.status.idle": "2026-07-07T05:44:42.540053Z",
+     "shell.execute_reply": "2026-07-07T05:44:42.539520Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "16 vertices, 24 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"340\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/29377557613fe95e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74d26bc02ae0>"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "t = 1 / 3\n",
+    "blobs = isoext.UniformGrid([4, 4, 4])\n",
+    "p = blobs.get_points()\n",
+    "centers = torch.tensor([[-t, -t, -t], [t, t, t]], device=\"cuda\")\n",
+    "blobs.set_values((p[..., None, :] - centers).norm(dim=-1).amin(-1) - 0.5)\n",
+    "\n",
+    "vertices, faces = isoext.dual_marching_cubes(blobs)\n",
+    "print(f\"{vertices.shape[0]} vertices, {faces.shape[0]} triangles\")\n",
+    "viewer.embed(vertices, faces, color=\"crimson\", flat_shading=True, height=340, grid=blobs)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7296f68e",
+   "metadata": {},
+   "source": [
+    "## Limitations\n",
+    "\n",
+    "The mesh ends half a cell short of the grid boundary, where crossed\n",
+    "edges have fewer than four cells around them. Where a tunnel passes\n",
+    "through a cell face, four quads share one edge and the mesh is not\n",
+    "manifold there; {doc}`how_it_works` shows the case. Triangle shapes\n",
+    "and speed are close to dual contouring's ({doc}`performance`).\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e4ae9c5b",
+   "metadata": {},
+   "source": [
+    "## References\n",
+    "\n",
+    "```{bibliography}\n",
+    ":filter: docname in docnames\n",
+    "```\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

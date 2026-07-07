@@ -207,8 +207,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul>
@@ -368,6 +369,41 @@ of less accurate vertex placement.</p>
 <li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
 <li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
 If not provided, intersections are computed automatically.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.dual_marching_cubes">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_marching_cubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'vega'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_marching_cubes" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using dual marching cubes.</p>
+<p>The dual of the marching cubes mesh: the chosen variant’s tables
+triangulate each cell, every connected patch of that triangulation
+becomes one vertex, and every crossed grid edge yields a quad
+connecting the four adjacent cells’ patch vertices. When the
+intersection carries normals, patch vertices are placed by the
+same QEF as dual contouring, which reproduces sharp features;
+without normals the centroid of the patch’s crossings is used.
+Cells crossed by several surface sheets get one vertex per sheet,
+which avoids the connectivity defects of dual contouring. The
+mesh ends half a cell short of the grid boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>method</strong> – The marching cubes variant used on the dual grid.
+Options are ‘vega’ (default), ‘lewiner’, ‘nagae’, or
+‘lorensen’.</p></li>
+<li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
+Attach normals to it (e.g. from the SDF gradient) to get
+sharp features. If not provided, intersections are computed
+automatically and vertices are placed at centroids.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1014,6 +1050,7 @@ against the exact SDF.</p>
 <li><a class="reference internal" href="#isoext.marching_tetrahedra"><code class="docutils literal notranslate"><span class="pre">marching_tetrahedra()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.surface_nets"><code class="docutils literal notranslate"><span class="pre">surface_nets()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.dual_marching_cubes"><code class="docutils literal notranslate"><span class="pre">dual_marching_cubes()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.get_intersection"><code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.make_grid"><code class="docutils literal notranslate"><span class="pre">make_grid()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.gaussian_smooth"><code class="docutils literal notranslate"><span class="pre">gaussian_smooth()</span></code></a></li>

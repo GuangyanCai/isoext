@@ -11,6 +11,8 @@
 
 .. autofunction:: isoext.surface_nets
 
+.. autofunction:: isoext.dual_marching_cubes
+
 .. autofunction:: isoext.get_intersection
 
 .. autofunction:: isoext.make_grid

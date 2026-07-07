@@ -38,6 +38,7 @@ suppress_warnings = ["bibtex.duplicate_label"]
 linkcheck_ignore = [
     r"https://doi\.org/10\.1145/.*",
     r"https://doi\.org/10\.1080/.*",
+    r"https://doi\.org/10\.1109/.*",
 ]
 
 # Copy viser's static client into _static so the interactive scene embeds in

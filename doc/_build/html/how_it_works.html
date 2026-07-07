@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Cubes Variants" href="mc_variants.html"><link rel="prev" title="Surface Nets" href="surface_nets.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Marching Cubes Variants" href="mc_variants.html"><link rel="prev" title="Dual Marching Cubes" href="dual_marching_cubes.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Method Comparisons - isoext documentation</title>
@@ -207,8 +207,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul class="current">
@@ -474,15 +475,15 @@ becomes six:</p>
         </div></div>
 </div>
 </section>
-<section id="dual-one-vertex-per-cell-one-quad-per-edge">
-<h2>Dual: One Vertex per Cell, One Quad per Edge<a class="headerlink" href="#dual-one-vertex-per-cell-one-quad-per-edge" title="Link to this heading">¶</a></h2>
-<p>The dual methods, <a class="reference internal" href="surface_nets.html"><span class="doc">surface nets</span></a> and
-<a class="reference internal" href="dual_contouring.html"><span class="doc">dual contouring</span></a>, swap the roles of cells
-and edges. Instead of putting vertices on the grid edges and
-triangles inside each cell, they put one vertex <em>inside</em> each cell
-the surface crosses. The connectivity comes from the crossed edges:
-every crossed edge is surrounded by four cells, and their four
-vertices are joined into a quad that straddles the edge.</p>
+<section id="dual-vertices-inside-cells">
+<h2>Dual: Vertices Inside Cells<a class="headerlink" href="#dual-vertices-inside-cells" title="Link to this heading">¶</a></h2>
+<p>The dual methods swap the roles of cells and edges. Instead of
+putting vertices on the grid edges and triangles inside each cell,
+<a class="reference internal" href="surface_nets.html"><span class="doc">surface nets</span></a> and
+<a class="reference internal" href="dual_contouring.html"><span class="doc">dual contouring</span></a> put one vertex <em>inside</em>
+each cell the surface crosses. The connectivity comes from the
+crossed edges: every crossed edge is surrounded by four cells, and
+their four vertices are joined into a quad that straddles the edge.</p>
 <p>Below, a flat field crosses every vertical edge of a 2x2x1 block of
 cells (gold dots). Only the central edge has four cells around it,
 so the mesh is exactly one quad – two triangles – connecting the
@@ -528,7 +529,7 @@ boundary edges with fewer neighbors and get no face:</p>
 vertex go? The two methods answer differently.</p>
 <ul class="simple">
 <li><p><strong>Surface nets</strong> places it at the centroid of the cell’s edge
-crossings. Simple, smooth, and it needs nothing but the crossings.</p></li>
+crossings. It needs nothing but the crossings.</p></li>
 <li><p><strong>Dual contouring</strong> uses the surface normal at each crossing.
 Every crossing plus its normal defines a tangent plane, and the
 vertex is placed to minimize the total squared distance to all of
@@ -539,19 +540,21 @@ exact, the crossings are first refined from their interpolated
 estimates onto the true surface with <code class="docutils literal notranslate"><span class="pre">project_to_surface</span></code>, the
 same recipe <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> uses for sharp features.</p></li>
 </ul>
-<p>The cell below contains the corner of a tilted box, modeled as
-the intersection of three half-spaces with rotated normals, meeting
-at (0.2, 0.25, 0.3). The
+<p>A third dual method, <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">dual marching cubes</span></a>, refines the recipe: it places one vertex per
+connected surface piece within the cell instead of one per cell, so
+a cell crossed by two sheets gets two vertices. The comparisons at
+the end of this page show why that matters.</p>
+<p>The cell below contains the corner of a tilted box, modeled as the
+intersection of three half-spaces meeting at (0.2, 0.25, 0.3). The
 gold dots are the crossings, the arrows their normals, and each
-translucent square a piece of the tangent plane they define, drawn
-large enough to reach their common intersection.
-Surface nets puts the vertex at their centroid (green), inside the
-box and away from the feature. The QEF solution (red) is the point
-closest to all three planes – here their exact intersection, the
-corner itself at (0.2, 0.25, 0.3). (When the crossings do not pin down all three axes
-– flat faces, straight creases – the QEF is degenerate, and real
-implementations regularize it toward the centroid; see
-<a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a>.)</p>
+translucent square is a piece of the tangent plane they define,
+drawn large enough to reach their common intersection. Surface nets
+puts the vertex at their centroid (green), inside the box and away
+from the feature. The QEF solution (red) is the point closest to all
+three planes, which here is their exact intersection: the corner.
+When the crossings do not pin down all three axes, on flat faces or
+straight creases, the QEF is degenerate, and real implementations
+regularize it toward the centroid; see <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Three tilted half-spaces whose faces meet at one point.</span>
@@ -700,10 +703,15 @@ surface nets, with its 8 vertices inside the cells:</p>
 <td><p>one quad per crossed edge</p></td>
 <td><p>none</p></td>
 </tr>
+<tr class="row-even"><td><p>Dual marching cubes</p></td>
+<td><p>one per patch, centroid or QEF</p></td>
+<td><p>one quad per crossed edge</p></td>
+<td><p>resolved by the variant</p></td>
+</tr>
 </tbody>
 </table>
 </div>
-<p>All four run on the same grids, share the same edge crossings, and
+<p>All of them run on the same grids, share the same edge crossings, and
 answer the same two questions from the top of the page. The primal
 methods answer with vertices at the crossings themselves, so the
 mesh interpolates the samples exactly. The dual methods answer with
@@ -719,10 +727,10 @@ never touches itself. The dual methods can fail that in two ways. A
 crossed by several sheets gets only one vertex in surface nets and
 dual contouring, so the sheets meet there in an hourglass. A <em>tunnel
 edge</em> is four quads sharing one edge, which happens when the surface
-passes through a cell face twice. Dual marching cubes eliminates the
+passes through a cell face twice. <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual marching cubes</span></a> eliminates the
 pinches (one vertex per sheet) but keeps the tunnel edges.</p>
 <p>The criteria below follow the comparison table of
-<span class="bibtex-citation" id="id1">Shen <em>et al.</em> [<a class="reference internal" href="#id14" title="Tianchang Shen, Jacob Munkberg, Jon Hasselgren, Kangxue Yin, Zian Wang, Wenzheng Chen, Zan Gojcic, Sanja Fidler, Nicholas Sharp, and Jun Gao. Flexible isosurface extraction for gradient-based mesh optimization. ACM Transactions on Graphics, 2023. doi:10.1145/3592430.">2023</a>]</span>, which surveys these methods as bases for
+<span class="bibtex-citation" id="id1">Shen <em>et al.</em> [<a class="reference internal" href="#id15" title="Tianchang Shen, Jacob Munkberg, Jon Hasselgren, Kangxue Yin, Zian Wang, Wenzheng Chen, Zan Gojcic, Sanja Fidler, Nicholas Sharp, and Jun Gao. Flexible isosurface extraction for gradient-based mesh optimization. ACM Transactions on Graphics, 2023. doi:10.1145/3592430.">2023</a>]</span>, which surveys these methods as bases for
 gradient-based mesh optimization; each entry here is backed by a
 demonstration on this page or a measurement in the test suite.</p>
 <div class="table-wrapper colwidths-auto docutils container">
@@ -953,7 +961,7 @@ behind every method are collected in <a class="reference internal" href="referen
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id2">
 <div role="list" class="citation-list">
-<div class="citation" id="id14" role="doc-biblioentry">
+<div class="citation" id="id15" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Tianchang Shen, Jacob Munkberg, Jon Hasselgren, Kangxue Yin, Zian Wang, Wenzheng Chen, Zan Gojcic, Sanja Fidler, Nicholas Sharp, and Jun Gao. Flexible isosurface extraction for gradient-based mesh optimization. <em>ACM Transactions on Graphics</em>, 2023. <a class="reference external" href="https://doi.org/10.1145/3592430">doi:10.1145/3592430</a>.</p>
 </div>
@@ -976,14 +984,14 @@ behind every method are collected in <a class="reference internal" href="referen
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="surface_nets.html">
+          <a class="prev-page" href="dual_marching_cubes.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Surface Nets</div>
+                <div class="title">Dual Marching Cubes</div>
                 
               </div>
             </a>
@@ -1021,7 +1029,7 @@ behind every method are collected in <a class="reference internal" href="referen
 <li><a class="reference internal" href="#where-the-surface-crosses-an-edge">Where the Surface Crosses an Edge</a></li>
 <li><a class="reference internal" href="#primal-marching-cubes">Primal: Marching Cubes</a></li>
 <li><a class="reference internal" href="#marching-tetrahedra-simpler-cells-no-choices">Marching Tetrahedra: Simpler Cells, No Choices</a></li>
-<li><a class="reference internal" href="#dual-one-vertex-per-cell-one-quad-per-edge">Dual: One Vertex per Cell, One Quad per Edge</a></li>
+<li><a class="reference internal" href="#dual-vertices-inside-cells">Dual: Vertices Inside Cells</a></li>
 <li><a class="reference internal" href="#how-the-methods-relate">How the Methods Relate</a></li>
 <li><a class="reference internal" href="#seeing-the-failure-cases">Seeing the Failure Cases</a><ul>
 <li><a class="reference internal" href="#pinches">Pinches</a></li>

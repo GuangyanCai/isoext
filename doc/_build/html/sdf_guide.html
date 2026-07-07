@@ -7,9 +7,9 @@
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>SDF Utilities - isoext documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=55bf9381" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -207,8 +207,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
 <li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul>
@@ -380,7 +381,7 @@ only sees the values you put on the grid, however you compute them.
 <section id="mandelbulbsdf">
 <h3>MandelbulbSDF<a class="headerlink" href="#mandelbulbsdf" title="Link to this heading">¶</a></h3>
 <p>A distance estimator for the Mandelbulb fractal of
-<span class="bibtex-citation" id="id1">White and Nylander [<a class="reference internal" href="#id11" title="Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: https://www.skytopia.com/project/fractal/mandelbulb.html.">2009</a>]</span>. The values approximate
+<span class="bibtex-citation" id="id1">White and Nylander [<a class="reference internal" href="#id12" title="Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: https://www.skytopia.com/project/fractal/mandelbulb.html.">2009</a>]</span>. The values approximate
 the distance to the surface rather than being an exact SDF; fewer
 iterations give a smoother shape.</p>
 <div class="cell docutils container">
@@ -510,7 +511,7 @@ iterations give a smoother shape.</p>
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id2">
 <div role="list" class="citation-list">
-<div class="citation" id="id11" role="doc-biblioentry">
+<div class="citation" id="id12" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: <a class="reference external" href="https://www.skytopia.com/project/fractal/mandelbulb.html">https://www.skytopia.com/project/fractal/mandelbulb.html</a>.</p>
 </div>

@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Surface Nets" href="surface_nets.html"><link rel="prev" title="Marching Cubes" href="marching_cubes.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Method Comparisons" href="how_it_works.html"><link rel="prev" title="Dual Contouring" href="dual_contouring.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Marching Tetrahedra - isoext documentation</title>
+        <title>Dual Marching Cubes - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
@@ -206,10 +206,10 @@
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
 <li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Dual Marching Cubes</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
 <ul>
@@ -256,12 +256,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/marching_tetrahedra.ipynb?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/blob/master/doc/dual_marching_cubes.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/marching_tetrahedra.ipynb" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/GuangyanCai/isoext/edit/master/doc/dual_marching_cubes.ipynb" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -278,52 +278,59 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="marching-tetrahedra">
-<h1>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">¶</a></h1>
-<p>Marching tetrahedra splits every cell into six tetrahedra and extracts
-the surface per tetrahedron. A tetrahedron has no ambiguous sign
-configurations, so the mesh is watertight and consistent by
-construction. The price is roughly 2-3x more triangles than marching
-cubes, with worse triangle shapes and a slight directional grain from
-the cell split. The method goes back to <span class="bibtex-citation" id="id1">Doi and Koide [<a class="reference internal" href="#id4" title="Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. IEICE Transactions on Information and Systems, E74-D(1):214–224, 1991.">1991</a>]</span>.</p>
+          <section id="dual-marching-cubes">
+<h1>Dual Marching Cubes<a class="headerlink" href="#dual-marching-cubes" title="Link to this heading">¶</a></h1>
+<p>Dual marching cubes extracts the dual of the marching cubes mesh
+(<span class="bibtex-citation" id="id1">Nielson [<a class="reference internal" href="#id11" title="Gregory M. Nielson. Dual marching cubes. In IEEE Visualization 2004, 489–496. 2004. doi:10.1109/VISUAL.2004.28.">2004</a>]</span>). The chosen marching cubes variant
+triangulates each cell, every connected piece of that triangulation
+becomes one vertex, and every crossed grid edge yields a quad
+connecting the vertices of the four cells around it. A cell crossed
+by several surface sheets gets one vertex per sheet, which avoids
+dual contouring’s pinches, and the topology follows the variant’s
+tables. <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> compares the methods in detail.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">SphereSDF</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">RotationOp</span><span class="p">,</span> <span class="n">get_sdf_normal</span><span class="p">,</span> <span class="n">project_to_surface</span>
 </pre></div>
 </div>
 </div>
 </div>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
-<p>The interface matches the other extraction methods: a grid with scalar
-values in, vertex and face tensors out.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;vega&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">grid</span></code>: A <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> or <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> with values set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: The iso-value to extract (default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code>: The marching cubes variant that triangulates the cells
+(<code class="docutils literal notranslate"><span class="pre">&quot;vega&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;lewiner&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;nagae&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;lorensen&quot;</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intersection</span></code>: Optional edge crossings from <code class="docutils literal notranslate"><span class="pre">get_intersection</span></code>;
+attach normals to them for sharp features</p></li>
+</ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">])</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># Sphere</span>
 
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;marching_tetrahedra: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-
-<span class="n">v_mc</span><span class="p">,</span> <span class="n">f_mc</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;marching_cubes:      </span><span class="si">{</span><span class="n">f_mc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
-
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>marching_tetrahedra: 13,416 triangles
-marching_cubes:      4,508 triangles
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>11,954 vertices, 23,904 triangles
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/0aa6cc85cc83b61e.viser&initialCameraPosition=1.380,1.380,0.966&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/69737c62568f218a.viser&initialCameraPosition=1.580,1.580,1.106&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -331,46 +338,38 @@ marching_cubes:      4,508 triangles
         </div></div>
 </div>
 </section>
-<section id="tessellation">
-<h2>Tessellation<a class="headerlink" href="#tessellation" title="Link to this heading">¶</a></h2>
-<p>The wireframes on a coarse grid show where the extra triangles go and
-the diagonal grain left by the six-tetrahedra split. Marching cubes
-first, marching tetrahedra second.</p>
+<section id="sharp-features">
+<h2>Sharp Features<a class="headerlink" href="#sharp-features" title="Link to this heading">¶</a></h2>
+<p>Vertex placement works like dual contouring’s: without normals, each
+vertex is the centroid of its patch’s edge crossings; with normals,
+it is the QEF minimizer, which lands on sharp edges and corners. The
+recipe is the same as on the <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> page:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coarse</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">])</span>
-<span class="n">coarse</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)(</span><span class="n">coarse</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">RotationOp</span><span class="p">(</span><span class="n">sdf</span><span class="o">=</span><span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">])</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;steelblue&quot;</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<span class="n">its</span><span class="o">.</span><span class="n">set_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+<span class="n">its</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">))</span>
+
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/bcb84fae47ae4b4f.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_tetrahedra</span><span class="p">(</span><span class="n">coarse</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max vertex error: 0.0073
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/df2fc4b01bd96805.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/068fe94d1842563c.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -378,20 +377,60 @@ first, marching tetrahedra second.</p>
         </div></div>
 </div>
 </section>
-<section id="when-to-use-it">
-<h2>When to Use It<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Pick marching tetrahedra when guaranteed topology matters more than
-triangle count, for example as input to solvers or simplification
-passes that assume a closed manifold. For visual quality at the same
-budget, marching cubes gives cleaner triangles.</p>
+<section id="patches">
+<h2>Patches<a class="headerlink" href="#patches" title="Link to this heading">¶</a></h2>
+<p>A patch is one connected piece of a cell’s triangulation. Most cells
+have one. A cell crossed by two sheets has two, and gets two
+vertices, so the sheets stay separate. The smallest field that shows
+this has two inside samples at opposite corners of the center cell:
+the mesh comes out as two pieces, each the dual of the octahedron
+marching cubes would extract, and the center cell contributes one
+vertex to each:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span>
+<span class="n">blobs</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">blobs</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="n">t</span><span class="p">],</span> <span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">]],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">blobs</span><span class="o">.</span><span class="n">set_values</span><span class="p">((</span><span class="n">p</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">centers</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_marching_cubes</span><span class="p">(</span><span class="n">blobs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">340</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">blobs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>16 vertices, 24 triangles
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="340"
+            src="_static/viser/index.html?playbackPath=../scenes/29377557613fe95e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
+<p>The mesh ends half a cell short of the grid boundary, where crossed
+edges have fewer than four cells around them. Where a tunnel passes
+through a cell face, four quads share one edge and the mesh is not
+manifold there; <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> shows the case. Triangle shapes
+and speed are close to dual contouring’s (<a class="reference internal" href="performance.html"><span class="doc">Performance</span></a>).</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id2">
 <div role="list" class="citation-list">
-<div class="citation" id="id4" role="doc-biblioentry">
+<div class="citation" id="id11" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. <em>IEICE Transactions on Information and Systems</em>, E74-D(1):214–224, 1991.</p>
+<p>Gregory M. Nielson. Dual marching cubes. In <em>IEEE Visualization 2004</em>, 489–496. 2004. <a class="reference external" href="https://doi.org/10.1109/VISUAL.2004.28">doi:10.1109/VISUAL.2004.28</a>.</p>
 </div>
 </div>
 </div>
@@ -403,23 +442,23 @@ budget, marching cubes gives cleaner triangles.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="surface_nets.html">
+          <a class="next-page" href="how_it_works.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Surface Nets</div>
+                <div class="title">Method Comparisons</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="marching_cubes.html">
+          <a class="prev-page" href="dual_contouring.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Marching Cubes</div>
+                <div class="title">Dual Contouring</div>
                 
               </div>
             </a>
@@ -453,10 +492,11 @@ budget, marching cubes gives cleaner triangles.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Marching Tetrahedra</a><ul>
+<li><a class="reference internal" href="#">Dual Marching Cubes</a><ul>
 <li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
-<li><a class="reference internal" href="#tessellation">Tessellation</a></li>
-<li><a class="reference internal" href="#when-to-use-it">When to Use It</a></li>
+<li><a class="reference internal" href="#sharp-features">Sharp Features</a></li>
+<li><a class="reference internal" href="#patches">Patches</a></li>
+<li><a class="reference internal" href="#limitations">Limitations</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
