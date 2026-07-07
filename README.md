@@ -49,6 +49,20 @@ isoext.write_obj("sphere.obj", vertices, faces)
 
 See the [full documentation](https://guangyancai.github.io/isoext/) for guides on grids, extraction methods, and the API reference.
 
+## Acknowledgements
+
+isoext builds on:
+
+- [PyTorch](https://pytorch.org) — fields and meshes are exchanged as torch tensors
+- [nanobind](https://github.com/wjakob/nanobind) — Python bindings for the CUDA core
+- [Thrust](https://developer.nvidia.com/thrust) — GPU primitives used throughout the extraction pipeline
+- [viser](https://viser.studio) — powers the interactive viewer
+- [scikit-build-core](https://github.com/scikit-build/scikit-build-core) — the build system
+
+Two marching cubes variants adapt existing implementations: the `lewiner` lookup tables are converted from [scikit-image](https://scikit-image.org), and the `vega` variant is a port of [MC33_c_library](https://github.com/dvega68/MC33_c_library) by David Vega (MIT License).
+
+The algorithms themselves come from published papers, cited on each method's documentation page and collected in the [references](https://guangyancai.github.io/isoext/references.html).
+
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
