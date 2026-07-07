@@ -12,7 +12,8 @@
   checks for this and stops with instructions if it finds an old nvcc.
 - A C++ compiler (GCC on Linux, Visual Studio on Windows)
 
-The three have to agree with each other: use the PyTorch build that
+PyTorch, the CUDA toolkit and the compiler have to agree with each
+other: use the PyTorch build that
 matches your CUDA toolkit's major version (compare `torch.version.cuda`
 with `nvcc --version`), and a C++ compiler your CUDA toolkit supports --
 each nvcc release accepts host compilers only up to a certain version.

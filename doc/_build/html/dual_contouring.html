@@ -284,8 +284,7 @@
 <p>Dual contouring is a dual extraction method: it places one vertex
 inside each cell the surface crosses, at the point that best fits
 the surface normals, which lets the mesh reproduce sharp edges and
-corners that marching cubes rounds off. <a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> covers
-how the dual family works.</p>
+corners that marching cubes rounds off.</p>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
@@ -345,7 +344,7 @@ crossed cell and one quad around each crossed edge (see
 edge crossing together with its surface normal defines a tangent
 plane, and the vertex is placed to minimize the total squared
 distance to all of the cell’s planes, a least-squares problem known
-as the QEF. If the cell contains a sharp corner, the planes are the
+as the QEF (<span class="bibtex-citation" id="id1">Ju <em>et al.</em> [<a class="reference internal" href="#id9" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>). If the cell contains a sharp corner, the planes are the
 corner’s faces and their intersection point is the corner itself.</p>
 <p>The cell below contains the corner of a tilted box. The gold dots
 are the crossings, the arrows their normals, and each translucent
@@ -413,7 +412,7 @@ crossings with <code class="docutils literal notranslate"><span class="pre">get_
 the result in:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 1: Find edge-surface intersections</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Find the edge crossings</span>
 <span class="n">intersection</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 <span class="n">points</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Intersection shape: </span><span class="si">{</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -428,7 +427,7 @@ the result in:</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 2: Compute accurate normals using the SDF gradient</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Attach normals from the SDF gradient</span>
 <span class="n">normals</span> <span class="o">=</span> <span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
 <span class="n">intersection</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">normals</span><span class="p">)</span>
 
@@ -444,7 +443,7 @@ the result in:</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Step 3: Run dual contouring with custom normals</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract with the supplied normals</span>
 <span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">intersection</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
@@ -463,7 +462,7 @@ Faces: torch.Size([12288, 3])
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/2482ad14345c0c5a.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/bd8c2a87948c029c.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -487,9 +486,8 @@ points, including neural networks. Disabling the clamp is another
 matter: it is only safe for exact fields like analytic SDFs. On
 approximate fields, such as distance estimators or neural networks,
 noise in the points and normals can throw unclamped vertices far from
-the surface, producing what <span class="bibtex-citation" id="id1">Schaefer and Warren [<a class="reference internal" href="#id10" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
+the surface, producing what <span class="bibtex-citation" id="id2">Schaefer and Warren [<a class="reference internal" href="#id10" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
 sampled volumes, keep the default clamp.</p>
-<p>The vertex placement follows <span class="bibtex-citation" id="id2">Ju <em>et al.</em> [<a class="reference internal" href="#id9" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>.</p>
 <p>Here is the difference on a cube rotated so its edges cross the
 grid at an angle. First without the refinement: the normals are
 taken at the interpolated crossings, which sit slightly off the true
@@ -521,7 +519,7 @@ the error – look along an edge and it comes out slightly serrated:</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/abd1d95f4823f96c.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/194fa79d819be34b.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -551,7 +549,7 @@ edges come out clean:</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/4fe40c8e4bbbc8d7.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/d3e0c735b0b6abf9.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -563,13 +561,13 @@ edges come out clean:</p>
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id3">
 <div role="list" class="citation-list">
-<div class="citation" id="id10" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: <a class="reference external" href="https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf</a>.</p>
-</div>
 <div class="citation" id="id9" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In <em>Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02)</em>, 339–346. 2002. <a class="reference external" href="https://doi.org/10.1145/566570.566586">doi:10.1145/566570.566586</a>.</p>
+</div>
+<div class="citation" id="id10" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: <a class="reference external" href="https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf</a>.</p>
 </div>
 </div>
 </div>

@@ -282,8 +282,8 @@
           <section class="tex2jax_ignore mathjax_ignore" id="marching-tetrahedra">
 <h1>Marching Tetrahedra<a class="headerlink" href="#marching-tetrahedra" title="Link to this heading">¶</a></h1>
 <p>Marching tetrahedra splits every cell into six tetrahedra and extracts
-the surface per tetrahedron. A tetrahedron has no ambiguous sign
-configurations, so the mesh is watertight and consistent by
+the surface per tetrahedron. No sign pattern of a tetrahedron has more than one valid
+triangulation, so the mesh comes out closed and consistent by
 construction. The price is roughly 2-3x more triangles than marching
 cubes, with worse triangle shapes and a slight directional grain from
 the cell split. The method goes back to <span class="bibtex-citation" id="id1">Doi and Koide [<a class="reference internal" href="#id4" title="Akio Doi and Akio Koide. An efficient method of triangulating equi-valued surfaces by using tetrahedral cells. IEICE Transactions on Information and Systems, E74-D(1):214–224, 1991.">1991</a>]</span>.</p>

@@ -8,8 +8,7 @@
     "\n",
     "Marching cubes is the workhorse of iso-surface extraction: it visits\n",
     "every grid cell and cuts triangles out of it based on which corners\n",
-    "are inside the surface. It is the default choice for most fields;\n",
-    "{doc}`how_it_works` explains the mechanics.\n"
+    "are inside the surface. It is the default choice for most fields.\n"
    ]
   },
   {
@@ -17,10 +16,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:57:32.495967Z",
-     "iopub.status.busy": "2026-07-07T05:57:32.495877Z",
-     "iopub.status.idle": "2026-07-07T05:57:33.349546Z",
-     "shell.execute_reply": "2026-07-07T05:57:33.348741Z"
+     "iopub.execute_input": "2026-07-07T06:38:55.126993Z",
+     "iopub.status.busy": "2026-07-07T06:38:55.126908Z",
+     "iopub.status.idle": "2026-07-07T06:38:55.990495Z",
+     "shell.execute_reply": "2026-07-07T06:38:55.990053Z"
     }
    },
    "outputs": [],
@@ -55,10 +54,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:57:33.351113Z",
-     "iopub.status.busy": "2026-07-07T05:57:33.350972Z",
-     "iopub.status.idle": "2026-07-07T05:57:33.407662Z",
-     "shell.execute_reply": "2026-07-07T05:57:33.407270Z"
+     "iopub.execute_input": "2026-07-07T06:38:55.991993Z",
+     "iopub.status.busy": "2026-07-07T06:38:55.991853Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.048984Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.048769Z"
     }
    },
    "outputs": [
@@ -85,7 +84,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x723c34134d10>"
+       "<IPython.lib.display.IFrame at 0x79ce04a71430>"
       ]
      },
      "execution_count": 2,
@@ -119,10 +118,11 @@
     "of the way along the edge. An endpoint whose value is close to zero\n",
     "is close to the surface, so it pulls the crossing toward itself.\n",
     "\n",
-    "The simplest pattern has one corner inside (the red dot below). The\n",
-    "surface crosses the three edges connecting it to outside corners,\n",
-    "the gold dots are the interpolated crossings, and the table cuts the\n",
-    "corner off with a single triangle through them:\n"
+    "The simplest pattern has one corner inside, the red dot below. The\n",
+    "surface crosses the three edges that connect it to outside corners;\n",
+    "the gold dots mark those crossings. For this pattern the lookup\n",
+    "table produces one triangle, and the three crossings are its\n",
+    "vertices:\n"
    ]
   },
   {
@@ -130,10 +130,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:57:33.424773Z",
-     "iopub.status.busy": "2026-07-07T05:57:33.424638Z",
-     "iopub.status.idle": "2026-07-07T05:57:33.483502Z",
-     "shell.execute_reply": "2026-07-07T05:57:33.482871Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.066600Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.066477Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.122420Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.122016Z"
     }
    },
    "outputs": [
@@ -159,7 +159,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x723a2a3e2330>"
+       "<IPython.lib.display.IFrame at 0x79cbac3567b0>"
       ]
      },
      "execution_count": 3,
@@ -193,7 +193,7 @@
     "  field's interpolant, using the corrected interior test.\n",
     "- `lewiner` follows the interpolant with the older interior test;\n",
     "  kept for comparison with other implementations.\n",
-    "- `nagae` uses fixed tables; watertight and slightly faster.\n",
+    "- `nagae` uses fixed tables; always closed and slightly faster.\n",
     "- `lorensen` is the original 1987 algorithm; ambiguous cells can\n",
     "  leave small cracks.\n",
     "\n",
@@ -205,10 +205,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:57:33.484912Z",
-     "iopub.status.busy": "2026-07-07T05:57:33.484758Z",
-     "iopub.status.idle": "2026-07-07T05:57:33.522309Z",
-     "shell.execute_reply": "2026-07-07T05:57:33.521925Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.123797Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.123667Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.160347Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.159915Z"
     }
    },
    "outputs": [
@@ -243,10 +243,10 @@
    "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:57:33.523874Z",
-     "iopub.status.busy": "2026-07-07T05:57:33.523797Z",
-     "iopub.status.idle": "2026-07-07T05:57:33.527165Z",
-     "shell.execute_reply": "2026-07-07T05:57:33.526911Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.161797Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.161659Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.165195Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.164857Z"
     }
    },
    "outputs": [
@@ -254,9 +254,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "level=-0.2: 4,728 vertices (radius \u2248 0.9)\n",
-      "level=+0.0: 9,168 vertices (radius \u2248 0.7)\n",
-      "level=+0.2: 15,072 vertices (radius \u2248 0.5)\n"
+      "level=-0.2: 4,728 vertices (radius ≈ 0.9)\n",
+      "level=+0.0: 9,168 vertices (radius ≈ 0.7)\n",
+      "level=+0.2: 15,072 vertices (radius ≈ 0.5)\n"
      ]
     }
    ],
@@ -264,7 +264,7 @@
     "# Extract at different iso-levels\n",
     "for level in [-0.2, 0.0, 0.2]:\n",
     "    v, f = isoext.marching_cubes(grid, level=level)\n",
-    "    print(f\"level={level:+.1f}: {v.shape[0]:,} vertices (radius \u2248 {0.7 - level:.1f})\")"
+    "    print(f\"level={level:+.1f}: {v.shape[0]:,} vertices (radius ≈ {0.7 - level:.1f})\")"
    ]
   },
   {
@@ -281,10 +281,10 @@
    "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-07T05:57:33.528715Z",
-     "iopub.status.busy": "2026-07-07T05:57:33.528641Z",
-     "iopub.status.idle": "2026-07-07T05:57:33.543554Z",
-     "shell.execute_reply": "2026-07-07T05:57:33.543323Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.166593Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.166522Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.181715Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.181515Z"
     }
    },
    "outputs": [
@@ -301,13 +301,6 @@
     "isoext.write_obj(\"mesh.obj\", vertices, faces)\n",
     "print(\"Saved to mesh.obj\")"
    ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": []
   }
  ],
  "metadata": {

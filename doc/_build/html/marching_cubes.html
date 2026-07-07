@@ -283,8 +283,7 @@
 <h1>Marching Cubes<a class="headerlink" href="#marching-cubes" title="Link to this heading">¶</a></h1>
 <p>Marching cubes is the workhorse of iso-surface extraction: it visits
 every grid cell and cuts triangles out of it based on which corners
-are inside the surface. It is the default choice for most fields;
-<a class="reference internal" href="how_it_works.html"><span class="doc">Method Comparisons</span></a> explains the mechanics.</p>
+are inside the surface. It is the default choice for most fields.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -349,10 +348,11 @@ values estimates where: with level-relative endpoint values <span class="math no
 and <span class="math notranslate nohighlight">\(v_b\)</span>, the crossing sits at the fraction <span class="math notranslate nohighlight">\(t = v_a / (v_a - v_b)\)</span>
 of the way along the edge. An endpoint whose value is close to zero
 is close to the surface, so it pulls the crossing toward itself.</p>
-<p>The simplest pattern has one corner inside (the red dot below). The
-surface crosses the three edges connecting it to outside corners,
-the gold dots are the interpolated crossings, and the table cuts the
-corner off with a single triangle through them:</p>
+<p>The simplest pattern has one corner inside, the red dot below. The
+surface crosses the three edges that connect it to outside corners;
+the gold dots mark those crossings. For this pattern the lookup
+table produces one triangle, and the three crossings are its
+vertices:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
@@ -393,7 +393,7 @@ same interface:</p>
 field’s interpolant, using the corrected interior test.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> follows the interpolant with the older interior test;
 kept for comparison with other implementations.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> uses fixed tables; watertight and slightly faster.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> uses fixed tables; always closed and slightly faster.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lorensen</span></code> is the original 1987 algorithm; ambiguous cells can
 leave small cracks.</p></li>
 </ul>

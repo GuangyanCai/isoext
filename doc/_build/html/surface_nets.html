@@ -284,10 +284,8 @@
 <p>Surface nets (<span class="bibtex-citation" id="id1">Gibson [<a class="reference internal" href="#id7" title="Sarah F. F. Gibson. Constrained elastic surface nets: generating smooth surfaces from binary segmented data. In Medical Image Computing and Computer-Assisted Intervention (MICCAI '98), LNCS 1496, 888–898. Springer, 1998. doi:10.1007/BFb0056277.">1998</a>]</span>) is a dual method: instead of cutting triangles out of
 each cell the way marching cubes does, it places one vertex inside
 every cell the surface crosses and connects the vertices of
-neighboring cells. The vertex sits at the centroid of the points
-where the surface crosses the cell’s edges. That placement needs no
-normals and no solves, so the method has no parameters to tune, and
-the mesh comes out smooth and evenly tessellated.</p>
+neighboring cells. It needs no normals and has no parameters to
+tune, and the mesh comes out smooth and evenly tessellated.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>

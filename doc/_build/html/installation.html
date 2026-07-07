@@ -293,7 +293,8 @@ errors like <code class="docutils literal notranslate"><span class="pre">&quot;_
 checks for this and stops with instructions if it finds an old nvcc.</p></li>
 <li><p>A C++ compiler (GCC on Linux, Visual Studio on Windows)</p></li>
 </ul>
-<p>The three have to agree with each other: use the PyTorch build that
+<p>PyTorch, the CUDA toolkit and the compiler have to agree with each
+other: use the PyTorch build that
 matches your CUDA toolkit’s major version (compare <code class="docutils literal notranslate"><span class="pre">torch.version.cuda</span></code>
 with <code class="docutils literal notranslate"><span class="pre">nvcc</span> <span class="pre">--version</span></code>), and a C++ compiler your CUDA toolkit supports –
 each nvcc release accepts host compilers only up to a certain version.</p>
