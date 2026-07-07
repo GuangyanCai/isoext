@@ -27,7 +27,7 @@ Interactive visualization built on [viser](https://viser.studio).
 
 ```{eval-rst}
 .. automodule:: isoext.viewer
-   :members: show, embed, add_mesh, add_grid, add_points, add_lines, add_arrows, add_planes, serialize_scene, save_scene, copy_client
+   :members: show, embed, add_mesh, add_grid, add_points, add_lines, add_arrows, add_planes, add_label, serialize_scene, save_scene, copy_client
 ```
 
 ## Classes

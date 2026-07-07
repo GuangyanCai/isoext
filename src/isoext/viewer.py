@@ -230,6 +230,22 @@ def add_lines(
     return server.scene.add_line_segments(name, segs, colors=colors, line_width=line_width)
 
 
+def add_label(server, text: str, position, *, name: str | None = None):
+    """Draw a text label, e.g. to caption the meshes of a composed scene.
+
+    Args:
+        server: A viser.ViserServer instance.
+        text: The label text.
+        position: The label position as a (3,) tensor, list or tuple.
+        name: Scene tree name. Defaults to a unique name.
+    """
+    if name is None:
+        name = f"/labels/{next(_anon_names)}"
+    if isinstance(position, torch.Tensor):
+        position = position.detach().reshape(3).cpu().tolist()
+    return server.scene.add_label(name, text=text, position=tuple(position))
+
+
 def _orthonormal_frame(directions):
     """Unit direction plus two unit vectors spanning its perpendicular plane."""
     n = directions / directions.norm(dim=-1, keepdim=True).clamp_min(1e-12)
@@ -455,17 +471,20 @@ def copy_client(directory) -> Path:
     return dst
 
 
-def _camera_params(vertices, grid) -> str:
+def _camera_params(vertices, grid, frame=None) -> str:
     """Initial camera URL parameters framing the mesh and grid.
 
     Without these the static client starts at a fixed distance, which
     leaves small scenes occupying a fraction of the viewport.
     """
     pts = []
-    if vertices is not None and len(vertices) > 0:
-        pts.append(vertices.detach().reshape(-1, 3))
-    if grid is not None:
-        pts.append(grid.get_points().detach().reshape(-1, 3))
+    if frame is not None:
+        pts.append(frame.detach().reshape(-1, 3))
+    else:
+        if vertices is not None and len(vertices) > 0:
+            pts.append(vertices.detach().reshape(-1, 3))
+        if grid is not None:
+            pts.append(grid.get_points().detach().reshape(-1, 3))
     if not pts:
         return ""
     stacked = torch.cat(pts)
@@ -485,6 +504,7 @@ def embed(
     *,
     root="_static",
     height: int = 420,
+    frame=None,
     **mesh_kwargs,
 ):
     """Display a mesh as a self-contained interactive scene in a notebook.
@@ -501,6 +521,9 @@ def embed(
         faces: (M, 3) tensor of triangle indices.
         root: Directory for the static assets, relative to the notebook.
         height: Height of the embedded viewer in pixels.
+        frame: Optional (N, 3) tensor of points that define the initial
+            camera framing, for scenes composed with draw= whose extent
+            the mesh alone does not describe.
         **mesh_kwargs: Forwarded to add_mesh; pass grid= (and optionally
             grid_level=) to overlay the grid's edges and corner signs, and
             draw= to add extra elements with add_points and add_lines.
@@ -527,7 +550,7 @@ def embed(
     # Both URLs are relative: the iframe src is resolved against the page and
     # playbackPath against the client's own URL.
     src = f"{root.as_posix()}/viser/index.html?playbackPath=../scenes/{scene_name}"
-    src += _camera_params(vertices, mesh_kwargs.get("grid"))
+    src += _camera_params(vertices, mesh_kwargs.get("grid"), frame)
     return IFrame(
         src,
         width="100%",
