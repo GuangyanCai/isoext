@@ -48,6 +48,11 @@ test-requires = ["pytest", "pytest-xdist"]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
 
+[tool.pixi.dependencies]
+# Stable CPython; without a pin the solver reaches for free-threaded 3.14
+# builds, which torch and the extension do not target yet.
+python = "3.12.*"
+
 [tool.pixi.pypi-dependencies]
 nanobind = "*"
 scikit-build-core = { version = "*", extras = ["pyproject"] }
