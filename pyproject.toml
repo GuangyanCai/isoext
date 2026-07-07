@@ -5,10 +5,10 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "isoext"
 version = "0.7.0"
-description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
+description = "GPU-accelerated iso-surface extraction for PyTorch"
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
+authors = [{ name = "Guangyan Cai", email = "gc.nick@pm.me" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Environment :: GPU :: NVIDIA CUDA",
@@ -43,6 +43,29 @@ build-verbosity = 1
 # instead of aborting the whole session.
 test-command = "pytest -n 2 {project}/tests"
 test-requires = ["pytest", "pytest-xdist"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+fix = true
+# Doc notebooks are hand-formatted for reading flow; keep the formatter
+# out of them.
+extend-exclude = ["doc"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+    "W",  # pycodestyle warnings
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
