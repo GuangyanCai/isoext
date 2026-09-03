@@ -13,7 +13,7 @@ An iso-surface is the set of points where a 3D scalar field equals a chosen valu
 - **Extraction methods** — sharing one grid interface, with more on the way
   - **Marching Cubes** — supports the same topology-correct MC33 as scikit-image (`lewiner`) and defaults to an improved variant with the corrected interior test (`vega`); the classic `nagae` and `lorensen` tables are included too
   - **Marching Tetrahedra** — ambiguity-free extraction by splitting cells into tetrahedra
-  - **Dual Contouring** — sharp feature preservation from surface normals
+  - **Dual Contouring** — sharp features from surface normals (`ju`), or recovered from the SDF samples alone (`carrera`)
   - **Surface Nets** — smooth dual meshes without needing normals
   - **Dual Marching Cubes** — sharp features with one vertex per surface sheet, so crossing sheets stay separate
 - **Grids**

@@ -449,47 +449,54 @@ NB_MODULE(isoext_ext, m) {
         "compute_normals=True).");
 
     m.def(
-        "dual_contouring",
+        "_dual_contouring_ju",
         [](Grid *grid, float level, std::optional<Intersection> its_opt,
            float reg, float svd_tol, bool clamp) {
             Intersection its = its_opt.has_value()
                                    ? std::move(its_opt.value())
                                    : get_intersection(grid, level, true);
-
-            // If normals are not set, compute them
             if (!its.has_normals()) {
                 compute_intersection_normals(its, grid);
                 its._has_normals = true;
             }
-
             auto [v, f] =
                 dual_contouring(grid, its, level, reg, svd_tol, clamp);
             return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
         },
         "grid"_a, "level"_a = 0.f, "intersection"_a = nb::none(),
         "reg"_a = 1e-2f, "svd_tol"_a = 1e-6f, "clamp"_a = true,
-        "Extract an iso-surface using the Dual Contouring algorithm.\n\n"
-        "Dual Contouring produces meshes with better-placed vertices than "
-        "Marching Cubes,\n"
-        "especially for sharp features. It solves a QEF (Quadric Error "
-        "Function) per cell\n"
-        "to find optimal vertex positions.\n\n"
-        "Args:\n"
-        "    grid: The input grid containing scalar values.\n"
-        "    level: The iso-value. Default is 0.0.\n"
-        "    intersection: Optional Intersection data from "
-        "get_intersection().\n"
-        "        If not provided, intersections are computed automatically.\n"
-        "        If provided but normals not set, normals are computed "
-        "automatically.\n"
-        "    reg: Regularization weight for the QEF solver. Default is 0.01.\n"
-        "    svd_tol: SVD tolerance for the QEF solver. Default is 1e-6.\n"
-        "    clamp: Keep each vertex inside its cell. Disabling follows sharp\n"
-        "        features more closely but can produce self-intersections.\n\n"
-        "Returns:\n"
-        "    A tuple (vertices, faces) where vertices is an (N, 3) float32 "
-        "tensor\n"
-        "    and faces is an (M, 3) int32 tensor of triangle indices.");
+        "Dual contouring of Hermite data (Ju et al. 2002). See "
+        "isoext.dual_contouring.");
+
+    m.def(
+        "_dual_contouring_sdf",
+        [](Grid *grid, float level, std::optional<Intersection> its_opt,
+           int outer_iters, int inner_iters, float mu, float hermite_weight,
+           float update_weight, bool hermite_update, bool qef_assignment,
+           float band, float tol) {
+            Intersection its = its_opt.has_value()
+                                   ? std::move(its_opt.value())
+                                   : get_intersection(grid, level, false);
+            SdfDcOptions opt;
+            opt.outer_iters = outer_iters;
+            opt.inner_iters = inner_iters;
+            opt.mu = mu;
+            opt.hermite_weight = hermite_weight;
+            opt.update_weight = update_weight;
+            opt.hermite_update = hermite_update;
+            opt.qef_assignment = qef_assignment;
+            opt.band = band;
+            opt.tol = tol;
+            auto [v, f] = dual_contouring_sdf(grid, its, level, opt);
+            return nb::make_tuple(ours_to_nb(v), ours_to_nb(f));
+        },
+        "grid"_a, "level"_a = 0.f, "intersection"_a = nb::none(),
+        "outer_iters"_a = 100, "inner_iters"_a = 100, "mu"_a = 0.1f,
+        "hermite_weight"_a = 0.02f, "update_weight"_a = 0.2f,
+        "hermite_update"_a = true, "qef_assignment"_a = true, "band"_a = 3.0f,
+        "tol"_a = 1e-5f,
+        "Dual contouring of signed distance data (Carrera et al. 2026). See "
+        "isoext.dual_contouring.");
 
     m.def(
         "dual_marching_cubes",

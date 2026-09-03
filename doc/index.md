@@ -42,8 +42,9 @@ scratch, and {doc}`method_comparisons` compares the methods.
     {doc}`mc_variants`
   - {doc}`Marching Tetrahedra <marching_tetrahedra>` — ambiguity-free
     extraction by splitting cells into tetrahedra
-  - {doc}`Dual Contouring <dual_contouring>` — sharp feature preservation
-    from surface normals
+  - {doc}`Dual Contouring <dual_contouring>` — sharp features from
+    surface normals (`ju`), or recovered from the SDF samples alone
+    (`carrera`)
   - {doc}`Surface Nets <surface_nets>` — smooth dual meshes without
     needing normals
   - {doc}`Dual Marching Cubes <dual_marching_cubes>` — sharp features
@@ -81,7 +82,8 @@ Median extraction times for a sphere SDF on an RTX 5090:
 |---------------------|--------------|-------------|
 | marching_cubes      | 5.4 ms       | 1.9 ms      |
 | marching_tetrahedra | 6.7 ms       | 3.2 ms      |
-| dual_contouring     | 7.0 ms       | 2.3 ms      |
+| dual_contouring (ju) | 7.0 ms      | 2.3 ms      |
+| dual_contouring (carrera) | 4.8 s  | 2.6 s       |
 | surface_nets        | 6.9 ms       | 2.2 ms      |
 | dual_marching_cubes | 9.0 ms       | 3.5 ms      |
 

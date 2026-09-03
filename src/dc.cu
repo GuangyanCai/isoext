@@ -187,6 +187,8 @@ struct place_centroid_vertex_op {
     }
 };
 
+}   // anonymous namespace
+
 // Shared tail of the dual methods: build one quad around every intersected
 // edge from the per-cell vertices, split the quads into triangles, and weld
 // the result into an indexed mesh.
@@ -221,8 +223,6 @@ build_dual_mesh(Grid *grid, const Intersection &its,
 
     return {v, f};
 }
-
-}   // anonymous namespace
 
 thrust::device_vector<float3>
 place_dual_vertices(Grid *grid, const Intersection &its, float reg,

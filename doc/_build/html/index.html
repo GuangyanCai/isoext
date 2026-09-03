@@ -318,8 +318,9 @@ improved variant with the corrected interior test (<code class="docutils literal
 <a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a></p></li>
 <li><p><a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching Tetrahedra</span></a> — ambiguity-free
 extraction by splitting cells into tetrahedra</p></li>
-<li><p><a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> — sharp feature preservation
-from surface normals</p></li>
+<li><p><a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> — sharp features from
+surface normals (<code class="docutils literal notranslate"><span class="pre">ju</span></code>), or recovered from the SDF samples alone
+(<code class="docutils literal notranslate"><span class="pre">carrera</span></code>)</p></li>
 <li><p><a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> — smooth dual meshes without
 needing normals</p></li>
 <li><p><a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> — sharp features
@@ -375,15 +376,19 @@ operations, and gradient and smoothing utilities (<a class="reference internal" 
 <td><p>6.7 ms</p></td>
 <td><p>3.2 ms</p></td>
 </tr>
-<tr class="row-even"><td><p>dual_contouring</p></td>
+<tr class="row-even"><td><p>dual_contouring (ju)</p></td>
 <td><p>7.0 ms</p></td>
 <td><p>2.3 ms</p></td>
 </tr>
-<tr class="row-odd"><td><p>surface_nets</p></td>
+<tr class="row-odd"><td><p>dual_contouring (carrera)</p></td>
+<td><p>4.8 s</p></td>
+<td><p>2.6 s</p></td>
+</tr>
+<tr class="row-even"><td><p>surface_nets</p></td>
 <td><p>6.9 ms</p></td>
 <td><p>2.2 ms</p></td>
 </tr>
-<tr class="row-even"><td><p>dual_marching_cubes</p></td>
+<tr class="row-odd"><td><p>dual_marching_cubes</p></td>
 <td><p>9.0 ms</p></td>
 <td><p>3.5 ms</p></td>
 </tr>

@@ -369,6 +369,59 @@ def add_planes(
     )
 
 
+def add_spheres(
+    server,
+    centers: torch.Tensor,
+    radii: torch.Tensor,
+    *,
+    color=(0.6, 0.7, 0.9),
+    opacity: float = 0.3,
+    name: str | None = None,
+):
+    """Draw translucent spheres, e.g. the distance spheres of SDF samples.
+
+    Args:
+        server: A viser.ViserServer instance.
+        centers: (N, 3) tensor of sphere centers.
+        radii: (N,) tensor of radii.
+        color: RGB tuple with components in [0, 1], or a color name.
+        opacity: Sphere opacity in [0, 1].
+        name: Scene tree name. Defaults to a unique name.
+    """
+    if name is None:
+        name = f"/spheres/{next(_anon_names)}"
+    centers = centers.detach().reshape(-1, 3)
+    radii = radii.detach().reshape(-1).to(centers)
+    # One unit UV sphere, instanced per center.
+    rings, segments = 12, 24
+    theta = torch.linspace(0, torch.pi, rings + 1, device=centers.device)
+    phi = torch.linspace(0, 2 * torch.pi, segments + 1, device=centers.device)[:-1]
+    unit = torch.stack(
+        [
+            torch.sin(theta)[:, None] * torch.cos(phi)[None],
+            torch.sin(theta)[:, None] * torch.sin(phi)[None],
+            torch.cos(theta)[:, None].expand(-1, segments),
+        ],
+        dim=-1,
+    ).reshape(-1, 3)
+    r = torch.arange(rings, device=centers.device)[:, None] * segments
+    c = torch.arange(segments, device=centers.device)[None]
+    c1 = (c + 1) % segments
+    quads = torch.stack([r + c, r + segments + c, r + segments + c1, r + c1], dim=-1).reshape(-1, 4)
+    unit_faces = torch.cat([quads[:, [0, 1, 2]], quads[:, [0, 2, 3]]])
+
+    verts = centers[:, None] + radii[:, None, None] * unit[None]
+    offsets = torch.arange(len(centers), device=centers.device)[:, None, None] * len(unit)
+    faces = (unit_faces[None] + offsets).reshape(-1, 3)
+    server.scene.add_mesh_simple(
+        name,
+        verts.reshape(-1, 3).cpu().numpy(),
+        faces.cpu().numpy(),
+        color=_to_rgb(color),
+        opacity=opacity,
+    )
+
+
 def show(
     vertices: torch.Tensor,
     faces: torch.Tensor,

@@ -9,7 +9,7 @@
         <title>Method Comparisons - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -307,10 +307,10 @@ values. The primal methods,
 vertices at the crossings themselves and cut triangles out of each
 cell by table lookup. The dual methods put one vertex inside each
 crossed cell – <a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> at the centroid of the cell’s
-crossings, <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> at the point its normals single
-out, and <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> one per surface piece rather
-than one per cell – and join them with one quad around each crossed
-edge.</p>
+crossings, <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> at the point that best fits the
+SDF samples or the normals, and <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> one per
+surface piece rather than one per cell – and join them with one
+quad around each crossed edge.</p>
 <p>The families are easy to tell apart on the smallest possible sphere.
 One inside sample on 2x2x2 cells comes out as an octahedron under
 marching cubes, with its 6 vertices on the grid edges, and as a cube
@@ -394,7 +394,7 @@ meshes are duals of each other:</p>
 <td><p>none</p></td>
 </tr>
 <tr class="row-odd"><td><p>Dual contouring</p></td>
-<td><p>one per cell, from the QEF</p></td>
+<td><p>one per cell, fitted to the SDF samples or the normals</p></td>
 <td><p>one quad per crossed edge</p></td>
 <td><p>none</p></td>
 </tr>
@@ -411,8 +411,9 @@ answer the same two questions from the top of the page. The primal
 methods answer with vertices at the crossings themselves, so the
 mesh interpolates the samples exactly. The dual methods answer with
 faces there instead, which tends to give better-shaped triangles
-and, with good normals, sharp features – at the cost of vertex
-positions that are estimated rather than interpolated.</p>
+and, given SDF samples or good normals, sharp features – at the
+cost of vertex positions that are estimated rather than
+interpolated.</p>
 <p>The guarantees differ too. Every method produces a closed mesh when
 the surface stays inside the grid (<code class="docutils literal notranslate"><span class="pre">lorensen</span></code> excepted: its tables
 can crack). Manifoldness is the primal family’s structural
@@ -458,9 +459,9 @@ demonstration on this page or a measurement in the test suite.</p>
 <td><p>pinches and tunnel edges</p></td>
 </tr>
 <tr class="row-odd"><td><p>Dual contouring</p></td>
-<td><p>with normals</p></td>
 <td><p>yes</p></td>
-<td><p>not unclamped</p></td>
+<td><p>yes</p></td>
+<td><p>no</p></td>
 <td><p>pinches and tunnel edges</p></td>
 </tr>
 <tr class="row-even"><td><p>Dual marching cubes</p></td>
@@ -472,13 +473,16 @@ demonstration on this page or a measurement in the test suite.</p>
 </tbody>
 </table>
 </div>
-<p>Sharp features need normals on the intersection, as shown below.
-Uniform triangles refers to the triangle shapes: the marching
-methods produce slivers wherever a crossing sits close to a corner
-(their worst triangles have edges differing by an order of
+<p>Dual contouring gets sharp features from normals on the
+intersection (<code class="docutils literal notranslate"><span class="pre">ju</span></code>, the default) or, with its <code class="docutils literal notranslate"><span class="pre">carrera</span></code> variant, from
+the SDF samples alone; dual marching cubes needs the normals, as
+shown below. Uniform triangles refers to the triangle shapes: the
+marching methods produce slivers wherever a crossing sits close to
+a corner (their worst triangles have edges differing by an order of
 magnitude), while the dual methods’ vertices sit centrally in their
-cells. Intersection-free fails for unclamped dual contouring, whose
-vertices may leave their cells (see <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a>).</p>
+cells. Intersection-free fails for dual contouring because its
+vertices may leave their cells: for <code class="docutils literal notranslate"><span class="pre">ju</span></code> with <code class="docutils literal notranslate"><span class="pre">clamp=False</span></code>, and
+always for <code class="docutils literal notranslate"><span class="pre">carrera</span></code> (see <a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a>).</p>
 </section>
 <section id="seeing-the-failure-cases">
 <h2>Seeing the Failure Cases<a class="headerlink" href="#seeing-the-failure-cases" title="Link to this heading">¶</a></h2>
@@ -488,7 +492,7 @@ left, dual contouring in gold in the middle, dual marching cubes in
 red on the right.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compare</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">its</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;front&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">320</span><span class="p">):</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compare</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">its</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;front&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span> <span class="n">dc_method</span><span class="o">=</span><span class="s2">&quot;ju&quot;</span><span class="p">):</span>
     <span class="n">span</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
     <span class="n">lo</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">hi</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -499,7 +503,10 @@ red on the right.</p>
     <span class="p">]</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">fn</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
-        <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">)</span> <span class="k">if</span> <span class="n">its</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">fn</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="n">dc_method</span><span class="p">}</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">its</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;intersection&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">its</span>
+        <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span><span class="si">:</span><span class="s2">20s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> vertices, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> triangles&quot;</span><span class="p">)</span>
         <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span> <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="n">span</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
 
@@ -554,7 +561,7 @@ dual_marching_cubes   24 vertices,  36 triangles
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/5f90c801215536cc.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/7dfdf6ef7f1ca15f.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -566,9 +573,8 @@ dual_marching_cubes   24 vertices,  36 triangles
 <h3>Sharp Features<a class="headerlink" href="#sharp-features" title="Link to this heading">¶</a></h3>
 <p>A tilted box corner (<a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> shows how the QEF finds
 it). With refined crossings and SDF normals, both dual methods put a
-vertex exactly on the corner point; marching cubes cannot leave the
-grid edges and chamfers it, leaving its nearest vertex a full cell
-away from the true corner:</p>
+vertex exactly on the corner point; marching cubes cannot leave the grid edges and chamfers it,
+leaving its nearest vertex a full cell away from the true corner:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">planes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span>
@@ -605,7 +611,7 @@ dual_marching_cubes   11 vertices,  10 triangles
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/1bcf4fe221eb2d88.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/d1e91b30d83c6ab5.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -641,7 +647,7 @@ dual_marching_cubes   14 vertices,  24 triangles
         <iframe
             width="100%"
             height="320"
-            src="_static/viser/index.html?playbackPath=../scenes/ef261017c97b1018.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/342071aacc5fd476.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"

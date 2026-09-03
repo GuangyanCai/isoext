@@ -282,21 +282,33 @@
           <section class="tex2jax_ignore mathjax_ignore" id="dual-contouring">
 <h1>Dual Contouring<a class="headerlink" href="#dual-contouring" title="Link to this heading">¶</a></h1>
 <p>Dual contouring is a dual extraction method: it places one vertex
-inside each cell the surface crosses, at the point that best fits
-the surface normals, which lets the mesh reproduce sharp edges and
-corners that marching cubes rounds off.</p>
+inside each cell the surface crosses and connects the vertices of
+neighboring cells, and it puts each vertex on the sharp edge or corner
+if the cell contains one. The default variant finds that point from
+the surface normals at the edge crossings. A second variant finds it
+from the signed distance samples alone.</p>
 <section id="basic-usage">
 <h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">grid</span></code>: A <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> or <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> with values set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span></code>: The iso-value to extract (default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intersection</span></code>: Optional precomputed edge crossings from
+<code class="docutils literal notranslate"><span class="pre">get_intersection</span></code>, with or without normals; computed automatically
+when omitted</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;ju&quot;</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">&quot;carrera&quot;</span></code>, described below</p></li>
+</ul>
 <p>Called like this, the edge crossings and normals are estimated from
-the grid values, which is enough for smooth surfaces:</p>
+the grid values, which is enough for smooth surfaces. A cube rotated so
+that none of its edges align with the grid, sampled on 32 cells per
+axis, comes out with rounded edges:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">get_sdf_normal</span><span class="p">,</span> <span class="n">project_to_surface</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CuboidSDF</span><span class="p">,</span> <span class="n">RotationOp</span><span class="p">,</span> <span class="n">get_sdf_normal</span><span class="p">,</span> <span class="n">project_to_surface</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 </pre></div>
 </div>
@@ -304,31 +316,31 @@ the grid values, which is enough for smooth surfaces:</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Simple usage - just call dual_contouring directly</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
-<span class="n">cube</span> <span class="o">=</span> <span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cube</span> <span class="o">=</span> <span class="n">RotationOp</span><span class="p">(</span><span class="n">sdf</span><span class="o">=</span><span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">33</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">33</span><span class="p">])</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 
-<span class="c1"># One-liner: normals computed automatically from grid values</span>
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (cell size </span><span class="si">{</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">32</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
 
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Vertices: torch.Size([6146, 3])
-Faces: torch.Size([12288, 3])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Vertices: torch.Size([2146, 3])
+Faces: torch.Size([4292, 3])
+max vertex error: 0.0184 (cell size 0.0625)
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/12fca5502d9cf198.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/6a30fdfa6460721d.viser&initialCameraPosition=1.363,1.363,0.954&initialCameraLookAt=-0.000,-0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -344,7 +356,7 @@ crossed cell and one quad around each crossed edge (see
 edge crossing together with its surface normal defines a tangent
 plane, and the vertex is placed to minimize the total squared
 distance to all of the cell’s planes, a least-squares problem known
-as the QEF (<span class="bibtex-citation" id="id1">Ju <em>et al.</em> [<a class="reference internal" href="#id9" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>). If the cell contains a sharp corner, the planes are the
+as the QEF (<span class="bibtex-citation" id="id1">Ju <em>et al.</em> [<a class="reference internal" href="#id10" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>). If the cell contains a sharp corner, the planes are the
 corner’s faces and their intersection point is the corner itself.</p>
 <p>The cell below contains the corner of a tilted box. The gold dots
 are the crossings, the arrows their normals, and each translucent
@@ -412,57 +424,25 @@ crossings with <code class="docutils literal notranslate"><span class="pre">get_
 the result in:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Find the edge crossings</span>
-<span class="n">intersection</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">intersection</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 <span class="n">points</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Intersection shape: </span><span class="si">{</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Intersection shape: torch.Size([24576, 3])
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Attach normals from the SDF gradient</span>
-<span class="n">normals</span> <span class="o">=</span> <span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
-<span class="n">intersection</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">normals</span><span class="p">)</span>
+<span class="n">intersection</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Normals shape: </span><span class="si">{</span><span class="n">normals</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Normals shape: torch.Size([24576, 3])
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Extract with the supplied normals</span>
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">intersection</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (M, 3) int32</span>
-
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">intersection</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;salmon&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Vertices: torch.Size([6146, 3])
-Faces: torch.Size([12288, 3])
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max vertex error: 0.0097
 </pre></div>
 </div>
 <div class="output text_html">
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/bd8c2a87948c029c.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/33f82b87e7907401.viser&initialCameraPosition=1.408,1.408,0.986&initialCameraLookAt=-0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -486,56 +466,17 @@ points, including neural networks. Disabling the clamp is another
 matter: it is only safe for exact fields like analytic SDFs. On
 approximate fields, such as distance estimators or neural networks,
 noise in the points and normals can throw unclamped vertices far from
-the surface, producing what <span class="bibtex-citation" id="id2">Schaefer and Warren [<a class="reference internal" href="#id10" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
+the surface, producing what <span class="bibtex-citation" id="id2">Schaefer and Warren [<a class="reference internal" href="#id11" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
 sampled volumes, keep the default clamp.</p>
-<p>Here is the difference on a cube rotated so its edges cross the
-grid at an angle. First without the refinement: the normals are
-taken at the interpolated crossings, which sit slightly off the true
-surface near the cube’s edges, and the unclamped vertices inherit
-the error – look along an edge and it comes out slightly serrated:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">RotationOp</span><span class="p">,</span> <span class="n">project_to_surface</span>
-
-<span class="c1"># A rotated cube, so its edges do not align with the grid</span>
-<span class="n">cube</span> <span class="o">=</span> <span class="n">RotationOp</span><span class="p">(</span><span class="n">sdf</span><span class="o">=</span><span class="n">CuboidSDF</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">])</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
-
-<span class="n">its</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">its</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
-
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">,</span> <span class="n">clamp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tomato&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max vertex error: 0.0038
-</pre></div>
-</div>
-<div class="output text_html">
-        <iframe
-            width="100%"
-            height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/194fa79d819be34b.viser&initialCameraPosition=1.409,1.409,0.986&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
-            frameborder="0"
-            allowfullscreen
-            style="border: 1px solid #8888; border-radius: 4px;"
-        ></iframe>
-        </div></div>
-</div>
 <p>With the refinement, the tangent planes pass through the exact
-surface, the vertex error drops by an order of magnitude, and the
-edges come out clean:</p>
+surface and the edges come out clean:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">its</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
-<span class="n">its</span><span class="o">.</span><span class="n">set_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
-<span class="n">its</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">project_to_surface</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">intersection</span><span class="o">.</span><span class="n">get_points</span><span class="p">())</span>
+<span class="n">intersection</span><span class="o">.</span><span class="n">set_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+<span class="n">intersection</span><span class="o">.</span><span class="n">set_normals</span><span class="p">(</span><span class="n">get_sdf_normal</span><span class="p">(</span><span class="n">cube</span><span class="p">,</span> <span class="n">points</span><span class="p">))</span>
 
-<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">its</span><span class="p">,</span> <span class="n">clamp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">intersection</span><span class="o">=</span><span class="n">intersection</span><span class="p">,</span> <span class="n">clamp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -549,7 +490,7 @@ edges come out clean:</p>
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/d3e0c735b0b6abf9.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            src="_static/viser/index.html?playbackPath=../scenes/fba1487770c669ab.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -557,17 +498,121 @@ edges come out clean:</p>
         </div></div>
 </div>
 </section>
+<section id="dual-contouring-of-signed-distance-data">
+<h2>Dual Contouring of Signed Distance Data<a class="headerlink" href="#dual-contouring-of-signed-distance-data" title="Link to this heading">¶</a></h2>
+<p>Exact normals need a field you can evaluate at any point. When all you
+have is the grid of signed distance samples, from a scan, a
+precomputed distance field or a swept volume, <code class="docutils literal notranslate"><span class="pre">method=&quot;carrera&quot;</span></code>
+recovers the sharp features from those samples alone
+(<span class="bibtex-citation" id="id3">Carrera <em>et al.</em> [<a class="reference internal" href="#id18" title="Xiana Carrera, Ningna Wang, Christopher Batty, Oded Stein, and Silvia Sellán. Dual contouring of signed distance data. In Proceedings of the Special Interest Group on Computer Graphics and Interactive Techniques Conference Conference Papers (SIGGRAPH '26). 2026. doi:10.1145/3799902.3811116.">2026</a>]</span>). The same cube, with nothing but the grid
+values:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_contouring</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;carrera&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max vertex error: </span><span class="si">{</span><span class="n">cube</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max vertex error: 0.0054
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/a50421c9a4e7a2d5.viser&initialCameraPosition=1.413,1.413,0.989&initialCameraLookAt=0.000,-0.000,-0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<p>The idea: every sample says how far the surface is from its grid
+point, so every sample is a sphere the surface must touch without
+cutting into it. The cell below is mostly filled by a corner of the
+cube. Its six outside samples are drawn as spheres with their distance
+as radius, and the true surface (grey) rests against every one of
+them. The centroid of the edge crossings (green), where surface nets
+and this method start, sits away from the corner (red); any surface
+through it would cut into the spheres around the corner. The
+method moves each vertex until a small local mesh around it is
+tangent to the spheres assigned to its cell, hands the spheres out
+again on the moved mesh, and repeats, 100 times by default. Sharp
+corners fall out of this, because only the corner touches all of its
+spheres at once.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># A cell around one corner of the cube, and the exact surface inside it</span>
+<span class="n">corner</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.6768</span><span class="p">,</span> <span class="mf">0.3232</span><span class="p">,</span> <span class="mf">0.4330</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">size</span> <span class="o">=</span> <span class="mf">0.6</span>
+<span class="n">lo</span> <span class="o">=</span> <span class="n">corner</span> <span class="o">-</span> <span class="n">size</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">one_cell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="n">lo</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">one_cell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">cube</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="n">one_cell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">fine</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">41</span><span class="p">,</span> <span class="mi">41</span><span class="p">,</span> <span class="mi">41</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">(</span><span class="n">lo</span> <span class="o">-</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="mf">1.15</span> <span class="o">*</span> <span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<span class="n">fine</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">cube</span><span class="p">(</span><span class="n">fine</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<span class="n">surface_v</span><span class="p">,</span> <span class="n">surface_f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">fine</span><span class="p">)</span>
+
+<span class="n">crossings</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">get_intersection</span><span class="p">(</span><span class="n">one_cell</span><span class="p">)</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+<span class="n">outside</span> <span class="o">=</span> <span class="n">values</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">surface_v</span><span class="p">,</span> <span class="n">surface_f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">,</span> <span class="n">flat_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">one_cell</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+    <span class="n">frame</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">lo</span> <span class="o">-</span> <span class="mf">0.3</span> <span class="o">*</span> <span class="n">size</span><span class="p">,</span> <span class="n">lo</span> <span class="o">+</span> <span class="mf">1.3</span> <span class="o">*</span> <span class="n">size</span><span class="p">]),</span> <span class="n">draw</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="p">(</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_spheres</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">samples</span><span class="p">[</span><span class="n">outside</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="n">outside</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;goldenrod&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">crossings</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;seagreen&quot;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.05</span><span class="p">),</span>
+    <span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">corner</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;crimson&quot;</span><span class="p">,</span> <span class="n">point_size</span><span class="o">=</span><span class="mf">0.05</span><span class="p">),</span>
+<span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="400"
+            src="_static/viser/index.html?playbackPath=../scenes/4d857abddce40559.viser&initialCameraPosition=1.445,1.182,0.917&initialCameraLookAt=0.497,0.233,0.253&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<p>This costs time: a fraction of a second on grids of a hundred cells
+per axis and seconds at 512, where the default variant takes
+milliseconds (see <a class="reference internal" href="performance.html"><span class="doc">Performance</span></a>). The samples must be true
+signed distances; for densities or occupancies use the default
+variant, <a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> or <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a>. Like the
+default variant, it is sensitive to noise in the samples.</p>
+<p><code class="docutils literal notranslate"><span class="pre">outer_iters</span></code> and <code class="docutils literal notranslate"><span class="pre">inner_iters</span></code> (100 each) trade accuracy for time,
+<code class="docutils literal notranslate"><span class="pre">band</span></code> (3 cell diagonals) selects the samples used, and the remaining
+options keep the defaults of the authors’ code. Where that code
+differs from the paper, the code is followed, since it produced the
+published results: the Hermite normal blend, the radius weighting of
+the sphere terms, and <code class="docutils literal notranslate"><span class="pre">qef_assignment</span></code>, which hands out the first
+samples on the QEF mesh. Each was more accurate in our comparison
+against the reference implementation, which also showed that the band
+loses nothing against the code’s random batches of far samples. An
+intersection with normals seeds the Hermite data in place of the
+estimate from the grid values.</p>
+</section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
-<div class="docutils container" id="id3">
+<div class="docutils container" id="id4">
 <div role="list" class="citation-list">
-<div class="citation" id="id9" role="doc-biblioentry">
+<div class="citation" id="id10" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In <em>Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02)</em>, 339–346. 2002. <a class="reference external" href="https://doi.org/10.1145/566570.566586">doi:10.1145/566570.566586</a>.</p>
 </div>
-<div class="citation" id="id10" role="doc-biblioentry">
+<div class="citation" id="id11" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
 <p>Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: <a class="reference external" href="https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf</a>.</p>
+</div>
+<div class="citation" id="id18" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Xiana Carrera, Ningna Wang, Christopher Batty, Oded Stein, and Silvia Sellán. Dual contouring of signed distance data. In <em>Proceedings of the Special Interest Group on Computer Graphics and Interactive Techniques Conference Conference Papers (SIGGRAPH '26)</em>. 2026. <a class="reference external" href="https://doi.org/10.1145/3799902.3811116">doi:10.1145/3799902.3811116</a>.</p>
 </div>
 </div>
 </div>
@@ -634,6 +679,7 @@ edges come out clean:</p>
 <li><a class="reference internal" href="#how-it-works">How It Works</a></li>
 <li><a class="reference internal" href="#custom-normals-for-sharp-features">Custom Normals for Sharp Features</a></li>
 <li><a class="reference internal" href="#refined-points-and-unclamped-vertices">Refined Points and Unclamped Vertices</a></li>
+<li><a class="reference internal" href="#dual-contouring-of-signed-distance-data">Dual Contouring of Signed Distance Data</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>

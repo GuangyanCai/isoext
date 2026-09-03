@@ -74,7 +74,8 @@ def benchmark_grid(grid, label, iters, results):
         "mc_vega": lambda: isoext.marching_cubes(grid, method="vega"),
         "marching_tets": lambda: isoext.marching_tetrahedra(grid),
         "get_intersection": lambda: isoext.get_intersection(grid, compute_normals=True),
-        "dual_contouring": lambda: isoext.dual_contouring(grid),
+        "dc_ju": lambda: isoext.dual_contouring(grid),
+        "dc_carrera": lambda: isoext.dual_contouring(grid, method="carrera"),
         "dual_marching_cubes": lambda: isoext.dual_marching_cubes(grid),
         "surface_nets": lambda: isoext.surface_nets(grid),
     }

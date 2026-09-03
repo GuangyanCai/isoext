@@ -9,7 +9,7 @@
         <title>API Reference - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -329,28 +329,60 @@ and faces is an (M, 3) int32 tensor of triangle indices.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.dual_contouring">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svd_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
-<dd><p>Extract an iso-surface using the Dual Contouring algorithm.</p>
-<p>Dual Contouring produces meshes with better-placed vertices than Marching Cubes,
-especially for sharp features. It solves a QEF (Quadric Error Function) per cell
-to find optimal vertex positions.</p>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ju'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface with dual contouring.</p>
+<p>Every cell the surface crosses gets one vertex and every crossed grid
+edge one quad connecting the four cells around it. The vertex placement
+depends on the variant:</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;ju&quot;</span></code> (default) is dual contouring of Hermite data (Ju et al. 2002):
+each vertex minimizes the QEF of the tangent planes at the cell’s edge
+crossings. It needs normals; estimated from the grid values they are
+smeared at sharp features, exact SDF normals attached to the
+intersection reproduce them. One linear solve per cell.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;carrera&quot;</span></code> is dual contouring of signed distance data (Carrera et
+al. 2026). The vertices are optimized so that the mesh is tangent to
+the spheres around the grid samples near the surface, of radius equal to
+the absolute sample value,
+which recovers sharp features from the samples alone, without normals.
+The grid must hold a signed distance field. Iterative, and orders of
+magnitude slower than <code class="docutils literal notranslate"><span class="pre">&quot;ju&quot;</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
 <li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
-<li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
-If not provided, intersections are computed automatically.
-If provided but normals not set, normals are computed automatically.</p></li>
-<li><p><strong>reg</strong> – Regularization weight for the QEF solver. Default is 0.01.</p></li>
-<li><p><strong>svd_tol</strong> – SVD tolerance for the QEF solver. Default is 1e-6.</p></li>
-<li><p><strong>clamp</strong> – Keep each vertex inside its cell. Disabling follows sharp
-features more closely but can produce self-intersections.</p></li>
+<li><p><strong>intersection</strong> – Optional Intersection from get_intersection(). Both
+variants use its points as the edge crossings; normals attached
+to it are used by “ju” directly and by “carrera” as the initial
+Hermite normals. Computed automatically when omitted.</p></li>
+<li><p><strong>method</strong> – “ju” (default) or “carrera”.</p></li>
+<li><p><strong>reg</strong> – (ju) Regularization weight of the QEF. Default 0.01.</p></li>
+<li><p><strong>svd_tol</strong> – (ju) Relative eigenvalue cutoff of the QEF solve.
+Default 1e-6.</p></li>
+<li><p><strong>clamp</strong> – (ju) Keep each vertex inside its cell. Default True.</p></li>
+<li><p><strong>outer_iters</strong> – (carrera) Global iterations. Default 100.</p></li>
+<li><p><strong>inner_iters</strong> – (carrera) Per-cell iterations per outer iteration.
+Default 100.</p></li>
+<li><p><strong>mu</strong> – (carrera) Regularization toward the previous iterate.
+Default 0.1.</p></li>
+<li><p><strong>hermite_weight</strong> – (carrera) Weight of the Hermite plane terms.
+Default 0.02.</p></li>
+<li><p><strong>update_weight</strong> – (carrera) Blend weight of the per-iteration Hermite
+and face point updates. Default 0.2.</p></li>
+<li><p><strong>hermite_update</strong> – (carrera) Refine the Hermite data from the mesh
+each iteration. Default True.</p></li>
+<li><p><strong>qef_assignment</strong> – (carrera) Assign the samples of the first iteration
+on the mesh of QEF vertices instead of the centroid mesh, as the
+reference code does. Default True.</p></li>
+<li><p><strong>band</strong> – (carrera) Only samples within this many cell diagonals of the
+surface are used. Default 3.0.</p></li>
+<li><p><strong>tol</strong> – (carrera) Inner-loop stopping step, in cell diagonals.
+Default 1e-5.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
-and faces is an (M, 3) int32 tensor of triangle indices.</p>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32
+tensor and faces is an (M, 3) int32 tensor of triangle indices.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -839,6 +871,24 @@ e.g. tangent planes.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_spheres">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_spheres</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radii</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.6,</span> <span class="pre">0.7,</span> <span class="pre">0.9)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_spheres" title="Link to this definition">¶</a></dt>
+<dd><p>Draw translucent spheres, e.g. the distance spheres of SDF samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>centers</strong> (<em>Tensor</em>) – (N, 3) tensor of sphere centers.</p></li>
+<li><p><strong>radii</strong> (<em>Tensor</em>) – (N,) tensor of radii.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>opacity</strong> (<em>float</em>) – Sphere opacity in [0, 1].</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name. Defaults to a unique name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.show">
 <span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.show" title="Link to this definition">¶</a></dt>
 <dd><p>Open an interactive viewer serving the given mesh.</p>
@@ -1273,6 +1323,7 @@ against the exact SDF.</p>
 <li><a class="reference internal" href="#isoext.viewer.add_label"><code class="docutils literal notranslate"><span class="pre">add_label()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.add_arrows"><code class="docutils literal notranslate"><span class="pre">add_arrows()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.add_planes"><code class="docutils literal notranslate"><span class="pre">add_planes()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_spheres"><code class="docutils literal notranslate"><span class="pre">add_spheres()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.serialize_scene"><code class="docutils literal notranslate"><span class="pre">serialize_scene()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.save_scene"><code class="docutils literal notranslate"><span class="pre">save_scene()</span></code></a></li>

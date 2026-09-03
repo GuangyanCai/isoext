@@ -9,7 +9,7 @@
         <title>Performance - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -313,39 +313,49 @@ classification, extraction, and vertex welding.</p>
 <td><p>6.9</p></td>
 </tr>
 <tr class="row-odd"><td><p>uniform</p></td>
-<td><p>dual_contouring</p></td>
+<td><p>dual_contouring (ju)</p></td>
 <td><p>0.83</p></td>
 <td><p>7.0</p></td>
 </tr>
 <tr class="row-even"><td><p>uniform</p></td>
+<td><p>dual_contouring (carrera)</p></td>
+<td><p>380</p></td>
+<td><p>4800</p></td>
+</tr>
+<tr class="row-odd"><td><p>uniform</p></td>
 <td><p>dual_marching_cubes</p></td>
 <td><p>1.21</p></td>
 <td><p>9.0</p></td>
 </tr>
-<tr class="row-odd"><td><p>uniform</p></td>
+<tr class="row-even"><td><p>uniform</p></td>
 <td><p>get_intersection</p></td>
 <td><p>0.26</p></td>
 <td><p>5.3</p></td>
 </tr>
-<tr class="row-even"><td><p>sparse</p></td>
+<tr class="row-odd"><td><p>sparse</p></td>
 <td><p>marching_cubes</p></td>
 <td><p>0.48</p></td>
 <td><p>1.9</p></td>
 </tr>
-<tr class="row-odd"><td><p>sparse</p></td>
+<tr class="row-even"><td><p>sparse</p></td>
 <td><p>marching_tetrahedra</p></td>
 <td><p>0.61</p></td>
 <td><p>3.2</p></td>
 </tr>
-<tr class="row-even"><td><p>sparse</p></td>
+<tr class="row-odd"><td><p>sparse</p></td>
 <td><p>surface_nets</p></td>
 <td><p>0.73</p></td>
 <td><p>2.2</p></td>
 </tr>
-<tr class="row-odd"><td><p>sparse</p></td>
-<td><p>dual_contouring</p></td>
+<tr class="row-even"><td><p>sparse</p></td>
+<td><p>dual_contouring (ju)</p></td>
 <td><p>0.75</p></td>
 <td><p>2.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>sparse</p></td>
+<td><p>dual_contouring (carrera)</p></td>
+<td><p>200</p></td>
+<td><p>2600</p></td>
 </tr>
 <tr class="row-even"><td><p>sparse</p></td>
 <td><p>dual_marching_cubes</p></td>
@@ -363,6 +373,11 @@ classification, extraction, and vertex welding.</p>
 <p>Sparse grids only touch cells near the surface, so their cost scales with
 the surface area rather than the volume. At 512³ that is 300k cells
 instead of 134M.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">carrera</span></code> variant of dual contouring is an iterative optimization
+(100 outer iterations of up to 100 inner iterations per cell by default)
+and sits three orders of magnitude above the one-pass methods. Its time
+scales with the number of crossed cells and the samples near the
+surface; fewer outer iterations trade accuracy for time.</p>
 </section>
 <section id="marching-cubes-variants-median-ms">
 <h2>Marching cubes variants (median, ms)<a class="headerlink" href="#marching-cubes-variants-median-ms" title="Link to this heading">¶</a></h2>

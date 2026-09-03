@@ -6,11 +6,11 @@ if importlib.util.find_spec("torch") is None:
 from importlib.metadata import version as _version
 
 from . import sdf
+from .dc import dual_contouring
 from .isoext_ext import (
     Intersection,
     SparseGrid,
     UniformGrid,
-    dual_contouring,
     dual_marching_cubes,
     get_intersection,
     marching_cubes,

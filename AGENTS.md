@@ -18,7 +18,8 @@ isoext/
 │   ├── isoext_ext.cu     # Python bindings (nanobind)
 │   ├── mc/               # Marching cubes implementations
 │   ├── grid/             # Grid implementations (uniform, sparse)
-│   ├── dc.cu             # Dual contouring
+│   ├── dc.cu             # Dual contouring (Ju et al. QEF) and the shared dual mesh build
+│   ├── dc_sdf.cu         # Dual contouring of signed distance data (Carrera et al.)
 │   └── its.cu            # Intersection computation
 ├── include/              # CUDA headers (.cuh files)
 ├── tests/                # pytest tests
@@ -81,7 +82,9 @@ Source files are in `src/` and headers in `include/`. After editing:
 Key files:
 - `src/isoext_ext.cu` - Python bindings (nanobind)
 - `src/mc/` - Marching cubes variants
-- `src/dc.cu` - Dual contouring
+- `src/dc.cu` - Dual contouring (Hermite QEF variant, shared quad mesh build)
+- `src/dc_sdf.cu` - Dual contouring of signed distance data (`method="carrera"`)
+- `src/isoext/dc.py` - `dual_contouring()` front end dispatching on `method`
 - `src/its.cu` - Intersection/normal computation
 - `src/grid/` - UniformGrid and SparseGrid
 
@@ -140,7 +143,7 @@ grid.set_values(sdf(grid.get_points()))
 Documentation uses Sphinx with MyST-NB (Jupyter notebooks):
 - Source: `doc/`
 - Build output: `doc/_build/html/`
-- Notebooks are executed during build
+- Notebooks are not executed during the build (`nb_execution_mode = "off"`): run them in place first with `pixi run -e doc jupyter nbconvert --to notebook --execute --inplace doc/<page>.ipynb` and commit the outputs
 
 To preview docs while editing:
 ```bash

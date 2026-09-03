@@ -78,6 +78,30 @@ struct GridView {
         return v;
     }
 
+    // Gradient of the trilinear interpolant at a point of the cell, with
+    // the point clamped to the cell. Lattice cells only.
+    __host__ __device__ float3 gradient_in_cell(uint cell, float3 p) const {
+        float3 lo = corner_position(cell, 0);
+        float3 hi = corner_position(cell, 7);
+        float3 size = hi - lo;
+        float3 t = clip((p - lo) / size, make_float3(0.0f, 0.0f, 0.0f),
+                        make_float3(1.0f, 1.0f, 1.0f));
+        float3 g = make_float3(0.0f, 0.0f, 0.0f);
+        for (uint i = 0; i < 8; i++) {
+            float sx = (i >> 2) & 1 ? 1.0f : -1.0f;
+            float sy = (i >> 1) & 1 ? 1.0f : -1.0f;
+            float sz = (i & 1) ? 1.0f : -1.0f;
+            float wx = sx > 0 ? t.x : 1.0f - t.x;
+            float wy = sy > 0 ? t.y : 1.0f - t.y;
+            float wz = sz > 0 ? t.z : 1.0f - t.z;
+            float v = corner_value(cell, i);
+            g.x += sx * wy * wz * v;
+            g.y += wx * sy * wz * v;
+            g.z += wx * wy * sz * v;
+        }
+        return g / size;
+    }
+
     // Load the positions and values of all 8 corners of a cell.
     __host__ __device__ void load_corners(uint cell, float3 p[8],
                                           float v[8]) const {
