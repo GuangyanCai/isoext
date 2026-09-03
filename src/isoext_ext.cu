@@ -4,6 +4,7 @@
 #include "grid/uniform.cuh"
 #include "its.cuh"
 #include "mc/mc.cuh"
+#include "mesh_sdf.cuh"
 #include "mt.cuh"
 #include "ndarray.cuh"
 
@@ -29,6 +30,7 @@ using UniformGridData = PyTorchCuda<float, nb::ndim<3>>;
 using SparseGridData = PyTorchCuda<float, nb::shape<-1, 8>>;
 using SparseGridCellIndices = PyTorchCuda<int, nb::ndim<1>>;
 using Vector3 = PyTorchCuda<float, nb::shape<-1, 3>>;
+using Faces = PyTorchCuda<int, nb::shape<-1, 3>>;
 
 // Function to create a nanobind capsule for device memory
 nb::capsule
@@ -428,6 +430,60 @@ NB_MODULE(isoext_ext, m) {
             "Set custom normals for the intersection points.\n\n"
             "Args:\n"
             "    new_normals: (N, 3) float32 tensor of normal vectors.");
+
+    nb::class_<MeshBVH>(
+        m, "MeshBVH",
+        "A triangle mesh with a GPU bounding volume hierarchy for distance "
+        "queries. Used by isoext.sdf.TriangleMeshSDF.")
+        .def(
+            "__init__",
+            [](MeshBVH *self, Vector3 vertices, Faces faces) {
+                NDArray<float3> v = nb_to_ours(vertices);
+                NDArray<int> f = nb_to_ours(faces);
+                new (self) MeshBVH(v, f);
+            },
+            "vertices"_a, "faces"_a,
+            "Build the hierarchy over a mesh.\n\n"
+            "Args:\n"
+            "    vertices: (V, 3) float32 CUDA tensor.\n"
+            "    faces: (F, 3) int32 CUDA tensor of vertex indices.")
+        .def("num_faces", &MeshBVH::num_faces,
+             "Return the number of triangles.")
+        .def(
+            "closest",
+            [](MeshBVH &self, Vector3 points) {
+                NDArray<float3> p = nb_to_ours(points);
+                auto [dist, closest, tri] = self.closest(p);
+                return nb::make_tuple(ours_to_nb(dist), ours_to_nb(closest),
+                                      ours_to_nb(tri));
+            },
+            "points"_a,
+            "Closest points on the mesh.\n\n"
+            "Args:\n"
+            "    points: (N, 3) float32 CUDA tensor.\n\n"
+            "Returns:\n"
+            "    A tuple (distances, closest_points, face_ids) of shapes "
+            "(N,), (N, 3) and (N,).")
+        .def(
+            "sign",
+            [](MeshBVH &self, Vector3 points) {
+                NDArray<float3> p = nb_to_ours(points);
+                NDArray<float> sign = self.sign(p);
+                return ours_to_nb(sign);
+            },
+            "points"_a,
+            "Return +1 for points outside the closed mesh and -1 inside, "
+            "as an (N,) float32 tensor.")
+        .def(
+            "winding_number",
+            [](MeshBVH &self, Vector3 points) {
+                NDArray<float3> p = nb_to_ours(points);
+                NDArray<float> w = self.winding_number(p);
+                return ours_to_nb(w);
+            },
+            "points"_a,
+            "Return the generalized winding number of each point as an (N,) "
+            "float32 tensor: 1 inside a closed mesh, 0 outside.");
 
     m.def(
         "get_intersection",

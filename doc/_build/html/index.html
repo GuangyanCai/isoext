@@ -338,7 +338,8 @@ with area instead of volume</p></li>
 browser, built on <a class="reference external" href="https://viser.studio">viser</a>; scenes can be embedded
 in static web pages</p></li>
 <li><p><strong>SDF toolbox</strong> — primitives from spheres to a Mandelbulb, CSG
-operations, and gradient and smoothing utilities (<a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a>)</p></li>
+operations, signed distances to triangle meshes on a GPU BVH, and
+gradient and smoothing utilities (<a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a>)</p></li>
 </ul>
 </section>
 <section id="quick-example">
@@ -415,7 +416,15 @@ throughout the extraction pipeline</p></li>
 <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> lookup tables are converted from
 <a class="reference external" href="https://scikit-image.org">scikit-image</a>, and the <code class="docutils literal notranslate"><span class="pre">vega</span></code> variant is a
 port of <a class="reference external" href="https://github.com/dvega68/MC33_c_library">MC33_c_library</a> by
-David Vega (MIT License).</p>
+David Vega (MIT License). The mesh SDF builds and traverses its
+bounding volume hierarchy with <a class="reference external" href="https://github.com/NVIDIA/cuBQL">cuBQL</a>
+by NVIDIA (Apache License 2.0), vendored under <code class="docutils literal notranslate"><span class="pre">ext/cuBQL</span></code>.</p>
+<p>The test meshes of <code class="docutils literal notranslate"><span class="pre">isoext.assets</span></code> are downloaded from their authors on
+first use: the bunny, armadillo and dragon from the <a class="reference external" href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford Computer
+Graphics Laboratory</a>
+(research use), and Spot from <a class="reference external" href="https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/">Keenan
+Crane</a>
+(public domain).</p>
 <p>The algorithms themselves come from published papers, cited on each
 method’s documentation page and collected in <a class="reference internal" href="references.html"><span class="doc">References</span></a>.</p>
 <div class="toctree-wrapper compound">

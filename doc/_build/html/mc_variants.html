@@ -308,7 +308,7 @@ along either diagonal. Neighboring cells share faces, so both cells
 must pick the same diagonal, or the mesh gets a hole. The <code class="docutils literal notranslate"><span class="pre">lorensen</span></code>
 tables (<span class="bibtex-citation" id="id1">Lorensen and Cline [<a class="reference internal" href="#id9" title="William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3D surface construction algorithm. In Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '87), 163–169. 1987. doi:10.1145/37401.37422.">1987</a>]</span>) were built with reflections, which
 can make the two cells disagree. The <code class="docutils literal notranslate"><span class="pre">nagae</span></code> tables
-(<span class="bibtex-citation" id="id2">Nagae <em>et al.</em> [<a class="reference internal" href="#id11" title="Takanori Nagae, Takeshi Agui, and Hiroshi Nagahashi. Surface construction and contour generation from volume data. In Medical Imaging 1993: Image Processing, Proc. SPIE 1898, 74–84. 1993. doi:10.1117/12.154567.">1993</a>]</span>) avoid reflections and always agree; so do
+(<span class="bibtex-citation" id="id2">Nagae <em>et al.</em> [<a class="reference internal" href="#id17" title="Takanori Nagae, Takeshi Agui, and Hiroshi Nagahashi. Surface construction and contour generation from volume data. In Medical Imaging 1993: Image Processing, Proc. SPIE 1898, 74–84. 1993. doi:10.1117/12.154567.">1993</a>]</span>) avoid reflections and always agree; so do
 <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code>. Counting broken meshes over 50 random closed
 fields:</p>
 <div class="cell docutils container">
@@ -398,7 +398,7 @@ an ambiguous cell connected or separate? Fixed tables like <code class="docutils
 always answer the same way. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> and <code class="docutils literal notranslate"><span class="pre">vega</span></code> instead evaluate
 the trilinear interpolant – the smooth field you get by blending
 the eight corner values across the cell – and follow its topology,
-implementing the MC33 method of <span class="bibtex-citation" id="id3">Chernyaev [<a class="reference internal" href="#id12" title="Evgeni Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Technical Report CERN-CN-95-17, CERN, Geneva, 1995. URL: https://repository.cern/records/7zfxg-q0t96.">1995</a>]</span>. In the cell
+implementing the MC33 method of <span class="bibtex-citation" id="id3">Chernyaev [<a class="reference internal" href="#id18" title="Evgeni Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Technical Report CERN-CN-95-17, CERN, Geneva, 1995. URL: https://repository.cern/records/7zfxg-q0t96.">1995</a>]</span>. In the cell
 below, the fixed table gives three separate pieces, while the
 interpolant connects two of them:</p>
 <div class="cell docutils container">
@@ -455,10 +455,10 @@ interpolant connects two of them:</p>
 <h3>Lewiner Limitations<a class="headerlink" href="#lewiner-limitations" title="Link to this heading">¶</a></h3>
 <p>Deciding whether two pieces connect through the inside of a cell
 takes an interior test. The <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> variant ports the
-implementation of <span class="bibtex-citation" id="id4">Lewiner <em>et al.</em> [<a class="reference internal" href="#id16" title="Thomas Lewiner, Hélio Lopes, Antônio Wilson Vieira, and Geovan Tavares. Efficient implementation of marching cubes' cases with topological guarantees. Journal of Graphics Tools, 8(2):1–15, 2003. doi:10.1080/10867651.2003.10487582.">2003</a>]</span>, whose interior test checks
+implementation of <span class="bibtex-citation" id="id4">Lewiner <em>et al.</em> [<a class="reference internal" href="#id22" title="Thomas Lewiner, Hélio Lopes, Antônio Wilson Vieira, and Geovan Tavares. Efficient implementation of marching cubes' cases with topological guarantees. Journal of Graphics Tools, 8(2):1–15, 2003. doi:10.1080/10867651.2003.10487582.">2003</a>]</span>, whose interior test checks
 the interpolant on a single cross-section instead of analyzing it
 fully. That has two consequences, documented by
-<span class="bibtex-citation" id="id5">Custodio <em>et al.</em> [<a class="reference internal" href="#id19" title="Lis Custodio, Tiago Etiene, Sinesio Pesco, and Claudio Silva. Practical considerations on marching cubes 33 topological correctness. Computers &amp; Graphics, 37(7):840–850, 2013. doi:10.1016/j.cag.2013.04.004.">2013</a>]</span>: the test can misjudge tunnels in rare
+<span class="bibtex-citation" id="id5">Custodio <em>et al.</em> [<a class="reference internal" href="#id26" title="Lis Custodio, Tiago Etiene, Sinesio Pesco, and Claudio Silva. Practical considerations on marching cubes 33 topological correctness. Computers &amp; Graphics, 37(7):840–850, 2013. doi:10.1016/j.cag.2013.04.004.">2013</a>]</span>: the test can misjudge tunnels in rare
 configurations, and mirroring the input field can change the answer.
 The field below triggers both. <code class="docutils literal notranslate"><span class="pre">lewiner</span></code> connects the surface into a
 tunnel, and extracting the mirrored field gives two separate sheets
@@ -515,7 +515,7 @@ instead. The meshes stay watertight and crack free either way.</p>
         ></iframe>
         </div></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">vega</span></code> variant ports the implementation of <span class="bibtex-citation" id="id6">Vega <em>et al.</em> [<a class="reference internal" href="#id20" title="David Vega, Javier Abache, and David Coll. A fast and memory-saving marching cubes 33 implementation with the correct interior test. Journal of Computer Graphics Techniques (JCGT), 8(3):1–18, 2019. URL: https://jcgt.org/published/0008/03/01/.">2019</a>]</span>,
+<p>The <code class="docutils literal notranslate"><span class="pre">vega</span></code> variant ports the implementation of <span class="bibtex-citation" id="id6">Vega <em>et al.</em> [<a class="reference internal" href="#id29" title="David Vega, Javier Abache, and David Coll. A fast and memory-saving marching cubes 33 implementation with the correct interior test. Journal of Computer Graphics Techniques (JCGT), 8(3):1–18, 2019. URL: https://jcgt.org/published/0008/03/01/.">2019</a>]</span>,
 which replaces the interior test with one that analyzes the
 interpolant fully. Here it extracts the two sheets the interpolant
 actually contains, and mirroring the field does not change the
@@ -593,7 +593,7 @@ distributed with scikit-image (BSD) by
 rather than generated: MC33 tables couple triangulations with face
 and interior test descriptors, and re-deriving that machinery is
 where historical implementations accumulated bugs.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">vega</span></code> table is converted from the MC33_c_library of <span class="bibtex-citation" id="id7">Vega <em>et al.</em> [<a class="reference internal" href="#id20" title="David Vega, Javier Abache, and David Coll. A fast and memory-saving marching cubes 33 implementation with the correct interior test. Journal of Computer Graphics Techniques (JCGT), 8(3):1–18, 2019. URL: https://jcgt.org/published/0008/03/01/.">2019</a>]</span> (MIT) by
+<p>The <code class="docutils literal notranslate"><span class="pre">vega</span></code> table is converted from the MC33_c_library of <span class="bibtex-citation" id="id7">Vega <em>et al.</em> [<a class="reference internal" href="#id29" title="David Vega, Javier Abache, and David Coll. A fast and memory-saving marching cubes 33 implementation with the correct interior test. Journal of Computer Graphics Techniques (JCGT), 8(3):1–18, 2019. URL: https://jcgt.org/published/0008/03/01/.">2019</a>]</span> (MIT) by
 <a class="reference external" href="https://github.com/GuangyanCai/isoext/blob/master/luts/convert_vega_luts.py"><code class="docutils literal notranslate"><span class="pre">luts/convert_vega_luts.py</span></code></a>.
 The converter re-derives every offset the case dispatch can reach and
 decodes the triangle strip at each one, so a conversion error fails
@@ -607,23 +607,23 @@ at generation time instead of on the GPU.</p>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>William E. Lorensen and Harvey E. Cline. Marching cubes: a high resolution 3D surface construction algorithm. In <em>Proceedings of the 14th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '87)</em>, 163–169. 1987. <a class="reference external" href="https://doi.org/10.1145/37401.37422">doi:10.1145/37401.37422</a>.</p>
 </div>
-<div class="citation" id="id11" role="doc-biblioentry">
+<div class="citation" id="id17" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
 <p>Takanori Nagae, Takeshi Agui, and Hiroshi Nagahashi. Surface construction and contour generation from volume data. In <em>Medical Imaging 1993: Image Processing, Proc. SPIE 1898</em>, 74–84. 1993. <a class="reference external" href="https://doi.org/10.1117/12.154567">doi:10.1117/12.154567</a>.</p>
 </div>
-<div class="citation" id="id12" role="doc-biblioentry">
+<div class="citation" id="id18" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
 <p>Evgeni Chernyaev. Marching cubes 33: construction of topologically correct isosurfaces. Technical Report CERN-CN-95-17, CERN, Geneva, 1995. URL: <a class="reference external" href="https://repository.cern/records/7zfxg-q0t96">https://repository.cern/records/7zfxg-q0t96</a>.</p>
 </div>
-<div class="citation" id="id16" role="doc-biblioentry">
+<div class="citation" id="id22" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
 <p>Thomas Lewiner, Hélio Lopes, Antônio Wilson Vieira, and Geovan Tavares. Efficient implementation of marching cubes' cases with topological guarantees. <em>Journal of Graphics Tools</em>, 8(2):1–15, 2003. <a class="reference external" href="https://doi.org/10.1080/10867651.2003.10487582">doi:10.1080/10867651.2003.10487582</a>.</p>
 </div>
-<div class="citation" id="id19" role="doc-biblioentry">
+<div class="citation" id="id26" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
 <p>Lis Custodio, Tiago Etiene, Sinesio Pesco, and Claudio Silva. Practical considerations on marching cubes 33 topological correctness. <em>Computers &amp; Graphics</em>, 37(7):840–850, 2013. <a class="reference external" href="https://doi.org/10.1016/j.cag.2013.04.004">doi:10.1016/j.cag.2013.04.004</a>.</p>
 </div>
-<div class="citation" id="id20" role="doc-biblioentry">
+<div class="citation" id="id29" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></span>
 <span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id7">2</a>)</span>
 <p>David Vega, Javier Abache, and David Coll. A fast and memory-saving marching cubes 33 implementation with the correct interior test. <em>Journal of Computer Graphics Techniques (JCGT)</em>, 8(3):1–18, 2019. URL: <a class="reference external" href="https://jcgt.org/published/0008/03/01/">https://jcgt.org/published/0008/03/01/</a>.</p>

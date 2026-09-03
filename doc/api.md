@@ -27,7 +27,17 @@ Signed distance functions and helpers for building test fields; the
 
 ```{eval-rst}
 .. automodule:: isoext.sdf
-   :members: SDF, SphereSDF, TorusSDF, CuboidSDF, MandelbulbSDF, UnionOp, IntersectionOp, NegationOp, SmoothUnionOp, TranslationOp, RotationOp, get_sdf_grad, get_sdf_normal, project_to_surface, SDFProtocol
+   :members: SDF, SphereSDF, TorusSDF, CuboidSDF, MandelbulbSDF, TriangleMeshSDF, UnionOp, IntersectionOp, NegationOp, SmoothUnionOp, TranslationOp, RotationOp, get_sdf_grad, get_sdf_normal, project_to_surface, SDFProtocol
+```
+
+## Test Meshes
+
+Well-known meshes for trying things out, downloaded on first use; the
+{doc}`sdf_guide` shows one turned into a field.
+
+```{eval-rst}
+.. automodule:: isoext.assets
+   :members: load_mesh, cache_dir, ASSETS
 ```
 
 (api-viewer)=

@@ -356,7 +356,7 @@ crossed cell and one quad around each crossed edge (see
 edge crossing together with its surface normal defines a tangent
 plane, and the vertex is placed to minimize the total squared
 distance to all of the cell’s planes, a least-squares problem known
-as the QEF (<span class="bibtex-citation" id="id1">Ju <em>et al.</em> [<a class="reference internal" href="#id10" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>). If the cell contains a sharp corner, the planes are the
+as the QEF (<span class="bibtex-citation" id="id1">Ju <em>et al.</em> [<a class="reference internal" href="#id16" title="Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02), 339–346. 2002. doi:10.1145/566570.566586.">2002</a>]</span>). If the cell contains a sharp corner, the planes are the
 corner’s faces and their intersection point is the corner itself.</p>
 <p>The cell below contains the corner of a tilted box. The gold dots
 are the crossings, the arrows their normals, and each translucent
@@ -366,7 +366,12 @@ crossings (green) sits away from the feature; the QEF solution (red)
 is the corner. When the crossings do not pin down all three axes, on
 flat faces or straight creases, the QEF is degenerate and the solver
 regularizes it toward the centroid.</p>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">planes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span>
     <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">],</span>
@@ -398,6 +403,7 @@ regularizes it toward the centroid.</p>
 </pre></div>
 </div>
 </div>
+</details>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>centroid: [-0.6, -0.59, -0.64]
 qef:      [0.1, 0.15, 0.2]
@@ -466,7 +472,7 @@ points, including neural networks. Disabling the clamp is another
 matter: it is only safe for exact fields like analytic SDFs. On
 approximate fields, such as distance estimators or neural networks,
 noise in the points and normals can throw unclamped vertices far from
-the surface, producing what <span class="bibtex-citation" id="id2">Schaefer and Warren [<a class="reference internal" href="#id11" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
+the surface, producing what <span class="bibtex-citation" id="id2">Schaefer and Warren [<a class="reference internal" href="#id17" title="Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf.">2002</a>]</span> call spikes. For those fields, and for purely
 sampled volumes, keep the default clamp.</p>
 <p>With the refinement, the tangent planes pass through the exact
 surface and the edges come out clean:</p>
@@ -504,7 +510,7 @@ surface and the edges come out clean:</p>
 have is the grid of signed distance samples, from a scan, a
 precomputed distance field or a swept volume, <code class="docutils literal notranslate"><span class="pre">method=&quot;carrera&quot;</span></code>
 recovers the sharp features from those samples alone
-(<span class="bibtex-citation" id="id3">Carrera <em>et al.</em> [<a class="reference internal" href="#id18" title="Xiana Carrera, Ningna Wang, Christopher Batty, Oded Stein, and Silvia Sellán. Dual contouring of signed distance data. In Proceedings of the Special Interest Group on Computer Graphics and Interactive Techniques Conference Conference Papers (SIGGRAPH '26). 2026. doi:10.1145/3799902.3811116.">2026</a>]</span>). The same cube, with nothing but the grid
+(<span class="bibtex-citation" id="id3">Carrera <em>et al.</em> [<a class="reference internal" href="#id27" title="Xiana Carrera, Ningna Wang, Christopher Batty, Oded Stein, and Silvia Sellán. Dual contouring of signed distance data. In Proceedings of the Special Interest Group on Computer Graphics and Interactive Techniques Conference Conference Papers (SIGGRAPH '26). 2026. doi:10.1145/3799902.3811116.">2026</a>]</span>). The same cube, with nothing but the grid
 values:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -542,7 +548,12 @@ tangent to the spheres assigned to its cell, hands the spheres out
 again on the moved mesh, and repeats, 100 times by default. Sharp
 corners fall out of this, because only the corner touches all of its
 spheres at once.</p>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># A cell around one corner of the cube, and the exact surface inside it</span>
 <span class="n">corner</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.6768</span><span class="p">,</span> <span class="mf">0.3232</span><span class="p">,</span> <span class="mf">0.4330</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
@@ -568,6 +579,7 @@ spheres at once.</p>
 </pre></div>
 </div>
 </div>
+</details>
 <div class="cell_output docutils container">
 <div class="output text_html">
         <iframe
@@ -602,15 +614,15 @@ estimate from the grid values.</p>
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id4">
 <div role="list" class="citation-list">
-<div class="citation" id="id10" role="doc-biblioentry">
+<div class="citation" id="id16" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Tao Ju, Frank Losasso, Scott Schaefer, and Joe Warren. Dual contouring of hermite data. In <em>Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '02)</em>, 339–346. 2002. <a class="reference external" href="https://doi.org/10.1145/566570.566586">doi:10.1145/566570.566586</a>.</p>
 </div>
-<div class="citation" id="id11" role="doc-biblioentry">
+<div class="citation" id="id17" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
 <p>Scott Schaefer and Joe Warren. Dual contouring: “the secret sauce”. Technical Report TR 02-408, Rice University, 2002. URL: <a class="reference external" href="https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf">https://www.cs.rice.edu/~jwarren/papers/techreport02408.pdf</a>.</p>
 </div>
-<div class="citation" id="id18" role="doc-biblioentry">
+<div class="citation" id="id27" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
 <p>Xiana Carrera, Ningna Wang, Christopher Batty, Oded Stein, and Silvia Sellán. Dual contouring of signed distance data. In <em>Proceedings of the Special Interest Group on Computer Graphics and Interactive Techniques Conference Conference Papers (SIGGRAPH '26)</em>. 2026. <a class="reference external" href="https://doi.org/10.1145/3799902.3811116">doi:10.1145/3799902.3811116</a>.</p>
 </div>

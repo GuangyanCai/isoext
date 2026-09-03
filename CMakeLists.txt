@@ -80,7 +80,7 @@ nanobind_add_module(
 )
 
 target_compile_options(isoext_ext PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Wno-deprecated-gpu-targets>)
-target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
+target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/" "${isoext_SOURCE_DIR}/ext/cuBQL/")
 
 set(ISOEXT_PYTHON_PACKAGE_DIR
     ${isoext_SOURCE_DIR}/src/isoext

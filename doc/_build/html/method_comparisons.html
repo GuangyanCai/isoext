@@ -426,7 +426,7 @@ edge</em> is four quads sharing one edge, which happens when the surface
 passes through a cell face twice. <a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual marching cubes</span></a> eliminates the
 pinches (one vertex per sheet) but keeps the tunnel edges.</p>
 <p>The criteria below follow the comparison table of
-<span class="bibtex-citation" id="id1">Shen <em>et al.</em> [<a class="reference internal" href="#id15" title="Tianchang Shen, Jacob Munkberg, Jon Hasselgren, Kangxue Yin, Zian Wang, Wenzheng Chen, Zan Gojcic, Sanja Fidler, Nicholas Sharp, and Jun Gao. Flexible isosurface extraction for gradient-based mesh optimization. ACM Transactions on Graphics, 2023. doi:10.1145/3592430.">2023</a>]</span>, which surveys these methods as bases for
+<span class="bibtex-citation" id="id1">Shen <em>et al.</em> [<a class="reference internal" href="#id24" title="Tianchang Shen, Jacob Munkberg, Jon Hasselgren, Kangxue Yin, Zian Wang, Wenzheng Chen, Zan Gojcic, Sanja Fidler, Nicholas Sharp, and Jun Gao. Flexible isosurface extraction for gradient-based mesh optimization. ACM Transactions on Graphics, 2023. doi:10.1145/3592430.">2023</a>]</span>, which surveys these methods as bases for
 gradient-based mesh optimization; each entry here is backed by a
 demonstration on this page or a measurement in the test suite.</p>
 <div class="table-wrapper colwidths-auto docutils container">
@@ -490,7 +490,12 @@ always for <code class="docutils literal notranslate"><span class="pre">carrera<
 is extracted three ways, side by side: marching cubes in blue on the
 left, dual contouring in gold in the middle, dual marching cubes in
 red on the right.</p>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">compare</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">its</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;front&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">320</span><span class="p">,</span> <span class="n">dc_method</span><span class="o">=</span><span class="s2">&quot;ju&quot;</span><span class="p">):</span>
     <span class="n">span</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
@@ -530,6 +535,7 @@ red on the right.</p>
 </pre></div>
 </div>
 </div>
+</details>
 </div>
 <section id="pinches">
 <h3>Pinches<a class="headerlink" href="#pinches" title="Link to this heading">¶</a></h3>
@@ -575,7 +581,12 @@ dual_marching_cubes   24 vertices,  36 triangles
 it). With refined crossings and SDF normals, both dual methods put a
 vertex exactly on the corner point; marching cubes cannot leave the grid edges and chamfers it,
 leaving its nearest vertex a full cell away from the true corner:</p>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell source</p>
+<p class="expanded admonition-title">Hide code cell source</p>
+</summary>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">planes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
@@ -601,6 +612,7 @@ leaving its nearest vertex a full cell away from the true corner:</p>
 </pre></div>
 </div>
 </div>
+</details>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>marching_cubes        18 vertices,  21 triangles
 dual_contouring       11 vertices,  10 triangles
@@ -662,7 +674,7 @@ behind every method are collected in <a class="reference internal" href="referen
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div class="docutils container" id="id2">
 <div role="list" class="citation-list">
-<div class="citation" id="id15" role="doc-biblioentry">
+<div class="citation" id="id24" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Tianchang Shen, Jacob Munkberg, Jon Hasselgren, Kangxue Yin, Zian Wang, Wenzheng Chen, Zan Gojcic, Sanja Fidler, Nicholas Sharp, and Jun Gao. Flexible isosurface extraction for gradient-based mesh optimization. <em>ACM Transactions on Graphics</em>, 2023. <a class="reference external" href="https://doi.org/10.1145/3592430">doi:10.1145/3592430</a>.</p>
 </div>

@@ -35,7 +35,10 @@
      "iopub.status.busy": "2026-07-07T06:26:41.595941Z",
      "iopub.status.idle": "2026-07-07T06:26:42.544949Z",
      "shell.execute_reply": "2026-07-07T06:26:42.544392Z"
-    }
+    },
+    "tags": [
+     "hide-input"
+    ]
    },
    "outputs": [
     {
@@ -140,7 +143,10 @@
      "iopub.status.busy": "2026-07-07T06:26:42.546247Z",
      "iopub.status.idle": "2026-07-07T06:26:42.562440Z",
      "shell.execute_reply": "2026-07-07T06:26:42.562019Z"
-    }
+    },
+    "tags": [
+     "hide-input"
+    ]
    },
    "outputs": [
     {

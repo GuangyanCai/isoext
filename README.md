@@ -20,7 +20,7 @@ An iso-surface is the set of points where a 3D scalar field equals a chosen valu
   - Dense uniform grids for full volumes
   - Sparse grids that only store cells near the surface, so memory scales with area instead of volume
 - **Interactive viewer** — meshes and grid overlays in the browser, built on [viser](https://viser.studio); scenes can be embedded in static web pages
-- **SDF toolbox** — primitives from spheres to a Mandelbulb, CSG operations, and gradient and smoothing utilities
+- **SDF toolbox** — primitives from spheres to a Mandelbulb, CSG operations, signed distances to triangle meshes on a GPU BVH, and gradient and smoothing utilities
 
 ## Installation
 
@@ -59,7 +59,9 @@ isoext builds on:
 - [viser](https://viser.studio) — powers the interactive viewer
 - [scikit-build-core](https://github.com/scikit-build/scikit-build-core) — the build system
 
-Two marching cubes variants adapt existing implementations: the `lewiner` lookup tables are converted from [scikit-image](https://scikit-image.org), and the `vega` variant is a port of [MC33_c_library](https://github.com/dvega68/MC33_c_library) by David Vega (MIT License).
+Two marching cubes variants adapt existing implementations: the `lewiner` lookup tables are converted from [scikit-image](https://scikit-image.org), and the `vega` variant is a port of [MC33_c_library](https://github.com/dvega68/MC33_c_library) by David Vega (MIT License). The mesh SDF builds and traverses its bounding volume hierarchy with [cuBQL](https://github.com/NVIDIA/cuBQL) by NVIDIA (Apache License 2.0), vendored under `ext/cuBQL`.
+
+The test meshes of `isoext.assets` are downloaded from their authors on first use: the bunny, armadillo and dragon from the [Stanford Computer Graphics Laboratory](https://graphics.stanford.edu/data/3Dscanrep/) (research use), and Spot from [Keenan Crane](https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/) (public domain).
 
 The algorithms themselves come from published papers, cited on each method's documentation page and collected in the [references](https://guangyancai.github.io/isoext/references.html).
 

@@ -20,8 +20,10 @@ isoext/
 │   ├── grid/             # Grid implementations (uniform, sparse)
 │   ├── dc.cu             # Dual contouring (Ju et al. QEF) and the shared dual mesh build
 │   ├── dc_sdf.cu         # Dual contouring of signed distance data (Carrera et al.)
+│   ├── mesh_sdf.cu       # Distance queries against a triangle mesh (GPU BVH)
 │   └── its.cu            # Intersection computation
 ├── include/              # CUDA headers (.cuh files)
+├── ext/cuBQL/            # Vendored subset of NVIDIA cuBQL (BVH build and queries)
 ├── tests/                # pytest tests
 │   └── conftest.py       # Shared fixtures
 ├── doc/                  # Sphinx documentation
@@ -69,6 +71,7 @@ Python source is in `src/isoext/`:
 - `sdf.py` - SDF primitives and operations
 - `utils.py` - Utilities (write_obj, gaussian_smooth)
 - `viewer.py` - Interactive viewing and scene export (viser)
+- `assets.py` - Test meshes (bunny, armadillo, dragon, Spot) downloaded and cached on first use
 - `__init__.py` - Package exports
 
 Changes take effect immediately (no rebuild needed).
@@ -85,6 +88,7 @@ Key files:
 - `src/dc.cu` - Dual contouring (Hermite QEF variant, shared quad mesh build)
 - `src/dc_sdf.cu` - Dual contouring of signed distance data (`method="carrera"`)
 - `src/isoext/dc.py` - `dual_contouring()` front end dispatching on `method`
+- `src/mesh_sdf.cu` - `MeshBVH`, behind `isoext.sdf.MeshSDF`
 - `src/its.cu` - Intersection/normal computation
 - `src/grid/` - UniformGrid and SparseGrid
 

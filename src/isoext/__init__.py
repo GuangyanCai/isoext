@@ -5,7 +5,7 @@ if importlib.util.find_spec("torch") is None:
 
 from importlib.metadata import version as _version
 
-from . import sdf
+from . import assets, sdf
 from .dc import dual_contouring
 from .isoext_ext import (
     Intersection,
@@ -23,6 +23,7 @@ __version__ = _version("isoext")
 
 __all__ = [
     "Intersection",
+    "assets",
     "SparseGrid",
     "UniformGrid",
     "dual_contouring",
