@@ -185,6 +185,7 @@ viewer
 api
 performance
 references
+changelog
 ```
 
 ```{toctree}
