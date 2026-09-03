@@ -295,8 +295,10 @@
 </div><div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Every 3D view in these docs is interactive: drag to orbit, right-drag
-to pan, scroll to zoom. The <a class="reference internal" href="viewer.html"><span class="doc">viewer page</span></a> covers the
-controls and how to open one from your own code.</p>
+to pan, scroll to zoom. Click a view and the keyboard works too: W, A,
+S and D move around, Q moves down and E moves up. The
+<a class="reference internal" href="viewer.html"><span class="doc">viewer page</span></a> covers the controls and how to open one
+from your own code.</p>
 </div>
 <p>An iso-surface is the set of points where a 3D scalar field equals a
 chosen value: the shape described by a signed distance function, or the
@@ -312,19 +314,29 @@ scratch, and <a class="reference internal" href="method_comparisons.html"><span 
 <ul class="simple">
 <li><p><strong>Extraction methods</strong> — sharing one grid interface, with more on the way</p>
 <ul>
-<li><p><a class="reference internal" href="marching_cubes.html"><span class="doc">Marching Cubes</span></a> — supports the same
-topology-correct MC33 as scikit-image (<code class="docutils literal notranslate"><span class="pre">lewiner</span></code>) and defaults to an
-improved variant with the corrected interior test (<code class="docutils literal notranslate"><span class="pre">vega</span></code>); see
-<a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a></p></li>
+<li><p><a class="reference internal" href="marching_cubes.html"><span class="doc">Marching Cubes</span></a> — the classic primal method,
+with a choice of lookup tables (<a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a>)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">vega</span></code> (default) — MC33 with the corrected interior test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> — the topology-correct MC33 tables of scikit-image</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> — reflection-free tables</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lorensen</span></code> — the original 1987 tables</p></li>
+</ul>
+</li>
 <li><p><a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching Tetrahedra</span></a> — ambiguity-free
 extraction by splitting cells into tetrahedra</p></li>
-<li><p><a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> — sharp features from
-surface normals (<code class="docutils literal notranslate"><span class="pre">ju</span></code>), or recovered from the SDF samples alone
-(<code class="docutils literal notranslate"><span class="pre">carrera</span></code>)</p></li>
+<li><p><a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> — one vertex per cell, placed
+on sharp features</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ju</span></code> (default) — from surface normals, the original QEF method</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">carrera</span></code> — from the signed distance samples alone, without normals</p></li>
+</ul>
+</li>
 <li><p><a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> — smooth dual meshes without
 needing normals</p></li>
 <li><p><a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> — sharp features
-with one vertex per surface sheet, so crossing sheets stay separate</p></li>
+with one vertex per surface sheet, so crossing sheets stay separate;
+takes any of the marching cubes tables above</p></li>
 </ul>
 </li>
 <li><p><a class="reference internal" href="grids.html"><span class="doc">Grids</span></a></p>
@@ -377,19 +389,15 @@ gradient and smoothing utilities (<a class="reference internal" href="sdf_guide.
 <td><p>6.7 ms</p></td>
 <td><p>3.2 ms</p></td>
 </tr>
-<tr class="row-even"><td><p>dual_contouring (ju)</p></td>
+<tr class="row-even"><td><p>dual_contouring</p></td>
 <td><p>7.0 ms</p></td>
 <td><p>2.3 ms</p></td>
 </tr>
-<tr class="row-odd"><td><p>dual_contouring (carrera)</p></td>
-<td><p>4.8 s</p></td>
-<td><p>2.6 s</p></td>
-</tr>
-<tr class="row-even"><td><p>surface_nets</p></td>
+<tr class="row-odd"><td><p>surface_nets</p></td>
 <td><p>6.9 ms</p></td>
 <td><p>2.2 ms</p></td>
 </tr>
-<tr class="row-odd"><td><p>dual_marching_cubes</p></td>
+<tr class="row-even"><td><p>dual_marching_cubes</p></td>
 <td><p>9.0 ms</p></td>
 <td><p>3.5 ms</p></td>
 </tr>

@@ -19,8 +19,10 @@
 
 ```{tip}
 Every 3D view in these docs is interactive: drag to orbit, right-drag
-to pan, scroll to zoom. The {doc}`viewer page <viewer>` covers the
-controls and how to open one from your own code.
+to pan, scroll to zoom. Click a view and the keyboard works too: W, A,
+S and D move around, Q moves down and E moves up. The
+{doc}`viewer page <viewer>` covers the controls and how to open one
+from your own code.
 ```
 
 An iso-surface is the set of points where a 3D scalar field equals a
@@ -36,19 +38,23 @@ scratch, and {doc}`method_comparisons` compares the methods.
 ## Features
 
 - **Extraction methods** — sharing one grid interface, with more on the way
-  - {doc}`Marching Cubes <marching_cubes>` — supports the same
-    topology-correct MC33 as scikit-image (`lewiner`) and defaults to an
-    improved variant with the corrected interior test (`vega`); see
-    {doc}`mc_variants`
+  - {doc}`Marching Cubes <marching_cubes>` — the classic primal method,
+    with a choice of lookup tables ({doc}`mc_variants`)
+    - `vega` (default) — MC33 with the corrected interior test
+    - `lewiner` — the topology-correct MC33 tables of scikit-image
+    - `nagae` — reflection-free tables
+    - `lorensen` — the original 1987 tables
   - {doc}`Marching Tetrahedra <marching_tetrahedra>` — ambiguity-free
     extraction by splitting cells into tetrahedra
-  - {doc}`Dual Contouring <dual_contouring>` — sharp features from
-    surface normals (`ju`), or recovered from the SDF samples alone
-    (`carrera`)
+  - {doc}`Dual Contouring <dual_contouring>` — one vertex per cell, placed
+    on sharp features
+    - `ju` (default) — from surface normals, the original QEF method
+    - `carrera` — from the signed distance samples alone, without normals
   - {doc}`Surface Nets <surface_nets>` — smooth dual meshes without
     needing normals
   - {doc}`Dual Marching Cubes <dual_marching_cubes>` — sharp features
-    with one vertex per surface sheet, so crossing sheets stay separate
+    with one vertex per surface sheet, so crossing sheets stay separate;
+    takes any of the marching cubes tables above
 - {doc}`Grids <grids>`
   - Dense uniform grids for full volumes
   - Sparse grids that only store cells near the surface, so memory scales
@@ -83,8 +89,7 @@ Median extraction times for a sphere SDF on an RTX 5090:
 |---------------------|--------------|-------------|
 | marching_cubes      | 5.4 ms       | 1.9 ms      |
 | marching_tetrahedra | 6.7 ms       | 3.2 ms      |
-| dual_contouring (ju) | 7.0 ms      | 2.3 ms      |
-| dual_contouring (carrera) | 4.8 s  | 2.6 s       |
+| dual_contouring     | 7.0 ms       | 2.3 ms      |
 | surface_nets        | 6.9 ms       | 2.2 ms      |
 | dual_marching_cubes | 9.0 ms       | 3.5 ms      |
 

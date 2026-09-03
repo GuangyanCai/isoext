@@ -11,11 +11,17 @@ An iso-surface is the set of points where a 3D scalar field equals a chosen valu
 ## Features
 
 - **Extraction methods** — sharing one grid interface, with more on the way
-  - **Marching Cubes** — supports the same topology-correct MC33 as scikit-image (`lewiner`) and defaults to an improved variant with the corrected interior test (`vega`); the classic `nagae` and `lorensen` tables are included too
+  - **Marching Cubes** — the classic primal method, with a choice of lookup tables
+    - `vega` (default) — MC33 with the corrected interior test
+    - `lewiner` — the topology-correct MC33 tables of scikit-image
+    - `nagae` — reflection-free tables
+    - `lorensen` — the original 1987 tables
   - **Marching Tetrahedra** — ambiguity-free extraction by splitting cells into tetrahedra
-  - **Dual Contouring** — sharp features from surface normals (`ju`), or recovered from the SDF samples alone (`carrera`)
+  - **Dual Contouring** — one vertex per cell, placed on sharp features
+    - `ju` (default) — from surface normals, the original QEF method
+    - `carrera` — from the signed distance samples alone, without normals
   - **Surface Nets** — smooth dual meshes without needing normals
-  - **Dual Marching Cubes** — sharp features with one vertex per surface sheet, so crossing sheets stay separate
+  - **Dual Marching Cubes** — sharp features with one vertex per surface sheet, so crossing sheets stay separate; takes any of the marching cubes tables above
 - **Grids**
   - Dense uniform grids for full volumes
   - Sparse grids that only store cells near the surface, so memory scales with area instead of volume
