@@ -67,15 +67,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # CUDA 12 needs only the compiler, runtime and Thrust components;
+          # CUDA 13 split the toolkit further (crt, nvvm, ...), so it is
+          # installed whole until the minimal set is known.
           - cuda: "12.6.3"
             tag: cu126
             archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90"
+            subpackages: '["nvcc", "cudart", "thrust"]'
           - cuda: "12.8.1"
             tag: cu128
             archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90-real;100-real;120"
+            subpackages: '["nvcc", "cudart", "thrust"]'
           - cuda: "13.0.3"
             tag: cu130
             archs: "75-real;80-real;86-real;89-real;90-real;100-real;120"
+            subpackages: '[]'   # everything
     steps:
       - uses: actions/checkout@v4
 
@@ -83,13 +89,12 @@ jobs:
         shell: bash
         run: sed -i 's/^version = "\(.*\)"/version = "\1+${{ matrix.tag }}"/' pyproject.toml
 
-      # The compiler, runtime and Thrust/CUB only; the full toolkit is 3 GB.
       - name: Install the CUDA toolkit
         uses: Jimver/cuda-toolkit@v0.2.36
         with:
           cuda: ${{ matrix.cuda }}
           method: network
-          sub-packages: '["nvcc", "cudart", "thrust"]'
+          sub-packages: ${{ matrix.subpackages }}
           log-file-suffix: win-${{ matrix.tag }}.txt
 
       # Put MSVC on the PATH so CMake's Ninja generator can drive it.
