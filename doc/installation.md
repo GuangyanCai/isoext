@@ -43,6 +43,7 @@ pip install isoext --extra-index-url https://guangyancai.github.io/isoext/whl/cu
 | Tag | Toolkit | GPUs |
 |---|---|---|
 | `cu126` | CUDA 12.6 | Maxwell (sm_50) to Hopper (sm_90) |
+| `cu128` | CUDA 12.8 | Maxwell (sm_50) to Blackwell (sm_120) |
 | `cu130` | CUDA 13.0 | Turing (sm_75) to Blackwell (sm_120) |
 
 The wheels need no toolkit or compiler, only a driver that supports the

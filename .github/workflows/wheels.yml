@@ -30,6 +30,9 @@ jobs:
           - cuda: "12.6"
             tag: cu126
             archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90"
+          - cuda: "12.8"
+            tag: cu128
+            archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90-real;100-real;120"
           - cuda: "13.0"
             tag: cu130
             archs: "75-real;80-real;86-real;89-real;90-real;100-real;120"
@@ -67,6 +70,9 @@ jobs:
           - cuda: "12.6.3"
             tag: cu126
             archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90"
+          - cuda: "12.8.1"
+            tag: cu128
+            archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90-real;100-real;120"
           - cuda: "13.0.3"
             tag: cu130
             archs: "75-real;80-real;86-real;89-real;90-real;100-real;120"
