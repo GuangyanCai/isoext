@@ -26,6 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Add the wheel index pages
+        run: python3 scripts/wheel_index.py "${{ github.repository }}" doc/_build/html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -6,7 +6,7 @@
 
 **GPU-accelerated iso-surface extraction for PyTorch**
 
-An iso-surface is the set of points where a 3D scalar field equals a chosen value: the shape described by a signed distance function, or the boundary of a density volume. `isoext` is a growing collection of iso-surface extraction methods that turn such fields into triangle meshes on the GPU, taking the field in as a PyTorch tensor and returning the mesh as tensors.
+An iso-surface is the set of points where a 3D scalar field equals a chosen value: the shape described by a signed distance function, or the boundary of a density volume. Fields like these come from neural networks, simulations and scans, while most tools consume triangle meshes. `isoext` is a growing collection of iso-surface extraction methods that turn such fields into triangle meshes on the GPU. The field values come in as a PyTorch tensor and the mesh comes back as tensors, so it fits directly into training loops and other GPU pipelines.
 
 ## Features
 
@@ -30,7 +30,12 @@ An iso-surface is the set of points where a 3D scalar field equals a chosen valu
 
 ## Installation
 
-Requires PyTorch with CUDA support; building from source needs CUDA 12.4+.
+Requires Python 3.10 or newer and PyTorch with CUDA support. `pip install`
+builds the extension from source, which needs a CUDA toolkit of version
+12.4 or newer and a C++ compiler. Prebuilt Linux wheels per CUDA version
+are attached to the GitHub releases; the
+[installation guide](https://guangyancai.github.io/isoext/installation.html)
+shows how to install them.
 
 ```bash
 pip install isoext
@@ -50,6 +55,20 @@ vertices, faces = isoext.marching_cubes(grid)
 server = viewer.show(vertices, faces)  # opens the mesh in the browser
 isoext.write_obj("sphere.obj", vertices, faces)
 ```
+
+## Performance
+
+Median extraction times for a sphere SDF on an RTX 5090:
+
+| Algorithm           | uniform 512³ | sparse 512³ |
+|---------------------|--------------|-------------|
+| marching_cubes      | 5.4 ms       | 1.9 ms      |
+| marching_tetrahedra | 6.7 ms       | 3.2 ms      |
+| dual_contouring     | 7.0 ms       | 2.3 ms      |
+| surface_nets        | 6.9 ms       | 2.2 ms      |
+| dual_marching_cubes | 9.0 ms       | 3.5 ms      |
+
+See the [performance page](https://guangyancai.github.io/isoext/performance.html) for the full table, the method variants, and how to reproduce it.
 
 ## Documentation
 

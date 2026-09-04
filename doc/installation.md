@@ -26,7 +26,31 @@ The simplest way to install:
 pip install isoext
 ```
 
-This will compile the CUDA extension during installation.
+This compiles the CUDA extension during installation, for exactly your
+GPU and toolkit.
+
+## Prebuilt Wheels
+
+Wheels for Linux x86_64 and Windows x64 are attached to each
+[GitHub release](https://github.com/GuangyanCai/isoext/releases), built
+per CUDA version like PyTorch's own wheels. Pick the tag of your PyTorch
+build (`torch.version.cuda`, so `cu126` for 12.6) and add its index:
+
+```bash
+pip install isoext --extra-index-url https://guangyancai.github.io/isoext/whl/cu126
+```
+
+| Tag | Toolkit | GPUs |
+|---|---|---|
+| `cu126` | CUDA 12.6 | Maxwell (sm_50) to Hopper (sm_90) |
+| `cu130` | CUDA 13.0 | Turing (sm_75) to Blackwell (sm_120) |
+
+The wheels need no toolkit or compiler, only a driver that supports the
+chosen CUDA version, the same requirement as the matching PyTorch build.
+They contain machine code for every listed GPU, so nothing is compiled at
+import time either. Without the extra index, pip builds from source as
+above, which is also the fallback if a wheel gives you trouble:
+`pip install --no-binary isoext isoext`.
 
 ```{note}
 On Windows, you may encounter errors due to path length limits (260 characters).

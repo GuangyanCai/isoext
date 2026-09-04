@@ -69,6 +69,18 @@ operator!=(float3 a, float3 b) {
     return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
+// CUB's unique-by-key compares keys with operator== even when a predicate
+// is supplied (CCCL 2.5, CUDA 12.6), so uint2 keys need one.
+inline __host__ __device__ bool
+operator==(uint2 a, uint2 b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+inline __host__ __device__ bool
+operator!=(uint2 a, uint2 b) {
+    return a.x != b.x || a.y != b.y;
+}
+
 inline __host__ __device__ float3
 operator/(float3 a, float b) {
     return make_float3(a.x / b, a.y / b, a.z / b);

@@ -94,7 +94,7 @@ ours_to_nb(NDArray<float3> &arr) {
 }
 
 struct PyGrid : Grid {
-    NB_TRAMPOLINE(Grid, 6);
+    NB_TRAMPOLINE(Grid);
 
     uint get_num_cells() const override { NB_OVERRIDE_PURE(get_num_cells); }
     uint get_num_points() const override { NB_OVERRIDE_PURE(get_num_points); }

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core >=0.4.3", "nanobind >=2.2.0"]
+requires = ["scikit-build-core >=0.4.3", "nanobind >=3.0.1,<4", "nanobind-backend >=1.0,<2"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -15,7 +15,10 @@ classifiers = [
     "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]
 
-dependencies = ["viser"]
+# nanobind-backend holds the Python-version-specific half of the bindings
+# (nanobind split mode); the extension itself is one stable-ABI wheel per
+# platform for Python 3.10 and newer.
+dependencies = ["viser", "nanobind-backend >=1.0,<2"]
 
 [project.urls]
 Homepage = "https://github.com/GuangyanCai/isoext"
@@ -29,20 +32,40 @@ minimum-version = "0.4"
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}"
 
-# Build stable ABI wheels for CPython 3.12+
+# Stable ABI wheels with a Python 3.10 floor (nanobind split mode)
 [tool.scikit-build.wheel]
-py-api = "cp312"
+py-api = "cp310"
 
 
 [tool.cibuildwheel]
+# One stable-ABI wheel per platform covers every Python version from 3.10.
+build = "cp310-*"
 # Necessary to see build output from the actual compilation
 build-verbosity = 1
+# Wheels are built per CUDA version (see .github/workflows/wheels.yml): the
+# toolkit is installed into the manylinux container and the embedded GPU
+# architectures are chosen per toolkit, both through these variables.
+environment-pass = ["ISOEXT_CUDA", "ISOEXT_CUDA_ARCHS"]
 
 # Run pytest to ensure that the package was correctly built. pytest-xdist runs
 # tests in worker processes so a CUDA crash is reported as a test failure
-# instead of aborting the whole session.
+# instead of aborting the whole session. CI runners have no GPU and skip it.
 test-command = "pytest -n 2 {project}/tests"
 test-requires = ["pytest", "pytest-xdist"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+# Ninja with MSVC from the runner's Visual Studio; nvcc's host compiler
+# check lags behind new Visual Studio releases, hence the override.
+environment = { SKBUILD_BUILD_DIR = "C:/isoext-build", CMAKE_GENERATOR = "Ninja", CUDAFLAGS = "-allow-unsupported-compiler", CMAKE_ARGS = "-DCMAKE_CUDA_ARCHITECTURES=$ISOEXT_CUDA_ARCHS" }
+
+[tool.cibuildwheel.linux]
+# CUDA exists for glibc x86_64 only: no musllinux, no i686.
+archs = ["x86_64"]
+skip = "*musllinux*"
+manylinux-x86_64-image = "manylinux_2_28"
+before-all = "bash {project}/scripts/manylinux_cuda.sh $ISOEXT_CUDA"
+environment = { SKBUILD_BUILD_DIR = "/tmp/isoext-build", PATH = "/usr/local/cuda/bin:$PATH", CUDACXX = "/usr/local/cuda/bin/nvcc", CC = "/opt/rh/gcc-toolset-13/root/usr/bin/gcc", CXX = "/opt/rh/gcc-toolset-13/root/usr/bin/g++", CUDAHOSTCXX = "/opt/rh/gcc-toolset-13/root/usr/bin/g++", CMAKE_ARGS = "-DCMAKE_CUDA_ARCHITECTURES=$ISOEXT_CUDA_ARCHS" }
 
 [tool.ruff]
 line-length = 120
@@ -77,7 +100,7 @@ platforms = ["linux-64"]
 python = "3.12.*"
 
 [tool.pixi.pypi-dependencies]
-nanobind = "*"
+nanobind = ">=3.0.1,<4"
 scikit-build-core = { version = "*", extras = ["pyproject"] }
 
 [tool.pixi.tasks]
