@@ -15,7 +15,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write   # upload release assets
+  actions: write    # dispatch the docs deployment for the wheel index
 
 jobs:
   linux:
