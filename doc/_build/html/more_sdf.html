@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="API Reference" href="api.html"><link rel="prev" title="Working with Occupancy Grids" href="occupancy_grids.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Viewer" href="viewer.html"><link rel="prev" title="Working with Occupancy Grids" href="occupancy_grids.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Using External SDF Libraries - isoext documentation</title>
@@ -202,11 +202,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_comparisons.html">Method Comparisons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul class="current">
@@ -215,10 +224,20 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -261,10 +280,12 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="using-external-sdf-libraries">
+          <section class="tex2jax_ignore mathjax_ignore" id="using-external-sdf-libraries">
 <h1>Using External SDF Libraries<a class="headerlink" href="#using-external-sdf-libraries" title="Link to this heading">¶</a></h1>
-<p>While <code class="docutils literal notranslate"><span class="pre">isoext</span></code> includes basic SDF primitives for convenience, you can use any SDF library to generate your scalar fields. One excellent option is <a class="reference external" href="https://github.com/fogleman/sdf"><code class="docutils literal notranslate"><span class="pre">sdf</span></code></a> by Michael Fogleman—a powerful Python library for constructing complex SDF.</p>
-<p>It can be installed by</p>
+<p>Any library that evaluates a field at 3D points can feed isoext. One
+option is <a class="reference external" href="https://github.com/fogleman/sdf"><code class="docutils literal notranslate"><span class="pre">sdf</span></code></a> by Michael
+Fogleman, a Python library for building complex SDFs, installed
+with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/fogleman/sdf
 </pre></div>
 </div>
@@ -320,7 +341,7 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">vertices</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (N, 3) float32</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        <span class="c1"># (M, 3) uint32</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">faces</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (M, 3) uint32</span>
 
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
 </pre></div>
@@ -335,7 +356,7 @@ Faces: torch.Size([222000, 3])
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/7f9a18f64439d275.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/d1edb25e3fa44ab6.viser&initialCameraPosition=19.367,19.367,13.557&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -350,12 +371,12 @@ Faces: torch.Size([222000, 3])
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="api.html">
+          <a class="next-page" href="viewer.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">API Reference</div>
+                <div class="title">Viewer</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

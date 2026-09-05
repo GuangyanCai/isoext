@@ -1,0 +1,337 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "f8f1d51c",
+   "metadata": {},
+   "source": [
+    "# What Is Iso-Surface Extraction?\n",
+    "\n",
+    "## Shapes as Functions\n",
+    "\n",
+    "A surface can be described without storing any geometry. Take a\n",
+    "function $f$ that assigns a number to every point in space, and pick\n",
+    "a threshold $c$. The points where $f(p) = c$ form a surface: the\n",
+    "**iso-surface** of $f$ at the **iso-level** $c$. Points where\n",
+    "$f(p) < c$ count as inside, points where $f(p) > c$ as outside. A\n",
+    "function used this way is called a **level set function**, and the\n",
+    "shape it carries is implicit: no vertices, no faces, just the rule.\n",
+    "\n",
+    "The simplest example is $f(p) = \\lVert p \\rVert$, the distance from\n",
+    "the origin. Its iso-surface at level 1 is the unit sphere; at level\n",
+    "2 it is a sphere of radius 2. One function holds every sphere at\n",
+    "once, and the iso-level picks which one to look at. Below is that\n",
+    "function sampled on a grid and extracted at three levels; the\n",
+    "`level=` argument selects the shell:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "9f35d172",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T06:26:41.596014Z",
+     "iopub.status.busy": "2026-07-07T06:26:41.595941Z",
+     "iopub.status.idle": "2026-07-07T06:26:42.544949Z",
+     "shell.execute_reply": "2026-07-07T06:26:42.544392Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"360\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/b2329656cae1b840.viser&initialCameraPosition=2.272,2.272,1.590&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7d95ef424b30>"
+      ]
+     },
+     "execution_count": 1,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import torch\n",
+    "import isoext\n",
+    "from isoext import viewer\n",
+    "\n",
+    "field = isoext.UniformGrid([48, 48, 48], aabb_min=[-1.2] * 3, aabb_max=[1.2] * 3)\n",
+    "field.set_values(field.get_points().norm(dim=-1))  # f(p) = |p|\n",
+    "\n",
+    "def shells(s):\n",
+    "    for level, color in [(1.0, (0.27, 0.51, 0.71)), (0.7, (0.24, 0.55, 0.36))]:\n",
+    "        v, f = isoext.marching_cubes(field, level=level)\n",
+    "        viewer.add_mesh(s, v, f, color=color, wireframe=True, name=f\"/level_{level}\")\n",
+    "        viewer.add_label(s, f\"level = {level}\", (0.0, 0.0, level + 0.12))\n",
+    "    viewer.add_label(s, \"level = 0.4\", (0.0, 0.0, 0.52))\n",
+    "\n",
+    "v, f = isoext.marching_cubes(field, level=0.4)\n",
+    "viewer.embed(v, f, color=\"coral\", height=360, draw=shells,\n",
+    "             frame=torch.tensor([[-1.15, -1.15, -1.15], [1.15, 1.15, 1.15]], device=\"cuda\"))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7b9c6b59",
+   "metadata": {},
+   "source": [
+    "## Signed Distance Functions\n",
+    "\n",
+    "A **signed distance function** (SDF) is a level set function with an\n",
+    "extra promise: its value at $p$ is the distance from $p$ to the\n",
+    "surface, made negative inside. The sphere of radius $r$ has the SDF\n",
+    "$f(p) = \\lVert p \\rVert - r$: zero exactly on the sphere, $-r$ at\n",
+    "the center, growing by one for every unit moved away. A general\n",
+    "level set function only promises the sign. Away from the surface its\n",
+    "values can be anything, and the same shape has infinitely many level\n",
+    "set functions but only one SDF.\n",
+    "\n",
+    "The distance meaning buys several things. Interpolated edge\n",
+    "crossings land close to the true surface, because distance changes\n",
+    "at a steady unit rate. Extracting at level $d$ gives the surface\n",
+    "offset outward by exactly $d$, which is what the sphere shells above\n",
+    "show. The gradient of an SDF is the unit surface normal, which\n",
+    "{doc}`dual_contouring` uses to reconstruct sharp features. And a\n",
+    "renderer can march a ray through an SDF by stepping the value at\n",
+    "each point, since no surface can be closer than the distance says.\n",
+    "\n",
+    "Extraction itself does not require true distances. Any level set\n",
+    "function works: a neural network's output, an occupancy volume from\n",
+    "a scan, the level set of a fluid solver. What matters is that the\n",
+    "values change sign across the surface.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b2fb896a",
+   "metadata": {},
+   "source": [
+    "## Sampling on a Grid\n",
+    "\n",
+    "A computer cannot evaluate $f$ at every point, so the field is sampled\n",
+    "on a regular grid, and everything downstream sees only those\n",
+    "samples. Below is the smallest possible case: a single grid cell\n",
+    "near a sphere of radius 1.2 centered at one of its corners. Each\n",
+    "corner is labeled with its sampled value, which is that corner's\n",
+    "signed distance to the sphere. The center corner reads -1.2 and is\n",
+    "inside (red); the other seven are positive and outside (blue). The\n",
+    "surface passes through the cell even though no sample sits exactly\n",
+    "on it:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "a90017ab",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T06:26:42.546375Z",
+     "iopub.status.busy": "2026-07-07T06:26:42.546247Z",
+     "iopub.status.idle": "2026-07-07T06:26:42.562440Z",
+     "shell.execute_reply": "2026-07-07T06:26:42.562019Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"340\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/f1902a993acb2073.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7d9826965c10>"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cell = isoext.UniformGrid([2, 2, 2])\n",
+    "center = torch.tensor([-1.0, -1.0, -1.0], device=\"cuda\")\n",
+    "values = (cell.get_points() - center).norm(dim=-1) - 1.2\n",
+    "cell.set_values(values)\n",
+    "\n",
+    "def value_labels(s):\n",
+    "    up = torch.tensor([0.0, 0.0, 0.17], device=\"cuda\")\n",
+    "    for p, val in zip(cell.get_points().reshape(-1, 3), values.reshape(-1)):\n",
+    "        viewer.add_label(s, f\"{val:+.1f}\", p + up)\n",
+    "\n",
+    "viewer.embed(grid=cell, height=340, draw=value_labels)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e1ea7861",
+   "metadata": {},
+   "source": [
+    "## Extraction\n",
+    "\n",
+    "Iso-surface extraction rebuilds the surface from the samples as a\n",
+    "triangle mesh. Wherever an edge of the cell connects an inside\n",
+    "corner to an outside one, the field must cross zero somewhere along\n",
+    "it, and interpolating the two corner values estimates where. Meshing\n",
+    "those crossings gives, for this cell, a single triangle that\n",
+    "separates the red corner from the rest:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "e7b591c5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T06:26:42.563659Z",
+     "iopub.status.busy": "2026-07-07T06:26:42.563584Z",
+     "iopub.status.idle": "2026-07-07T06:26:42.570392Z",
+     "shell.execute_reply": "2026-07-07T06:26:42.569959Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"340\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d0ef058c3a319f3a.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7d95ef0e3cb0>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "v, f = isoext.marching_cubes(cell)  # level=0 by default\n",
+    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, side=\"double\",\n",
+    "             height=340, grid=cell, draw=value_labels)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "daf54739",
+   "metadata": {},
+   "source": [
+    "## Zooming Out\n",
+    "\n",
+    "A real grid repeats this in every cell. Eight cells per side is\n",
+    "already enough to recognize a sphere; the {doc}`quickstart` example\n",
+    "uses 256 and produces hundreds of thousands of triangles. The\n",
+    "extraction methods differ in where they place the vertices and how\n",
+    "they connect them: each method's page explains its algorithm, and\n",
+    "{doc}`method_comparisons` compares them side by side.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "016a733a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T06:26:42.571557Z",
+     "iopub.status.busy": "2026-07-07T06:26:42.571484Z",
+     "iopub.status.idle": "2026-07-07T06:26:42.580426Z",
+     "shell.execute_reply": "2026-07-07T06:26:42.580204Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"340\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/32f1ad640002b113.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7d99985f2900>"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "grid = isoext.UniformGrid([9, 9, 9])\n",
+    "grid.set_values(grid.get_points().norm(dim=-1) - 0.8)\n",
+    "\n",
+    "v, f = isoext.marching_cubes(grid)\n",
+    "viewer.embed(v, f, wireframe=True, height=340, grid=grid)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3800f69e",
+   "metadata": {},
+   "source": [
+    "From here, {doc}`quickstart` runs the full pipeline on a real\n",
+    "shape, {doc}`grids` covers the data structures, and\n",
+    "{doc}`sdf_guide` provides ready-made fields to experiment with.\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,11 +1,9 @@
 """Tests for marching cubes algorithm with different methods."""
 
 import torch
+from conftest import populate_sparse_grid
 
 import isoext
-from isoext.sdf import SphereSDF
-
-from conftest import populate_sparse_grid
 
 
 def test_marching_cubes_nagae(sphere_grid):
@@ -76,29 +74,6 @@ def test_marching_cubes_empty_result():
     assert f.shape == (0, 3)
     assert v.is_cuda
     assert f.is_cuda
-
-
-def test_marching_cubes_with_make_grid():
-    """Test marching cubes using make_grid utility."""
-    from isoext.utils import make_grid
-
-    def sphere_sdf(x):
-        return x.norm(dim=-1) - 0.5
-
-    res = 16
-    grid_tensor = make_grid([-1, -1, -1, 1, 1, 1], res=res, device="cuda")
-    sdf = sphere_sdf(grid_tensor)
-
-    # Create UniformGrid and set values
-    grid = isoext.UniformGrid([res, res, res], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
-    grid.set_values(sdf)
-
-    v, f = isoext.marching_cubes(grid, level=0.0)
-
-    assert v.shape[1] == 3
-    assert f.shape[1] == 3
-    assert len(v) > 0
-    assert len(f) > 0
 
 
 def test_marching_cubes_non_uniform_resolution(sphere):

@@ -1,8 +1,8 @@
 """Benchmark isoext extraction algorithms.
 
 Usage:
-    pixi run --environment cu128 bench
-    pixi run --environment cu128 python benchmarks/benchmark.py \
+    pixi run bench
+    pixi run python benchmarks/benchmark.py \
         --res 32 64 --iters 50 --json benchmarks/results/out.json
 """
 
@@ -70,8 +70,14 @@ def benchmark_grid(grid, label, iters, results):
     cases = {
         "mc_nagae": lambda: isoext.marching_cubes(grid, method="nagae"),
         "mc_lorensen": lambda: isoext.marching_cubes(grid, method="lorensen"),
+        "mc_lewiner": lambda: isoext.marching_cubes(grid, method="lewiner"),
+        "mc_vega": lambda: isoext.marching_cubes(grid, method="vega"),
+        "marching_tets": lambda: isoext.marching_tetrahedra(grid),
         "get_intersection": lambda: isoext.get_intersection(grid, compute_normals=True),
-        "dual_contouring": lambda: isoext.dual_contouring(grid),
+        "dc_ju": lambda: isoext.dual_contouring(grid),
+        "dc_carrera": lambda: isoext.dual_contouring(grid, method="carrera"),
+        "dual_marching_cubes": lambda: isoext.dual_marching_cubes(grid),
+        "surface_nets": lambda: isoext.surface_nets(grid),
     }
     for algo, fn in cases.items():
         try:

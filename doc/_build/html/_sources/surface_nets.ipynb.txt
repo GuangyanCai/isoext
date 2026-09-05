@@ -1,0 +1,382 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "be9fd16c",
+   "metadata": {},
+   "source": [
+    "# Surface Nets\n",
+    "\n",
+    "Surface nets ({cite:t}`gibson1998`) is a dual method: instead of cutting triangles out of\n",
+    "each cell the way marching cubes does, it places one vertex inside\n",
+    "every cell the surface crosses and connects the vertices of\n",
+    "neighboring cells. It needs no normals and has no parameters to\n",
+    "tune, and the mesh comes out smooth and evenly tessellated.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "8f643fd8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:38.936593Z",
+     "iopub.status.busy": "2026-07-07T05:57:38.936504Z",
+     "iopub.status.idle": "2026-07-07T05:57:39.636485Z",
+     "shell.execute_reply": "2026-07-07T05:57:39.636032Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import isoext\n",
+    "from isoext import viewer\n",
+    "from isoext.sdf import CuboidSDF, MandelbulbSDF, get_sdf_normal\n",
+    "from isoext.utils import gaussian_smooth"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bb979aaa",
+   "metadata": {},
+   "source": [
+    "## Basic Usage\n",
+    "\n",
+    "```python\n",
+    "vertices, faces = isoext.surface_nets(grid, level=0.0)\n",
+    "```\n",
+    "\n",
+    "- `grid`: A `UniformGrid` or `SparseGrid` with values set\n",
+    "- `level`: The iso-value to extract (default: 0.0)\n",
+    "- `intersection`: Optional precomputed edge crossings from\n",
+    "  `get_intersection`; computed automatically when omitted\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "0d966964",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:39.638317Z",
+     "iopub.status.busy": "2026-07-07T05:57:39.638204Z",
+     "iopub.status.idle": "2026-07-07T05:57:39.811911Z",
+     "shell.execute_reply": "2026-07-07T05:57:39.811465Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "11,954 vertices, 23,904 triangles\n"
+     ]
+    }
+   ],
+   "source": [
+    "grid = isoext.UniformGrid([64, 64, 64])\n",
+    "grid.set_values(grid.get_points().norm(dim=-1) - 0.8)  # Sphere\n",
+    "\n",
+    "vertices, faces = isoext.surface_nets(grid)\n",
+    "print(f\"{vertices.shape[0]:,} vertices, {faces.shape[0]:,} triangles\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3ed878c3",
+   "metadata": {},
+   "source": [
+    "## How It Works\n",
+    "\n",
+    "One vertex goes inside each cell the surface crosses, at the\n",
+    "centroid of the points where the surface crosses the cell's edges.\n",
+    "The connectivity comes from the crossed edges: every crossed edge is\n",
+    "surrounded by four cells, and their four vertices are joined into a\n",
+    "quad that straddles the edge.\n",
+    "\n",
+    "Below, a flat field crosses every vertical edge of a 2x2x1 block of\n",
+    "cells (gold dots). Only the central edge has four cells around it,\n",
+    "so the mesh is exactly one quad, two triangles, connecting the four\n",
+    "cell vertices around that edge. The other crossings sit on boundary\n",
+    "edges with fewer neighbors and get no face:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "65daa864",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:39.813593Z",
+     "iopub.status.busy": "2026-07-07T05:57:39.813514Z",
+     "iopub.status.idle": "2026-07-07T05:57:39.916211Z",
+     "shell.execute_reply": "2026-07-07T05:57:39.915786Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/92ba03774dff01db.viser&initialCameraPosition=1.711,1.711,1.198&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x71893ef90da0>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "block = isoext.UniformGrid([3, 3, 2], aabb_min=[-1, -1, -0.5], aabb_max=[1, 1, 0.5])\n",
+    "block.set_values(block.get_points()[..., 2])  # a flat surface at z = 0\n",
+    "\n",
+    "v, f = isoext.surface_nets(block)\n",
+    "crossings = isoext.get_intersection(block).get_points()\n",
+    "print(f\"{f.shape[0]} triangles\")\n",
+    "viewer.embed(v, f, color=\"seagreen\", flat_shading=True, side=\"double\", height=300,\n",
+    "             grid=block,\n",
+    "             draw=lambda s: viewer.add_points(s, crossings, point_size=0.07))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bc0c0a24",
+   "metadata": {},
+   "source": [
+    "## A Smooth Field\n",
+    "\n",
+    "Because the vertex placement only uses where the surface crosses the\n",
+    "cell edges, surface nets works well on fields where normals are\n",
+    "unreliable: distance estimators, neural network outputs, or smoothed\n",
+    "data. The Mandelbulb below is a distance estimator, and the mesh\n",
+    "stays clean without any of the tuning dual contouring would need\n",
+    "here:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "22ae95fd",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:39.917638Z",
+     "iopub.status.busy": "2026-07-07T05:57:39.917516Z",
+     "iopub.status.idle": "2026-07-07T05:57:40.123296Z",
+     "shell.execute_reply": "2026-07-07T05:57:40.122826Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "84,708 vertices\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/20331a15f9e3035e.viser&initialCameraPosition=2.096,2.101,1.441&initialCameraLookAt=-0.005,0.000,-0.030&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x71893ef83aa0>"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bulb_grid = isoext.UniformGrid([128] * 3, aabb_min=[-1.2] * 3, aabb_max=[1.2] * 3)\n",
+    "values = MandelbulbSDF(iterations=6)(bulb_grid.get_points())\n",
+    "bulb_grid.set_values(gaussian_smooth(values, sigma=1.0))\n",
+    "\n",
+    "v, f = isoext.surface_nets(bulb_grid)\n",
+    "print(f\"{v.shape[0]:,} vertices\")\n",
+    "viewer.embed(v, f, color=\"coral\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1d11f70d",
+   "metadata": {},
+   "source": [
+    "## Versus Dual Contouring\n",
+    "\n",
+    "Surface nets and dual contouring build the same mesh connectivity\n",
+    "and differ only in where the vertex goes inside each cell. Dual\n",
+    "contouring solves for the point that best fits the surface normals,\n",
+    "which can reconstruct sharp edges and corners exactly -- provided it\n",
+    "gets good normals, here computed from the SDF gradient. Surface nets\n",
+    "averages the edge crossings, which rounds them off. The cube below\n",
+    "shows the difference. Use dual contouring when the field has sharp\n",
+    "features worth preserving and normals you trust; use surface nets\n",
+    "otherwise. See {doc}`dual_contouring` for the details on normals.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "d3f15d97",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:40.124790Z",
+     "iopub.status.busy": "2026-07-07T05:57:40.124713Z",
+     "iopub.status.idle": "2026-07-07T05:57:40.360507Z",
+     "shell.execute_reply": "2026-07-07T05:57:40.360114Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "dual_contouring: 6,146 vertices\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d623d211d254c60f.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x71893ef830b0>"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cube_grid = isoext.UniformGrid([64] * 3)\n",
+    "cube = CuboidSDF(size=[1.0, 1.0, 1.0])\n",
+    "cube_grid.set_values(cube(cube_grid.get_points()))\n",
+    "\n",
+    "its = isoext.get_intersection(cube_grid)\n",
+    "its.set_normals(get_sdf_normal(cube, its.get_points()))\n",
+    "v, f = isoext.dual_contouring(cube_grid, intersection=its)\n",
+    "print(f\"dual_contouring: {v.shape[0]:,} vertices\")\n",
+    "viewer.embed(v, f, color=\"goldenrod\", flat_shading=True, height=300)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "884bcef2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T05:57:40.361677Z",
+     "iopub.status.busy": "2026-07-07T05:57:40.361544Z",
+     "iopub.status.idle": "2026-07-07T05:57:40.370220Z",
+     "shell.execute_reply": "2026-07-07T05:57:40.369987Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "surface_nets:    6,146 vertices\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/c9ce4ae36859b202.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x71890cb9a1b0>"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "v, f = isoext.surface_nets(cube_grid)\n",
+    "print(f\"surface_nets:    {v.shape[0]:,} vertices\")\n",
+    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, height=300)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "76a1a424",
+   "metadata": {},
+   "source": [
+    "## References\n",
+    "\n",
+    "```{bibliography}\n",
+    ":filter: docname in docnames\n",
+    "```\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

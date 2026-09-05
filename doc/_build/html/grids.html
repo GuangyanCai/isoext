@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="SDF Utilities" href="sdf_guide.html"><link rel="prev" title="Dual Contouring" href="dual_contouring.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="SDF Utilities" href="sdf_guide.html"><link rel="prev" title="Marching Cubes Variants" href="mc_variants.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Working with Grids - isoext documentation</title>
@@ -202,11 +202,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_comparisons.html">Method Comparisons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul class="current">
@@ -215,10 +224,20 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -261,14 +280,13 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="working-with-grids">
+          <section class="tex2jax_ignore mathjax_ignore" id="working-with-grids">
 <h1>Working with Grids<a class="headerlink" href="#working-with-grids" title="Link to this heading">¶</a></h1>
-<p>Grids are the foundation of iso-surface extraction. They define <strong>where</strong> in 3D space we sample scalar values, and <strong>store</strong> those values for the extraction algorithms.</p>
-<p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> provides two grid types:</p>
-<ul class="simple">
-<li><p><strong>UniformGrid</strong> — Dense regular lattice, simple and fast</p></li>
-<li><p><strong>SparseGrid</strong> — Only stores active cells, memory-efficient for large sparse domains</p></li>
-</ul>
+<p>A grid defines where in space the scalar field is sampled and stores
+the sampled values for extraction. There are two grid types:
+<code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> samples a dense regular lattice, and <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code>
+stores only the cells you add, which saves memory when the surface
+occupies a small part of a large volume.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -287,9 +305,14 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">shape</span></code>: Number of cells in each dimension <code class="docutils literal notranslate"><span class="pre">[nx,</span> <span class="pre">ny,</span> <span class="pre">nz]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shape</span></code>: Number of sample points in each dimension <code class="docutils literal notranslate"><span class="pre">[nx,</span> <span class="pre">ny,</span> <span class="pre">nz]</span></code>,
+giving <code class="docutils literal notranslate"><span class="pre">(nx-1)</span> <span class="pre">*</span> <span class="pre">(ny-1)</span> <span class="pre">*</span> <span class="pre">(nz-1)</span></code> cells</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">aabb_min</span></code> / <code class="docutils literal notranslate"><span class="pre">aabb_max</span></code>: Axis-aligned bounding box corners</p></li>
 </ul>
+<p>The grid always spans its bounding box, whatever the shape: a
+non-cubic shape on the default <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">1]</span></code> box gives stretched,
+non-cubic cells. Pass a box with matching proportions when the cells
+should be cubes.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a 64³ grid spanning [-1, 1]³ (default bounds)</span>
@@ -310,7 +333,8 @@ Points: 262,144
 </section>
 <section id="getting-point-positions">
 <h3>Getting Point Positions<a class="headerlink" href="#getting-point-positions" title="Link to this heading">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">get_points()</span></code> returns the 3D coordinates of all grid points as a PyTorch tensor. This is essential for computing your scalar field values.</p>
+<p><code class="docutils literal notranslate"><span class="pre">get_points()</span></code> returns the coordinates of all grid points as a
+PyTorch tensor on the GPU. Evaluate your field at these points.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
@@ -339,12 +363,11 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 </section>
 <section id="setting-values">
 <h3>Setting Values<a class="headerlink" href="#setting-values" title="Link to this heading">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">set_values()</span></code> stores your scalar field on the grid. The values can come from <strong>anywhere</strong> — you’re not limited to the built-in SDF utilities.</p>
-<p>The iso-surface is extracted where values equal zero:</p>
-<ul class="simple">
-<li><p><strong>Negative</strong> values → inside the surface</p></li>
-<li><p><strong>Positive</strong> values → outside the surface</p></li>
-</ul>
+<p><code class="docutils literal notranslate"><span class="pre">set_values()</span></code> stores your scalar field on the grid. The values can
+come from anywhere: a formula, an SDF, a network, a simulation. The
+convention is that negative values are inside the surface and
+positive values outside, so the surface sits where the values cross
+the level, zero by default.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example 1: Simple sphere using raw PyTorch</span>
@@ -368,7 +391,7 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/a2ce8dd973f21c15.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/d80132206c99ae2e.viser&initialCameraPosition=1.382,1.382,0.968&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -383,9 +406,9 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 <span class="n">scale</span> <span class="o">=</span> <span class="mf">6.0</span>
 
 <span class="n">gyroid</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+    <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scale</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">gyroid</span><span class="p">)</span>
@@ -403,7 +426,36 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/fa78756a8cc02f13.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/6352a067269bd8c4.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="seeing-the-grid">
+<h3>Seeing the Grid<a class="headerlink" href="#seeing-the-grid" title="Link to this heading">¶</a></h3>
+<p>For small grids, the viewer can overlay the grid itself: gray lines
+are the cell edges, red dots are corners inside the surface, blue
+dots corners outside. Pass the grid to <code class="docutils literal notranslate"><span class="pre">viewer.embed</span></code> or
+<code class="docutils literal notranslate"><span class="pre">viewer.show</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">small</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="n">small</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">small</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">small</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">small</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="360"
+            src="_static/viser/index.html?playbackPath=../scenes/99ec906eca6ef3fa.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -441,13 +493,10 @@ Max corner: tensor([1., 1., 1.], device=&#39;cuda:0&#39;)
 </section>
 <section id="sparsegrid">
 <h2>SparseGrid<a class="headerlink" href="#sparsegrid" title="Link to this heading">¶</a></h2>
-<p>For large domains where the surface occupies only a small region, <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> saves memory by only storing active cells.</p>
-<p>This is useful for:</p>
-<ul class="simple">
-<li><p>High-resolution extraction in large scenes</p></li>
-<li><p>Adaptive refinement workflows</p></li>
-<li><p>Memory-constrained applications</p></li>
-</ul>
+<p>A <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> stores only the cells you add. When the surface
+occupies a thin shell of a large volume – a high-resolution scene,
+an adaptive refinement loop – that shell is all that costs memory
+and time.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a sparse grid with the same logical resolution</span>
@@ -473,14 +522,10 @@ After adding: 1000 active cells
 </div>
 <section id="sparsegrid-workflow">
 <h3>SparseGrid Workflow<a class="headerlink" href="#sparsegrid-workflow" title="Link to this heading">¶</a></h3>
-<p>With <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code>, you work with cells explicitly:</p>
-<ol class="arabic simple">
-<li><p><strong>Add cells</strong> where you expect the surface</p></li>
-<li><p><strong>Get points</strong> for those cells</p></li>
-<li><p><strong>Compute and set values</strong></p></li>
-<li><p><strong>Optionally filter</strong> to cells that actually cross the surface</p></li>
-<li><p><strong>Extract</strong> the mesh</p></li>
-</ol>
+<p>Cells are managed explicitly: add candidate cells, evaluate the
+field at their corner points, keep the cells the surface actually
+crosses, set the values, and extract. The example below does one
+pass of that:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Complete SparseGrid example</span>
@@ -495,13 +540,13 @@ After adding: 1000 active cells
 <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">:</span>
     <span class="c1"># Get corner positions for these cells</span>
     <span class="n">points</span> <span class="o">=</span> <span class="n">sparse_grid</span><span class="o">.</span><span class="n">get_points_by_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>  <span class="c1"># (N, 8, 3)</span>
-    
+
     <span class="c1"># Compute values at corners (sphere SDF)</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span>  <span class="c1"># (N, 8)</span>
-    
+
     <span class="c1"># Filter to cells that cross the surface (have both + and - values)</span>
     <span class="n">active</span> <span class="o">=</span> <span class="n">sparse_grid</span><span class="o">.</span><span class="n">filter_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="n">active</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">active</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">sparse_grid</span><span class="o">.</span><span class="n">add_cells</span><span class="p">(</span><span class="n">active</span><span class="p">)</span>
 
@@ -538,7 +583,44 @@ Extracted: 2,416,776 vertices
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/db1dbb3f795d929f.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/a4a2e84beb01a66d.viser&initialCameraPosition=1.383,1.383,0.968&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="seeing-active-cells">
+<h3>Seeing Active Cells<a class="headerlink" href="#seeing-active-cells" title="Link to this heading">¶</a></h3>
+<p>The overlay works for sparse grids too and draws only the active
+cells, which makes the sparseness itself visible: the cells hug the
+surface and the rest of the volume is empty.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shell</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">SparseGrid</span><span class="p">([</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">shell</span><span class="o">.</span><span class="n">get_potential_cell_indices</span><span class="p">(</span><span class="mi">100000</span><span class="p">):</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">shell</span><span class="o">.</span><span class="n">get_points_by_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="n">near</span> <span class="o">=</span> <span class="n">shell</span><span class="o">.</span><span class="n">filter_cell_indices</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">points</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">near</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">shell</span><span class="o">.</span><span class="n">add_cells</span><span class="p">(</span><span class="n">near</span><span class="p">)</span>
+<span class="n">shell</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.7</span><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">shell</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">shell</span><span class="o">.</span><span class="n">get_num_cells</span><span class="p">()</span><span class="si">}</span><span class="s2"> active cells of </span><span class="si">{</span><span class="mi">7</span><span class="o">**</span><span class="mi">3</span><span class="si">}</span><span class="s2"> possible&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">shell</span><span class="p">,</span> <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>98 active cells of 343 possible
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="360"
+            src="_static/viser/index.html?playbackPath=../scenes/5796fbcc469936f2.viser&initialCameraPosition=1.411,1.411,0.988&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -549,14 +631,10 @@ Extracted: 2,416,776 vertices
 </section>
 <section id="summary">
 <h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">¶</a></h2>
-<p><strong>Key points:</strong></p>
-<ul class="simple">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">get_points()</span></code> to get coordinates for computing your scalar field</p></li>
-<li><p>Values can come from anywhere: math formulas, SDFs, neural networks, simulations</p></li>
-<li><p>Negative values = inside, positive = outside, zero = surface</p></li>
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> for most cases, <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> for large sparse domains</p></li>
-</ul>
-<p><strong>Next:</strong> <a class="reference internal" href="marching_cubes.html"><span class="std std-doc">Marching Cubes</span></a> or <a class="reference internal" href="dual_contouring.html"><span class="std std-doc">Dual Contouring</span></a></p>
+<p>Evaluate your field at <code class="docutils literal notranslate"><span class="pre">get_points()</span></code>, store it with <code class="docutils literal notranslate"><span class="pre">set_values()</span></code>,
+and extract; values below the level count as inside. <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code>
+is the default choice, and <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code> pays off when the surface is
+small compared to the volume.</p>
 </section>
 </section>
 
@@ -574,14 +652,14 @@ Extracted: 2,416,776 vertices
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="dual_contouring.html">
+          <a class="prev-page" href="mc_variants.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Dual Contouring</div>
+                <div class="title">Marching Cubes Variants</div>
                 
               </div>
             </a>
@@ -620,11 +698,13 @@ Extracted: 2,416,776 vertices
 <li><a class="reference internal" href="#creating-a-grid">Creating a Grid</a></li>
 <li><a class="reference internal" href="#getting-point-positions">Getting Point Positions</a></li>
 <li><a class="reference internal" href="#setting-values">Setting Values</a></li>
+<li><a class="reference internal" href="#seeing-the-grid">Seeing the Grid</a></li>
 <li><a class="reference internal" href="#using-neural-networks">Using Neural Networks</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#sparsegrid">SparseGrid</a><ul>
 <li><a class="reference internal" href="#sparsegrid-workflow">SparseGrid Workflow</a></li>
+<li><a class="reference internal" href="#seeing-active-cells">Seeing Active Cells</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#summary">Summary</a></li>

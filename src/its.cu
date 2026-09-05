@@ -132,13 +132,13 @@ get_intersection(Grid *grid, float level, bool compute_normals) {
         NDArray<uint>::copy(cell_indices_dv.data().get(), {num_cells});
 
     // Get the intersection points.
-    thrust::for_each(
-        thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(num_cells),
-        get_its_op(its.points.data(), its.edges.data(), its.is_out.data(),
-                   its.cell_offsets.data(), cell_indices_dv.data().get(),
-                   edge_status.data().get(), view,
-                   edges_table_dv.data().get(), level));
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     get_its_op(its.points.data(), its.edges.data(),
+                                its.is_out.data(), its.cell_offsets.data(),
+                                cell_indices_dv.data().get(),
+                                edge_status.data().get(), view,
+                                edges_table_dv.data().get(), level));
 
     // Optionally compute normals
     if (compute_normals) {
@@ -161,14 +161,14 @@ namespace {
 __host__ __device__ float
 trilinear_interp(float3 t, const float *c_v) {
     // Interpolate along z first
-    float c00 = c_v[0] * (1 - t.z) + c_v[1] * t.z;  // x=0, y=0
-    float c01 = c_v[2] * (1 - t.z) + c_v[3] * t.z;  // x=0, y=1
-    float c10 = c_v[4] * (1 - t.z) + c_v[5] * t.z;  // x=1, y=0
-    float c11 = c_v[6] * (1 - t.z) + c_v[7] * t.z;  // x=1, y=1
+    float c00 = c_v[0] * (1 - t.z) + c_v[1] * t.z;   // x=0, y=0
+    float c01 = c_v[2] * (1 - t.z) + c_v[3] * t.z;   // x=0, y=1
+    float c10 = c_v[4] * (1 - t.z) + c_v[5] * t.z;   // x=1, y=0
+    float c11 = c_v[6] * (1 - t.z) + c_v[7] * t.z;   // x=1, y=1
 
     // Interpolate along y
-    float c0 = c00 * (1 - t.y) + c01 * t.y;  // x=0
-    float c1 = c10 * (1 - t.y) + c11 * t.y;  // x=1
+    float c0 = c00 * (1 - t.y) + c01 * t.y;   // x=0
+    float c1 = c10 * (1 - t.y) + c11 * t.y;   // x=1
 
     // Interpolate along x
     return c0 * (1 - t.x) + c1 * t.x;
@@ -197,7 +197,8 @@ struct compute_normals_op {
         view.load_corners(cell_indices[cell_idx], c_p, c_v);
 
         // Cell origin and size
-        // Corner 0 is at (min_x, min_y, min_z), corner 7 is at (max_x, max_y, max_z)
+        // Corner 0 is at (min_x, min_y, min_z), corner 7 is at (max_x, max_y,
+        // max_z)
         float3 cell_min = c_p[0];
         float3 cell_size = c_p[7] - c_p[0];
 
@@ -224,15 +225,15 @@ struct compute_normals_op {
             float3 t_pz = make_float3(t.x, t.y, fminf(t.z + eps, 0.99f));
             float3 t_mz = make_float3(t.x, t.y, fmaxf(t.z - eps, 0.01f));
 
-            float dfdx = (trilinear_interp(t_px, c_v) -
-                          trilinear_interp(t_mx, c_v)) /
-                         ((t_px.x - t_mx.x) * cell_size.x);
-            float dfdy = (trilinear_interp(t_py, c_v) -
-                          trilinear_interp(t_my, c_v)) /
-                         ((t_py.y - t_my.y) * cell_size.y);
-            float dfdz = (trilinear_interp(t_pz, c_v) -
-                          trilinear_interp(t_mz, c_v)) /
-                         ((t_pz.z - t_mz.z) * cell_size.z);
+            float dfdx =
+                (trilinear_interp(t_px, c_v) - trilinear_interp(t_mx, c_v)) /
+                ((t_px.x - t_mx.x) * cell_size.x);
+            float dfdy =
+                (trilinear_interp(t_py, c_v) - trilinear_interp(t_my, c_v)) /
+                ((t_py.y - t_my.y) * cell_size.y);
+            float dfdz =
+                (trilinear_interp(t_pz, c_v) - trilinear_interp(t_mz, c_v)) /
+                ((t_pz.z - t_mz.z) * cell_size.z);
 
             float3 grad = make_float3(dfdx, dfdy, dfdz);
 
@@ -254,10 +255,10 @@ struct compute_normals_op {
 void
 compute_intersection_normals(Intersection &its, Grid *grid) {
     uint num_cells = its.cell_indices.size();
-    thrust::for_each(
-        thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(num_cells),
-        compute_normals_op(its.normals.data(), its.points.data(),
-                           its.cell_offsets.data(), its.cell_indices.data(),
-                           grid->get_view()));
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_cells),
+                     compute_normals_op(its.normals.data(), its.points.data(),
+                                        its.cell_offsets.data(),
+                                        its.cell_indices.data(),
+                                        grid->get_view()));
 }

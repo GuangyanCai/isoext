@@ -1,0 +1,554 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "d0f825a1",
+   "metadata": {},
+   "source": [
+    "# Method Comparisons\n",
+    "\n",
+    "The field is only known at the grid corners, and every extraction\n",
+    "method reconstructs the surface from those samples. They all answer\n",
+    "the same two questions: where do the mesh vertices go, and how are\n",
+    "they connected? Each method's page explains its own answer. The\n",
+    "comparisons below put the answers side by side, on fields of a few\n",
+    "cells where every vertex is visible.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "93a19ae2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:09.639928Z",
+     "iopub.status.busy": "2026-09-03T04:23:09.639842Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.363976Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.363225Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import torch\n",
+    "import isoext\n",
+    "from isoext import viewer\n",
+    "from isoext.sdf import get_sdf_normal, project_to_surface"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "91574c2b",
+   "metadata": {},
+   "source": [
+    "## Two Families\n",
+    "\n",
+    "Every method places its geometry using the edge crossings:\n",
+    "wherever a grid edge runs from an inside corner to an outside one,\n",
+    "the surface crosses it, at a point interpolated from the two corner\n",
+    "values. The primal methods,\n",
+    "{doc}`marching_cubes` and {doc}`marching_tetrahedra`, put their\n",
+    "vertices at the crossings themselves and cut triangles out of each\n",
+    "cell by table lookup. The dual methods put one vertex inside each\n",
+    "crossed cell -- {doc}`surface_nets` at the centroid of the cell's\n",
+    "crossings, {doc}`dual_contouring` at the point that best fits the\n",
+    "SDF samples or the normals, and {doc}`dual_marching_cubes` one per\n",
+    "surface piece rather than one per cell -- and join them with one\n",
+    "quad around each crossed edge.\n",
+    "\n",
+    "The families are easy to tell apart on the smallest possible sphere.\n",
+    "One inside sample on 2x2x2 cells comes out as an octahedron under\n",
+    "marching cubes, with its 6 vertices on the grid edges, and as a cube\n",
+    "under surface nets, with its 8 vertices inside the cells. The two\n",
+    "meshes are duals of each other:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "9faf61d9",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:10.365644Z",
+     "iopub.status.busy": "2026-09-03T04:23:10.365512Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.624824Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.624147Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "marching_cubes: 6 vertices, 8 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"320\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/3ef8986a8f63f85a.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cb33c777a0>"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "tiny = isoext.UniformGrid([3, 3, 3])\n",
+    "tiny.set_values(tiny.get_points().norm(dim=-1) - 0.7)\n",
+    "\n",
+    "v, f = isoext.marching_cubes(tiny)\n",
+    "print(f\"marching_cubes: {v.shape[0]} vertices, {f.shape[0]} triangles\")\n",
+    "viewer.embed(v, f, wireframe=True, color=\"orange\", height=320, grid=tiny)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "24216c58",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:10.626431Z",
+     "iopub.status.busy": "2026-09-03T04:23:10.626299Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.634396Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.634022Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "surface_nets:   8 vertices, 12 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"320\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/fbb1e6a38a279c8e.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cb521e9ac0>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "v, f = isoext.surface_nets(tiny)\n",
+    "print(f\"surface_nets:   {v.shape[0]} vertices, {f.shape[0]} triangles\")\n",
+    "viewer.embed(v, f, wireframe=True, color=\"seagreen\", height=320, grid=tiny)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7fc0a6a8",
+   "metadata": {},
+   "source": [
+    "## How the Methods Relate\n",
+    "\n",
+    "| Method | Vertices | Faces | Ambiguities |\n",
+    "|---|---|---|---|\n",
+    "| Marching cubes | on grid edges | per cell, from a table | resolved by the variant |\n",
+    "| Marching tetrahedra | on tetrahedron edges | per tetrahedron | none |\n",
+    "| Surface nets | one per cell, at the centroid | one quad per crossed edge | none |\n",
+    "| Dual contouring | one per cell, fitted to the SDF samples or the normals | one quad per crossed edge | none |\n",
+    "| Dual marching cubes | one per patch, centroid or QEF | one quad per crossed edge | resolved by the variant |\n",
+    "\n",
+    "All of them run on the same grids, share the same edge crossings, and\n",
+    "answer the same two questions from the top of the page. The primal\n",
+    "methods answer with vertices at the crossings themselves, so the\n",
+    "mesh interpolates the samples exactly. The dual methods answer with\n",
+    "faces there instead, which tends to give better-shaped triangles\n",
+    "and, given SDF samples or good normals, sharp features -- at the\n",
+    "cost of vertex positions that are estimated rather than\n",
+    "interpolated.\n",
+    "\n",
+    "The guarantees differ too. Every method produces a closed mesh when\n",
+    "the surface stays inside the grid (`lorensen` excepted: its tables\n",
+    "can crack). Manifoldness is the primal family's structural\n",
+    "advantage: every edge borders exactly two triangles and the mesh\n",
+    "never touches itself. The dual methods can fail that in two ways. A\n",
+    "*pinch* is two surface sheets forced through a single vertex: a cell\n",
+    "crossed by several sheets gets only one vertex in surface nets and\n",
+    "dual contouring, so the sheets meet there in an hourglass. A *tunnel\n",
+    "edge* is four quads sharing one edge, which happens when the surface\n",
+    "passes through a cell face twice. {doc}`Dual marching cubes <dual_marching_cubes>` eliminates the\n",
+    "pinches (one vertex per sheet) but keeps the tunnel edges.\n",
+    "\n",
+    "The criteria below follow the comparison table of\n",
+    "{cite:t}`shen2023`, which surveys these methods as bases for\n",
+    "gradient-based mesh optimization; each entry here is backed by a\n",
+    "demonstration on this page or a measurement in the test suite.\n",
+    "\n",
+    "| Method | Sharp features | Uniform triangles | Intersection-free | Manifold |\n",
+    "|---|---|---|---|---|\n",
+    "| Marching cubes | no | no | yes | yes |\n",
+    "| Marching tetrahedra | no | no | yes | yes |\n",
+    "| Surface nets | no | yes | yes | pinches and tunnel edges |\n",
+    "| Dual contouring | yes | yes | no | pinches and tunnel edges |\n",
+    "| Dual marching cubes | with normals | yes | yes | tunnel edges only |\n",
+    "\n",
+    "Dual contouring gets sharp features from normals on the\n",
+    "intersection (`ju`, the default) or, with its `carrera` variant, from\n",
+    "the SDF samples alone; dual marching cubes needs the normals, as\n",
+    "shown below. Uniform triangles refers to the triangle shapes: the\n",
+    "marching methods produce slivers wherever a crossing sits close to\n",
+    "a corner (their worst triangles have edges differing by an order of\n",
+    "magnitude), while the dual methods' vertices sit centrally in their\n",
+    "cells. Intersection-free fails for dual contouring because its\n",
+    "vertices may leave their cells: for `ju` with `clamp=False`, and\n",
+    "always for `carrera` (see {doc}`dual_contouring`).\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a1bde5bd",
+   "metadata": {},
+   "source": [
+    "## Seeing the Failure Cases\n",
+    "\n",
+    "Each failure fits on a tiny grid. In the scenes below the same field\n",
+    "is extracted three ways, side by side: marching cubes in blue on the\n",
+    "left, dual contouring in gold in the middle, dual marching cubes in\n",
+    "red on the right.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "2170533b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:10.635647Z",
+     "iopub.status.busy": "2026-09-03T04:23:10.635581Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.638739Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.638300Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "def compare(grid, its=None, side=\"front\", height=320, dc_method=\"ju\"):\n",
+    "    span = torch.tensor([2.8, 0.0, 0.0], device=\"cuda\")\n",
+    "    lo = grid.get_points().reshape(-1, 3).amin(dim=0)\n",
+    "    hi = grid.get_points().reshape(-1, 3).amax(dim=0)\n",
+    "    methods = [\n",
+    "        (isoext.marching_cubes, \"steelblue\", -1),\n",
+    "        (isoext.dual_contouring, \"goldenrod\", 0),\n",
+    "        (isoext.dual_marching_cubes, \"crimson\", 1),\n",
+    "    ]\n",
+    "    results = []\n",
+    "    for fn, color, k in methods:\n",
+    "        kwargs = {\"method\": dc_method} if k == 0 else {}\n",
+    "        if its is not None and k != -1:\n",
+    "            kwargs[\"intersection\"] = its\n",
+    "        v, f = fn(grid, **kwargs)\n",
+    "        print(f\"{fn.__name__:20s} {len(v):3d} vertices, {len(f):3d} triangles\")\n",
+    "        results.append((v + k * span, f, color, k))\n",
+    "\n",
+    "    center = (lo + hi) / 2\n",
+    "\n",
+    "    def draw(s):\n",
+    "        for v, f, color, k in results[1:]:\n",
+    "            viewer.add_mesh(s, v, f, color=color, flat_shading=True, side=side, name=f\"/m{k}\")\n",
+    "        for fn, _, k in methods:\n",
+    "            viewer.add_label(s, fn.__name__, (float(center[0]) + k * 2.8, float(center[1]), float(hi[2]) + 0.4))\n",
+    "        for k in (-1, 0, 1):\n",
+    "            g = isoext.UniformGrid(\n",
+    "                list(grid.get_values().shape), aabb_min=(lo + k * span).tolist(), aabb_max=(hi + k * span).tolist()\n",
+    "            )\n",
+    "            g.set_values(grid.get_values())\n",
+    "            viewer.add_grid(s, g, name=f\"/g{k}\")\n",
+    "\n",
+    "    v0, f0, c0, _ = results[0]\n",
+    "    frame = torch.stack([lo - span - 0.3, hi + span + 0.3])\n",
+    "    return viewer.embed(v0, f0, color=c0, flat_shading=True, side=side, draw=draw, frame=frame, height=height)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6f949245",
+   "metadata": {},
+   "source": [
+    "### Pinches\n",
+    "\n",
+    "Three shallow blobs at mutually diagonal corners of the center cell.\n",
+    "Marching cubes extracts three separate pieces, and so does dual\n",
+    "marching cubes: the center cell holds three patches and gets three\n",
+    "vertices. Dual contouring can only give each cell one vertex, so the\n",
+    "sheets pinch together into a single piece -- it has five fewer\n",
+    "vertices than dual marching cubes, and each missing vertex is a\n",
+    "pinch point:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "0da3cf29",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:10.640038Z",
+     "iopub.status.busy": "2026-09-03T04:23:10.639971Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.659960Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.658862Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "marching_cubes        18 vertices,  24 triangles\n",
+      "dual_contouring       19 vertices,  36 triangles\n",
+      "dual_marching_cubes   24 vertices,  36 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"320\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/7dfdf6ef7f1ca15f.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cd8d864770>"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "t = 1 / 3\n",
+    "blobs = isoext.UniformGrid([4, 4, 4])\n",
+    "p = blobs.get_points()\n",
+    "centers = torch.tensor([[-t, -t, -t], [-t, t, t], [t, -t, t]], device=\"cuda\")\n",
+    "blobs.set_values((p[..., None, :] - centers).norm(dim=-1).amin(-1) - 0.25)\n",
+    "compare(blobs)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ba740f99",
+   "metadata": {},
+   "source": [
+    "### Sharp Features\n",
+    "\n",
+    "A tilted box corner ({doc}`dual_contouring` shows how the QEF finds\n",
+    "it). With refined crossings and SDF normals, both dual methods put a\n",
+    "vertex exactly on the corner point; marching cubes cannot leave the grid edges and chamfers it,\n",
+    "leaving its nearest vertex a full cell away from the true corner:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "8301bd05",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:10.661490Z",
+     "iopub.status.busy": "2026-09-03T04:23:10.661397Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.949092Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.948662Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "marching_cubes        18 vertices,  21 triangles\n",
+      "dual_contouring       11 vertices,  10 triangles\n",
+      "dual_marching_cubes   11 vertices,  10 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"320\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d1e91b30d83c6ab5.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cb33c8be30>"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "planes = torch.nn.functional.normalize(\n",
+    "    torch.tensor(\n",
+    "        [\n",
+    "            [1.0, 0.3, -0.2],\n",
+    "            [-0.25, 1.0, 0.3],\n",
+    "            [0.2, -0.3, 1.0],\n",
+    "        ],\n",
+    "        device=\"cuda\",\n",
+    "    ),\n",
+    "    dim=-1,\n",
+    ")\n",
+    "corner = torch.tensor([0.1, 0.15, 0.2], device=\"cuda\")\n",
+    "corner_box = lambda q: ((q - corner) @ planes.T).amax(dim=-1)\n",
+    "\n",
+    "sharp = isoext.UniformGrid([4, 4, 4])\n",
+    "sharp.set_values(corner_box(sharp.get_points()))\n",
+    "its = isoext.get_intersection(sharp)\n",
+    "pts = project_to_surface(corner_box, its.get_points())\n",
+    "its.set_points(pts)\n",
+    "its.set_normals(get_sdf_normal(corner_box, pts))\n",
+    "compare(sharp, its, side=\"double\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7c73b8ff",
+   "metadata": {},
+   "source": [
+    "### Tunnel Edges\n",
+    "\n",
+    "Two deep blobs on a face diagonal. The bilinear face test joins them\n",
+    "through the shared face, so every method extracts one connected\n",
+    "dumbbell -- marching cubes stays manifold, but for both dual methods\n",
+    "the dual edge across that face is used by four quads. This tunnel\n",
+    "edge is the one non-manifold configuration dual marching cubes keeps\n",
+    "from the dual family:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "71c72010",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T04:23:10.950422Z",
+     "iopub.status.busy": "2026-09-03T04:23:10.950288Z",
+     "iopub.status.idle": "2026-09-03T04:23:10.964023Z",
+     "shell.execute_reply": "2026-09-03T04:23:10.963785Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "marching_cubes        12 vertices,  20 triangles\n",
+      "dual_contouring       14 vertices,  24 triangles\n",
+      "dual_marching_cubes   14 vertices,  24 triangles\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"320\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/342071aacc5fd476.viser&initialCameraPosition=5.126,5.126,3.588&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x74cb21ecbe90>"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "pair = isoext.UniformGrid([4, 4, 4])\n",
+    "p = pair.get_points()\n",
+    "centers = torch.tensor([[-t, -t, -t], [-t, t, t]], device=\"cuda\")\n",
+    "pair.set_values((p[..., None, :] - centers).norm(dim=-1).amin(-1) - 0.5)\n",
+    "compare(pair)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b845fbaf",
+   "metadata": {},
+   "source": [
+    "{doc}`performance` compares the methods' speed, and the papers\n",
+    "behind every method are collected in {doc}`references`.\n",
+    "\n",
+    "## References\n",
+    "\n",
+    "```{bibliography}\n",
+    ":filter: docname in docnames\n",
+    "```\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

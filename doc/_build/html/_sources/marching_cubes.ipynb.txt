@@ -6,7 +6,9 @@
    "source": [
     "# Marching Cubes\n",
     "\n",
-    "Marching Cubes extracts a **triangular mesh** from a scalar field. It examines each cell in the grid and generates triangles where the iso-surface passes through.\n"
+    "Marching cubes is the workhorse of iso-surface extraction: it visits\n",
+    "every grid cell and cuts triangles out of it based on which corners\n",
+    "are inside the surface. It is the default choice for most fields.\n"
    ]
   },
   {
@@ -14,10 +16,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:20.152460Z",
-     "iopub.status.busy": "2026-07-05T04:06:20.152358Z",
-     "iopub.status.idle": "2026-07-05T04:06:20.986455Z",
-     "shell.execute_reply": "2026-07-05T04:06:20.986097Z"
+     "iopub.execute_input": "2026-07-07T06:38:55.126993Z",
+     "iopub.status.busy": "2026-07-07T06:38:55.126908Z",
+     "iopub.status.idle": "2026-07-07T06:38:55.990495Z",
+     "shell.execute_reply": "2026-07-07T06:38:55.990053Z"
     }
    },
    "outputs": [],
@@ -29,7 +31,7 @@
     "# Setup: create a grid with a sphere\n",
     "grid = isoext.UniformGrid([64, 64, 64])\n",
     "points = grid.get_points()\n",
-    "grid.set_values(points.norm(dim=-1) - 0.7)\n"
+    "grid.set_values(points.norm(dim=-1) - 0.7)"
    ]
   },
   {
@@ -39,12 +41,12 @@
     "## Basic Usage\n",
     "\n",
     "```python\n",
-    "vertices, faces = isoext.marching_cubes(grid, level=0.0, method=\"nagae\")\n",
+    "vertices, faces = isoext.marching_cubes(grid, level=0.0, method=\"vega\")\n",
     "```\n",
     "\n",
     "- `grid`: A `UniformGrid` or `SparseGrid` with values set\n",
     "- `level`: The iso-value to extract (default: 0.0)\n",
-    "- `method`: Algorithm variant (`\"nagae\"` or `\"lorensen\"`)\n"
+    "- `method`: Algorithm variant (`\"vega\"`, `\"lewiner\"`, `\"nagae\"`, or `\"lorensen\"`)\n"
    ]
   },
   {
@@ -52,10 +54,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:20.988789Z",
-     "iopub.status.busy": "2026-07-05T04:06:20.988664Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.072786Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.072373Z"
+     "iopub.execute_input": "2026-07-07T06:38:55.991993Z",
+     "iopub.status.busy": "2026-07-07T06:38:55.991853Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.048984Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.048769Z"
     }
    },
    "outputs": [
@@ -74,7 +76,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/a2ce8dd973f21c15.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d80132206c99ae2e.viser&initialCameraPosition=1.382,1.382,0.968&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -82,7 +84,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7b248d90f320>"
+       "<IPython.lib.display.IFrame at 0x79ce04a71430>"
       ]
      },
      "execution_count": 2,
@@ -94,9 +96,88 @@
     "vertices, faces = isoext.marching_cubes(grid)\n",
     "\n",
     "print(f\"Vertices: {vertices.shape}\")  # (N, 3) float32\n",
-    "print(f\"Faces: {faces.shape}\")        # (M, 3) uint32\n",
+    "print(f\"Faces: {faces.shape}\")  # (M, 3) uint32\n",
     "\n",
-    "viewer.embed(vertices, faces)\n"
+    "viewer.embed(vertices, faces)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## How It Works\n",
+    "\n",
+    "Marching cubes visits every cell independently. Each of a cell's 8\n",
+    "corners is either inside or outside the surface, giving 256 possible\n",
+    "sign patterns, and a lookup table maps each pattern to a set of\n",
+    "triangles. The triangle vertices sit on the cell's edges. If one end of an\n",
+    "edge is inside the surface and the other is outside, the surface has\n",
+    "to cross that edge somewhere in between, and interpolating the two\n",
+    "values estimates where: with level-relative endpoint values $v_a$\n",
+    "and $v_b$, the crossing sits at the fraction $t = v_a / (v_a - v_b)$\n",
+    "of the way along the edge. An endpoint whose value is close to zero\n",
+    "is close to the surface, so it pulls the crossing toward itself.\n",
+    "\n",
+    "The simplest pattern has one corner inside, the red dot below. The\n",
+    "surface crosses the three edges that connect it to outside corners;\n",
+    "the gold dots mark those crossings. For this pattern the lookup\n",
+    "table produces one triangle, and the three crossings are its\n",
+    "vertices:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-07-07T06:38:56.066600Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.066477Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.122420Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.122016Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "1 triangle(s)\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"300\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/0510b7a061a7acbb.viser&initialCameraPosition=1.976,1.976,1.383&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x79cbac3567b0>"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cell = isoext.UniformGrid([2, 2, 2])\n",
+    "cell.set_values(torch.tensor(\n",
+    "    [-0.5, 0.3, 0.4, 0.5, 0.6, 0.4, 0.3, 0.2], device=\"cuda\"\n",
+    ").reshape(2, 2, 2))\n",
+    "\n",
+    "crossings = isoext.get_intersection(cell).get_points()\n",
+    "v, f = isoext.marching_cubes(cell)\n",
+    "print(f\"{f.shape[0]} triangle(s)\")\n",
+    "viewer.embed(v, f, color=\"steelblue\", flat_shading=True, side=\"double\", height=300,\n",
+    "             grid=cell, draw=lambda s: viewer.add_points(s, crossings, point_size=0.09))\n"
    ]
   },
   {
@@ -105,28 +186,29 @@
    "source": [
     "## Algorithm Variants\n",
     "\n",
-    "### `nagae` (default)\n",
+    "The `method` argument selects between four variants that share the\n",
+    "same interface:\n",
     "\n",
-    "Uses only rotations to handle ambiguous cases, producing **watertight meshes** without holes or cracks.\n",
+    "- `vega` (default) resolves topological ambiguities by following the\n",
+    "  field's interpolant, using the corrected interior test.\n",
+    "- `lewiner` follows the interpolant with the older interior test;\n",
+    "  kept for comparison with other implementations.\n",
+    "- `nagae` uses fixed tables; always closed and slightly faster.\n",
+    "- `lorensen` is the original 1987 algorithm; ambiguous cells can\n",
+    "  leave small cracks.\n",
     "\n",
-    "From: *\"Surface construction and contour generation from volume data\"* (1991)\n",
-    "\n",
-    "### `lorensen`\n",
-    "\n",
-    "The original Marching Cubes algorithm. Uses rotations and reflections, which can create ambiguities leading to small holes in the mesh.\n",
-    "\n",
-    "From: *\"Marching cubes: A high resolution 3D surface construction algorithm\"* (1987)\n"
+    "See {doc}`mc_variants` for the differences in detail.\n"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:21.087022Z",
-     "iopub.status.busy": "2026-07-05T04:06:21.086887Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.105181Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.104713Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.123797Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.123667Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.160347Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.159915Z"
     }
    },
    "outputs": [
@@ -134,17 +216,17 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Nagae:    18,332 triangles\n",
-      "Lorensen: 18,332 triangles\n"
+      "nagae     18,332 triangles\n",
+      "lorensen  18,332 triangles\n",
+      "lewiner   18,332 triangles\n",
+      "vega      18,332 triangles\n"
      ]
     }
    ],
    "source": [
-    "v_nagae, f_nagae = isoext.marching_cubes(grid, method=\"nagae\")\n",
-    "v_lorensen, f_lorensen = isoext.marching_cubes(grid, method=\"lorensen\")\n",
-    "\n",
-    "print(f\"Nagae:    {f_nagae.shape[0]:,} triangles\")\n",
-    "print(f\"Lorensen: {f_lorensen.shape[0]:,} triangles\")\n"
+    "for method in [\"nagae\", \"lorensen\", \"lewiner\", \"vega\"]:\n",
+    "    v, f = isoext.marching_cubes(grid, method=method)\n",
+    "    print(f\"{method:9s} {f.shape[0]:,} triangles\")"
    ]
   },
   {
@@ -158,13 +240,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:21.107009Z",
-     "iopub.status.busy": "2026-07-05T04:06:21.106941Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.109825Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.109610Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.161797Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.161659Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.165195Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.164857Z"
     }
    },
    "outputs": [
@@ -182,7 +264,7 @@
     "# Extract at different iso-levels\n",
     "for level in [-0.2, 0.0, 0.2]:\n",
     "    v, f = isoext.marching_cubes(grid, level=level)\n",
-    "    print(f\"level={level:+.1f}: {v.shape[0]:,} vertices (radius ≈ {0.7 - level:.1f})\")\n"
+    "    print(f\"level={level:+.1f}: {v.shape[0]:,} vertices (radius ≈ {0.7 - level:.1f})\")"
    ]
   },
   {
@@ -196,13 +278,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:21.111319Z",
-     "iopub.status.busy": "2026-07-05T04:06:21.111254Z",
-     "iopub.status.idle": "2026-07-05T04:06:21.125969Z",
-     "shell.execute_reply": "2026-07-05T04:06:21.125772Z"
+     "iopub.execute_input": "2026-07-07T06:38:56.166593Z",
+     "iopub.status.busy": "2026-07-07T06:38:56.166522Z",
+     "iopub.status.idle": "2026-07-07T06:38:56.181715Z",
+     "shell.execute_reply": "2026-07-07T06:38:56.181515Z"
     }
    },
    "outputs": [
@@ -217,38 +299,8 @@
    "source": [
     "vertices, faces = isoext.marching_cubes(grid)\n",
     "isoext.write_obj(\"mesh.obj\", vertices, faces)\n",
-    "print(\"Saved to mesh.obj\")\n"
+    "print(\"Saved to mesh.obj\")"
    ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "## Lookup tables\n",
-    "\n",
-    "The lookup tables that drive marching cubes are generated by [`luts/gen_mc_lut.py`](https://github.com/GuangyanCai/isoext/blob/master/luts/gen_mc_lut.py). This script:\n",
-    "\n",
-    "1. Reads base cases from a JSON file (e.g., `luts/mc_methods/nagae.json`)\n",
-    "2. Generates all 256 cases via rotations (and optionally reflections)\n",
-    "3. Outputs lookup tables and debug meshes\n",
-    "\n",
-    "You can use this as a reference for:\n",
-    "- **Understanding the algorithm**: See how base cases expand to cover all configurations\n",
-    "- **Implementing your own variant**: Create a new JSON file with your base cases\n",
-    "- **Debugging**: The script outputs OBJ files for each case to visualize the triangulations\n",
-    "\n",
-    "```bash\n",
-    "# Generate lookup tables for a marching cubes variant\n",
-    "python luts/gen_mc_lut.py luts/mc_methods/nagae.json output_dir/\n",
-    "```\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": []
   }
  ],
  "metadata": {

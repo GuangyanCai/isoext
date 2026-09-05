@@ -202,11 +202,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_comparisons.html">Method Comparisons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
@@ -215,10 +224,20 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -261,22 +280,81 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="isoext">
+          <section class="tex2jax_ignore mathjax_ignore" id="isoext">
 <h1>isoext<a class="headerlink" href="#isoext" title="Link to this heading">¶</a></h1>
 <p><a class="reference external" href="https://badge.fury.io/py/isoext"><img alt="PyPI version" src="https://badge.fury.io/py/isoext.svg?" /></a>
-<a class="reference external" href="https://github.com/GuangyanCai/isoext"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-isoext-blue?logo=github" /></a></p>
+<a class="reference external" href="https://github.com/GuangyanCai/isoext"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-isoext-blue?logo=github" /></a>
+<a class="reference external" href="https://github.com/GuangyanCai/isoext/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/GuangyanCai/isoext" /></a></p>
 <p><strong>GPU-accelerated iso-surface extraction for PyTorch</strong></p>
 <div class="hero-viewer">
   <iframe src="_static/viser/index.html?playbackPath=../scenes/hero.viser&darkMode&initialCameraPosition=1.5,1.5,1.1&initialCameraLookAt=0,0,0&initialCameraUp=0,0,1"
           frameborder="0"></iframe>
   <p class="hero-caption">
     A power-8 Mandelbulb, extracted with <code>isoext.marching_cubes</code>:
-    219k vertices in about 4&nbsp;ms. Drag to rotate.
+    around 220k vertices in about 2&nbsp;ms. Drag to rotate.
   </p>
-</div><p><code class="docutils literal notranslate"><span class="pre">isoext</span></code> extracts iso-surfaces from scalar fields on the GPU. The field
-values come in as a PyTorch tensor and the mesh comes back as tensors, so
-it fits directly into training loops and other GPU pipelines. Marching
-cubes and dual contouring are implemented, on both dense and sparse grids.</p>
+</div><div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Every 3D view in these docs is interactive: drag to orbit, right-drag
+to pan, scroll to zoom. Click a view and the keyboard works too: W, A,
+S and D move around, Q moves down and E moves up. The
+<a class="reference internal" href="viewer.html"><span class="doc">viewer page</span></a> covers the controls and how to open one
+from your own code.</p>
+</div>
+<p>An iso-surface is the set of points where a 3D scalar field equals a
+chosen value: the shape described by a signed distance function, or the
+boundary of a density volume. Fields like these come from neural
+networks, simulations and scans, while most tools consume triangle
+meshes. <code class="docutils literal notranslate"><span class="pre">isoext</span></code> is a growing collection of iso-surface extraction
+methods that turn such fields into triangle meshes on the GPU. The field values come in as a PyTorch tensor and the
+mesh comes back as tensors, so it fits directly into training loops and
+other GPU pipelines. <a class="reference internal" href="intro.html"><span class="doc">What Is Iso-Surface Extraction?</span></a> explains the concepts from
+scratch, and <a class="reference internal" href="method_comparisons.html"><span class="doc">Method Comparisons</span></a> compares the methods.</p>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Extraction methods</strong> — sharing one grid interface, with more on the way</p>
+<ul>
+<li><p><a class="reference internal" href="marching_cubes.html"><span class="doc">Marching Cubes</span></a> — the classic primal method,
+with a choice of lookup tables (<a class="reference internal" href="mc_variants.html"><span class="doc">Marching Cubes Variants</span></a>)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">vega</span></code> (default) — MC33 with the corrected interior test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lewiner</span></code> — the topology-correct MC33 tables of scikit-image</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nagae</span></code> — reflection-free tables</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lorensen</span></code> — the original 1987 tables</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="marching_tetrahedra.html"><span class="doc">Marching Tetrahedra</span></a> — ambiguity-free
+extraction by splitting cells into tetrahedra</p></li>
+<li><p><a class="reference internal" href="dual_contouring.html"><span class="doc">Dual Contouring</span></a> — one vertex per cell, placed
+on sharp features</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ju</span></code> (default) — from surface normals, the original QEF method</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">carrera</span></code> — from the signed distance samples alone, without normals</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="surface_nets.html"><span class="doc">Surface Nets</span></a> — smooth dual meshes without
+needing normals</p></li>
+<li><p><a class="reference internal" href="dual_marching_cubes.html"><span class="doc">Dual Marching Cubes</span></a> — sharp features
+with one vertex per surface sheet, so crossing sheets stay separate;
+takes any of the marching cubes tables above</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="grids.html"><span class="doc">Grids</span></a></p>
+<ul>
+<li><p>Dense uniform grids for full volumes</p></li>
+<li><p>Sparse grids that only store cells near the surface, so memory scales
+with area instead of volume</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="viewer.html"><span class="doc">Interactive viewer</span></a> — meshes and grid overlays in the
+browser, built on <a class="reference external" href="https://viser.studio">viser</a>; scenes can be embedded
+in static web pages</p></li>
+<li><p><strong>SDF toolbox</strong> — primitives from spheres to a Mandelbulb, CSG
+operations, signed distances to triangle meshes on a GPU BVH, and
+gradient and smoothing utilities (<a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a>)</p></li>
+</ul>
+</section>
 <section id="quick-example">
 <h2>Quick Example<a class="headerlink" href="#quick-example" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
@@ -305,17 +383,65 @@ cubes and dual contouring are implemented, on both dense and sparse grids.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>marching_cubes</p></td>
-<td><p>4.8 ms</p></td>
-<td><p>1.4 ms</p></td>
+<td><p>5.4 ms</p></td>
+<td><p>1.9 ms</p></td>
 </tr>
-<tr class="row-odd"><td><p>dual_contouring</p></td>
+<tr class="row-odd"><td><p>marching_tetrahedra</p></td>
+<td><p>6.7 ms</p></td>
+<td><p>3.2 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>dual_contouring</p></td>
 <td><p>7.0 ms</p></td>
 <td><p>2.3 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>surface_nets</p></td>
+<td><p>6.9 ms</p></td>
+<td><p>2.2 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>dual_marching_cubes</p></td>
+<td><p>9.0 ms</p></td>
+<td><p>3.5 ms</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p>See <a class="reference internal" href="performance.html"><span class="doc">Performance</span></a> for the full table and how to reproduce it.</p>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">¶</a></h2>
+<p>isoext builds on:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://pytorch.org">PyTorch</a> — fields and meshes are exchanged as
+torch tensors</p></li>
+<li><p><a class="reference external" href="https://github.com/wjakob/nanobind">nanobind</a> — Python bindings for
+the CUDA core</p></li>
+<li><p><a class="reference external" href="https://developer.nvidia.com/thrust">Thrust</a> — GPU primitives used
+throughout the extraction pipeline</p></li>
+<li><p><a class="reference external" href="https://viser.studio">viser</a> — powers the interactive viewer</p></li>
+<li><p><a class="reference external" href="https://github.com/scikit-build/scikit-build-core">scikit-build-core</a>
+— the build system</p></li>
+</ul>
+<p>Two marching cubes variants adapt existing implementations: the
+<code class="docutils literal notranslate"><span class="pre">lewiner</span></code> lookup tables are converted from
+<a class="reference external" href="https://scikit-image.org">scikit-image</a>, and the <code class="docutils literal notranslate"><span class="pre">vega</span></code> variant is a
+port of <a class="reference external" href="https://github.com/dvega68/MC33_c_library">MC33_c_library</a> by
+David Vega (MIT License). The mesh SDF builds and traverses its
+bounding volume hierarchy with <a class="reference external" href="https://github.com/NVIDIA/cuBQL">cuBQL</a>
+by NVIDIA (Apache License 2.0), vendored under <code class="docutils literal notranslate"><span class="pre">ext/cuBQL</span></code>.</p>
+<p>The test meshes of <code class="docutils literal notranslate"><span class="pre">isoext.assets</span></code> are downloaded from their authors on
+first use: the bunny, armadillo and dragon from the <a class="reference external" href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford Computer
+Graphics Laboratory</a>
+(research use), and Spot from <a class="reference external" href="https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/">Keenan
+Crane</a>
+(public domain).</p>
+<p>The algorithms themselves come from published papers, cited on each
+method’s documentation page and collected in <a class="reference internal" href="references.html"><span class="doc">References</span></a>.</p>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
@@ -373,8 +499,10 @@ cubes and dual contouring are implemented, on both dense and sparse grids.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">isoext</a><ul>
+<li><a class="reference internal" href="#features">Features</a></li>
 <li><a class="reference internal" href="#quick-example">Quick Example</a></li>
-<li><a class="reference internal" href="#performance">Performance</a><ul>
+<li><a class="reference internal" href="#performance">Performance</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a><ul>
 </ul>
 </li>
 </ul>

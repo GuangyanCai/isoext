@@ -18,9 +18,12 @@ isoext/
 │   ├── isoext_ext.cu     # Python bindings (nanobind)
 │   ├── mc/               # Marching cubes implementations
 │   ├── grid/             # Grid implementations (uniform, sparse)
-│   ├── dc.cu             # Dual contouring
+│   ├── dc.cu             # Dual contouring (Ju et al. QEF) and the shared dual mesh build
+│   ├── dc_sdf.cu         # Dual contouring of signed distance data (Carrera et al.)
+│   ├── mesh_sdf.cu       # Distance queries against a triangle mesh (GPU BVH)
 │   └── its.cu            # Intersection computation
 ├── include/              # CUDA headers (.cuh files)
+├── ext/cuBQL/            # Vendored subset of NVIDIA cuBQL (BVH build and queries)
 ├── tests/                # pytest tests
 │   └── conftest.py       # Shared fixtures
 ├── doc/                  # Sphinx documentation
@@ -66,8 +69,9 @@ pixi run --environment doc doc-serve
 
 Python source is in `src/isoext/`:
 - `sdf.py` - SDF primitives and operations
-- `utils.py` - Utilities (make_grid, write_obj, gaussian_smooth)
+- `utils.py` - Utilities (write_obj, gaussian_smooth)
 - `viewer.py` - Interactive viewing and scene export (viser)
+- `assets.py` - Test meshes (bunny, armadillo, dragon, Spot) downloaded and cached on first use
 - `__init__.py` - Package exports
 
 Changes take effect immediately (no rebuild needed).
@@ -81,7 +85,10 @@ Source files are in `src/` and headers in `include/`. After editing:
 Key files:
 - `src/isoext_ext.cu` - Python bindings (nanobind)
 - `src/mc/` - Marching cubes variants
-- `src/dc.cu` - Dual contouring
+- `src/dc.cu` - Dual contouring (Hermite QEF variant, shared quad mesh build)
+- `src/dc_sdf.cu` - Dual contouring of signed distance data (`method="carrera"`)
+- `src/isoext/dc.py` - `dual_contouring()` front end dispatching on `method`
+- `src/mesh_sdf.cu` - `MeshBVH`, behind `isoext.sdf.MeshSDF`
 - `src/its.cu` - Intersection/normal computation
 - `src/grid/` - UniformGrid and SparseGrid
 
@@ -140,7 +147,7 @@ grid.set_values(sdf(grid.get_points()))
 Documentation uses Sphinx with MyST-NB (Jupyter notebooks):
 - Source: `doc/`
 - Build output: `doc/_build/html/`
-- Notebooks are executed during build
+- Notebooks are not executed during the build (`nb_execution_mode = "off"`): run them in place first with `pixi run -e doc jupyter nbconvert --to notebook --execute --inplace doc/<page>.ipynb` and commit the outputs
 
 To preview docs while editing:
 ```bash

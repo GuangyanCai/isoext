@@ -7,9 +7,11 @@
    "source": [
     "# Using External SDF Libraries\n",
     "\n",
-    "While `isoext` includes basic SDF primitives for convenience, you can use any SDF library to generate your scalar fields. One excellent option is [`sdf`](https://github.com/fogleman/sdf) by Michael Fogleman—a powerful Python library for constructing complex SDF.\n",
+    "Any library that evaluates a field at 3D points can feed isoext. One\n",
+    "option is [`sdf`](https://github.com/fogleman/sdf) by Michael\n",
+    "Fogleman, a Python library for building complex SDFs, installed\n",
+    "with:\n",
     "\n",
-    "It can be installed by \n",
     "```bash\n",
     "pip install git+https://github.com/fogleman/sdf\n",
     "```\n"
@@ -21,10 +23,10 @@
    "id": "49b9c47f-f5ed-4939-bf19-1fb7cce490e2",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:39.462132Z",
-     "iopub.status.busy": "2026-07-05T04:06:39.462049Z",
-     "iopub.status.idle": "2026-07-05T04:06:40.308489Z",
-     "shell.execute_reply": "2026-07-05T04:06:40.307628Z"
+     "iopub.execute_input": "2026-07-06T19:39:33.853159Z",
+     "iopub.status.busy": "2026-07-06T19:39:33.853077Z",
+     "iopub.status.idle": "2026-07-06T19:39:34.741632Z",
+     "shell.execute_reply": "2026-07-06T19:39:34.740860Z"
     }
    },
    "outputs": [],
@@ -32,7 +34,7 @@
     "import sdf\n",
     "import isoext\n",
     "import torch\n",
-    "from isoext import viewer\n"
+    "from isoext import viewer"
    ]
   },
   {
@@ -51,10 +53,10 @@
    "id": "8b2b316c-f7a4-4974-9b2b-0902386c2b77",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:40.310219Z",
-     "iopub.status.busy": "2026-07-05T04:06:40.310077Z",
-     "iopub.status.idle": "2026-07-05T04:06:40.313182Z",
-     "shell.execute_reply": "2026-07-05T04:06:40.312206Z"
+     "iopub.execute_input": "2026-07-06T19:39:34.743475Z",
+     "iopub.status.busy": "2026-07-06T19:39:34.743363Z",
+     "iopub.status.idle": "2026-07-06T19:39:34.745554Z",
+     "shell.execute_reply": "2026-07-06T19:39:34.745182Z"
     }
    },
    "outputs": [],
@@ -86,10 +88,10 @@
    "id": "35bdcdc0-4537-4f5b-bc06-41041b46eee7",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:40.314748Z",
-     "iopub.status.busy": "2026-07-05T04:06:40.314662Z",
-     "iopub.status.idle": "2026-07-05T04:08:28.321226Z",
-     "shell.execute_reply": "2026-07-05T04:08:28.320559Z"
+     "iopub.execute_input": "2026-07-06T19:39:34.746553Z",
+     "iopub.status.busy": "2026-07-06T19:39:34.746487Z",
+     "iopub.status.idle": "2026-07-06T19:41:32.175304Z",
+     "shell.execute_reply": "2026-07-06T19:41:32.174621Z"
     }
    },
    "outputs": [],
@@ -119,10 +121,10 @@
    "id": "f69c0611-cc63-4163-b3d2-b2a887940918",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:08:28.322567Z",
-     "iopub.status.busy": "2026-07-05T04:08:28.322488Z",
-     "iopub.status.idle": "2026-07-05T04:08:28.512451Z",
-     "shell.execute_reply": "2026-07-05T04:08:28.511855Z"
+     "iopub.execute_input": "2026-07-06T19:41:32.176990Z",
+     "iopub.status.busy": "2026-07-06T19:41:32.176920Z",
+     "iopub.status.idle": "2026-07-06T19:41:32.334571Z",
+     "shell.execute_reply": "2026-07-06T19:41:32.333981Z"
     }
    },
    "outputs": [
@@ -141,7 +143,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/7f9a18f64439d275.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/d1edb25e3fa44ab6.viser&initialCameraPosition=19.367,19.367,13.557&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -149,7 +151,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7ca57d79e6f0>"
+       "<IPython.lib.display.IFrame at 0x753d803c7410>"
       ]
      },
      "execution_count": 4,
@@ -161,9 +163,9 @@
     "vertices, faces = isoext.marching_cubes(grid)\n",
     "\n",
     "print(f\"Vertices: {vertices.shape}\")  # (N, 3) float32\n",
-    "print(f\"Faces: {faces.shape}\")        # (M, 3) uint32\n",
+    "print(f\"Faces: {faces.shape}\")  # (M, 3) uint32\n",
     "\n",
-    "viewer.embed(vertices, faces)\n"
+    "viewer.embed(vertices, faces)"
    ]
   },
   {

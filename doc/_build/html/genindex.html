@@ -7,7 +7,7 @@
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 --><title>Index - isoext documentation</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -200,11 +200,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_comparisons.html">Method Comparisons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
@@ -213,10 +222,20 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -252,17 +271,31 @@
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#W"><strong>W</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#W"><strong>W</strong></a></div>
 </section>
 <section id="A" class="genindex-section">
   <h2>A</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.add_arrows">add_arrows() (in module isoext.viewer)</a>
+</li>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.add_cells">add_cells() (isoext.isoext.SparseGrid.SparseGrid method)</a>
+</li>
+        <li><a href="api.html#isoext.viewer.add_grid">add_grid() (in module isoext.viewer)</a>
+</li>
+        <li><a href="api.html#isoext.viewer.add_label">add_label() (in module isoext.viewer)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.add_lines">add_lines() (in module isoext.viewer)</a>
+</li>
         <li><a href="api.html#isoext.viewer.add_mesh">add_mesh() (in module isoext.viewer)</a>
+</li>
+        <li><a href="api.html#isoext.viewer.add_planes">add_planes() (in module isoext.viewer)</a>
+</li>
+        <li><a href="api.html#isoext.viewer.add_points">add_points() (in module isoext.viewer)</a>
+</li>
+        <li><a href="api.html#isoext.viewer.add_spheres">add_spheres() (in module isoext.viewer)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -272,7 +305,15 @@
   <h2>C</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.assets.cache_dir">cache_dir() (in module isoext.assets)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.TriangleMeshSDF.closest_points">closest_points() (isoext.sdf.TriangleMeshSDF method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.viewer.copy_client">copy_client() (in module isoext.viewer)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.CuboidSDF">CuboidSDF (class in isoext.sdf)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -283,6 +324,10 @@
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.dual_contouring">dual_contouring() (in module isoext)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.dual_marching_cubes">dual_marching_cubes() (in module isoext)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -312,6 +357,8 @@
   <h2>G</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.gaussian_smooth">gaussian_smooth() (in module isoext)</a>
+</li>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_cell_indices">get_cell_indices() (isoext.isoext.SparseGrid.SparseGrid method)</a>
 </li>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_cells">get_cells() (isoext.isoext.SparseGrid.SparseGrid method)</a>
@@ -324,10 +371,10 @@
 </li>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_num_points">get_num_points() (isoext.isoext.SparseGrid.SparseGrid method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.Intersection.get_points">get_points (isoext.Intersection attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_points">get_points() (isoext.isoext.SparseGrid.SparseGrid method)</a>
 
         <ul>
@@ -337,6 +384,10 @@
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_points_by_cell_indices">get_points_by_cell_indices() (isoext.isoext.SparseGrid.SparseGrid method)</a>
 </li>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_potential_cell_indices">get_potential_cell_indices() (isoext.isoext.SparseGrid.SparseGrid method)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.get_sdf_grad">get_sdf_grad() (in module isoext.sdf)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.get_sdf_normal">get_sdf_normal() (in module isoext.sdf)</a>
 </li>
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.get_values">get_values() (isoext.isoext.SparseGrid.SparseGrid method)</a>
 
@@ -364,10 +415,26 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.Intersection">Intersection (class in isoext)</a>
 </li>
-        <li><a href="api.html#isoext.viewer.isoext.SparseGrid">isoext.SparseGrid (class in isoext.viewer)</a>
+        <li><a href="api.html#isoext.sdf.IntersectionOp">IntersectionOp (class in isoext.sdf)</a>
 </li>
+        <li>
+    isoext.assets
+
+        <ul>
+          <li><a href="api.html#module-isoext.assets">module</a>
+</li>
+        </ul></li>
+        <li>
+    isoext.sdf
+
+        <ul>
+          <li><a href="api.html#module-isoext.sdf">module</a>
+</li>
+        </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.viewer.isoext.SparseGrid">isoext.SparseGrid (class in isoext.viewer)</a>
+</li>
         <li><a href="api.html#isoext.viewer.isoext.UniformGrid">isoext.UniformGrid (class in isoext.viewer)</a>
 </li>
         <li>
@@ -381,13 +448,25 @@
   </tr></table>
 </section>
 
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.assets.load_mesh">load_mesh() (in module isoext.assets)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
 <section id="M" class="genindex-section">
   <h2>M</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="api.html#isoext.make_grid">make_grid() (in module isoext)</a>
+        <li><a href="api.html#isoext.sdf.MandelbulbSDF">MandelbulbSDF (class in isoext.sdf)</a>
 </li>
         <li><a href="api.html#isoext.marching_cubes">marching_cubes() (in module isoext)</a>
+</li>
+        <li><a href="api.html#isoext.marching_tetrahedra">marching_tetrahedra() (in module isoext)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -395,9 +474,33 @@
     module
 
         <ul>
+          <li><a href="api.html#module-isoext.assets">isoext.assets</a>
+</li>
+          <li><a href="api.html#module-isoext.sdf">isoext.sdf</a>
+</li>
           <li><a href="api.html#module-isoext.viewer">isoext.viewer</a>
 </li>
         </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.NegationOp">NegationOp (class in isoext.sdf)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.project_to_surface">project_to_surface() (in module isoext.sdf)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -409,6 +512,10 @@
         <li><a href="api.html#isoext.isoext.SparseGrid.SparseGrid.remove_cells">remove_cells() (isoext.isoext.SparseGrid.SparseGrid method)</a>
 </li>
     </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.RotationOp">RotationOp (class in isoext.sdf)</a>
+</li>
+    </ul></td>
   </tr></table>
 </section>
 
@@ -418,9 +525,15 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.viewer.save_scene">save_scene() (in module isoext.viewer)</a>
 </li>
+        <li><a href="api.html#isoext.sdf.SDF">SDF (class in isoext.sdf)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.SDFProtocol">SDFProtocol (class in isoext.sdf)</a>
+</li>
         <li><a href="api.html#isoext.viewer.serialize_scene">serialize_scene() (in module isoext.viewer)</a>
 </li>
         <li><a href="api.html#isoext.Intersection.set_normals">set_normals (isoext.Intersection attribute)</a>
+</li>
+        <li><a href="api.html#isoext.Intersection.set_points">set_points (isoext.Intersection attribute)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -432,6 +545,38 @@
         </ul></li>
         <li><a href="api.html#isoext.viewer.show">show() (in module isoext.viewer)</a>
 </li>
+        <li><a href="api.html#isoext.sdf.SmoothUnionOp">SmoothUnionOp (class in isoext.sdf)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.SphereSDF">SphereSDF (class in isoext.sdf)</a>
+</li>
+        <li><a href="api.html#isoext.surface_nets">surface_nets() (in module isoext)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.TorusSDF">TorusSDF (class in isoext.sdf)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.TranslationOp">TranslationOp (class in isoext.sdf)</a>
+</li>
+        <li><a href="api.html#isoext.sdf.TriangleMeshSDF">TriangleMeshSDF (class in isoext.sdf)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.UnionOp">UnionOp (class in isoext.sdf)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -439,6 +584,10 @@
 <section id="W" class="genindex-section">
   <h2>W</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api.html#isoext.sdf.TriangleMeshSDF.winding_number">winding_number() (isoext.sdf.TriangleMeshSDF method)</a>
+</li>
+    </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api.html#isoext.write_obj">write_obj() (in module isoext)</a>
 </li>

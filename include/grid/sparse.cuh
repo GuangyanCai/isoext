@@ -34,8 +34,12 @@ class SparseGrid : public Grid {
     inline uint3 get_shape() const override { return shape; }
 
     inline GridView get_view() const override {
-        return {shape, aabb_min, aabb_max, values.data().get(),
-                cell_indices.data().get(), true};
+        return {shape,
+                aabb_min,
+                aabb_max,
+                values.data().get(),
+                cell_indices.data().get(),
+                true};
     }
 
     NDArray<float3> get_points() const override;
@@ -61,7 +65,8 @@ class SparseGrid : public Grid {
                                       const NDArray<float> &new_values,
                                       float level = 0.f) const;
 
-    std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+    std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>,
+               thrust::device_vector<uint2>>
     get_dual_quads(const NDArray<uint2> &edges,
                    const NDArray<bool> &is_out) const override;
 };

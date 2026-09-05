@@ -19,13 +19,18 @@ struct Intersection {
     inline NDArray<float3> get_points() { return points; }
     inline NDArray<float3> get_normals() { return normals; }
     inline bool has_normals() const { return _has_normals; }
+    inline void set_points(const NDArray<float3> &points_) {
+        points.set(points_);
+    }
     inline void set_normals(const NDArray<float3> &normals_) {
         normals.set(normals_);
         _has_normals = true;
     }
 };
 
-Intersection get_intersection(Grid *grid, float level, bool compute_normals = false);
+Intersection get_intersection(Grid *grid, float level,
+                              bool compute_normals = false);
 
-// Compute normals at intersection points using central differences on grid values
+// Compute normals at intersection points using central differences on grid
+// values
 void compute_intersection_normals(Intersection &its, Grid *grid);

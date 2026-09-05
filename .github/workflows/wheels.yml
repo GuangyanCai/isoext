@@ -1,0 +1,129 @@
+# Build wheels for several CUDA versions on Linux and Windows and attach
+# them to the release. PyPI only ever receives the source distribution (see
+# python-publish.yml); the wheels are served from GitHub Pages index pages
+# that the docs deployment generates from the release assets.
+#
+# To try the build without a release, push the branch `ci/wheels` or start
+# the workflow by hand: the wheels appear as workflow artifacts.
+name: Build Wheels
+
+on:
+  release:
+    types: [published]
+  push:
+    branches: [ci/wheels]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: Linux, CUDA ${{ matrix.cuda }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Architectures each toolkit can target, oldest to newest; the last
+          # one also embeds PTX so future GPUs can still run the wheel.
+          - cuda: "12.6"
+            tag: cu126
+            archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90"
+          - cuda: "12.8"
+            tag: cu128
+            archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90-real;100-real;120"
+          - cuda: "13.0"
+            tag: cu130
+            archs: "75-real;80-real;86-real;89-real;90-real;100-real;120"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag the version with the CUDA build
+        run: sed -i 's/^version = "\(.*\)"/version = "\1+${{ matrix.tag }}"/' pyproject.toml
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v3.4
+        env:
+          ISOEXT_CUDA: ${{ matrix.cuda }}
+          ISOEXT_CUDA_ARCHS: ${{ matrix.archs }}
+          CIBW_TEST_SKIP: "*"   # no GPU on the runner
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-${{ matrix.tag }}
+          path: wheelhouse/*.whl
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        run: gh release upload "${{ github.event.release.tag_name }}" wheelhouse/*.whl --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  windows:
+    name: Windows, CUDA ${{ matrix.cuda }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # CUDA 12 needs only the compiler, runtime and Thrust components;
+          # CUDA 13 split the toolkit further (crt, nvvm, ...), so it is
+          # installed whole until the minimal set is known.
+          - cuda: "12.6.3"
+            tag: cu126
+            archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90"
+            subpackages: '["nvcc", "cudart", "thrust"]'
+          - cuda: "12.8.1"
+            tag: cu128
+            archs: "50-real;60-real;70-real;75-real;80-real;86-real;89-real;90-real;100-real;120"
+            subpackages: '["nvcc", "cudart", "thrust"]'
+          - cuda: "13.0.3"
+            tag: cu130
+            archs: "75-real;80-real;86-real;89-real;90-real;100-real;120"
+            subpackages: '[]'   # everything
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag the version with the CUDA build
+        shell: bash
+        run: sed -i 's/^version = "\(.*\)"/version = "\1+${{ matrix.tag }}"/' pyproject.toml
+
+      - name: Install the CUDA toolkit
+        uses: Jimver/cuda-toolkit@v0.2.36
+        with:
+          cuda: ${{ matrix.cuda }}
+          method: network
+          sub-packages: ${{ matrix.subpackages }}
+          log-file-suffix: win-${{ matrix.tag }}.txt
+
+      # Put MSVC on the PATH so CMake's Ninja generator can drive it.
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v3.4
+        env:
+          ISOEXT_CUDA_ARCHS: ${{ matrix.archs }}
+          CIBW_TEST_SKIP: "*"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows-${{ matrix.tag }}
+          path: wheelhouse/*.whl
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        shell: bash
+        run: gh release upload "${{ github.event.release.tag_name }}" wheelhouse/*.whl --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  index:
+    name: Update the wheel index
+    needs: [linux, windows]
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow run docs.yml --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ github.token }}

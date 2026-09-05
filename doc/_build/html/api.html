@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Performance" href="performance.html"><link rel="prev" title="Using External SDF Libraries" href="more_sdf.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Performance" href="performance.html"><link rel="prev" title="Viewer" href="viewer.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>API Reference - isoext documentation</title>
@@ -202,11 +202,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_comparisons.html">Method Comparisons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul>
@@ -215,10 +224,20 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -261,20 +280,23 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="api-reference">
+          <section class="tex2jax_ignore mathjax_ignore" id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.marching_cubes">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">marching_cubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nagae'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.marching_cubes" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">marching_cubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'vega'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.marching_cubes" title="Link to this definition">¶</a></dt>
 <dd><p>Extract an iso-surface from a grid using the Marching Cubes algorithm.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> – The input grid (UniformGrid or SparseGrid) containing scalar values.</p></li>
 <li><p><strong>level</strong> – The iso-value at which to extract the surface. Default is 0.0.</p></li>
-<li><p><strong>method</strong> – The marching cubes variant to use. Options are ‘nagae’ (default) or ‘lorensen’.</p></li>
+<li><p><strong>method</strong> – The marching cubes variant to use. Options are ‘vega’
+(default), ‘lewiner’, ‘nagae’, or ‘lorensen’. The default
+resolves the topological ambiguities of standard marching cubes
+with the corrected interior test of Vega et al.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -285,22 +307,137 @@ and faces is an (M, 3) int32 tensor of triangle indices.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="isoext.marching_tetrahedra">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">marching_tetrahedra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.marching_tetrahedra" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using the marching tetrahedra algorithm.</p>
+<p>Each cell is split into 6 tetrahedra, which have no ambiguous sign
+configurations, so the mesh is closed and consistent by
+construction. Produces roughly 2-3x more triangles than marching
+cubes on the same grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="isoext.dual_contouring">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.009999999776482582</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">svd_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">9.999999974752427e-07</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
-<dd><p>Extract an iso-surface using the Dual Contouring algorithm.</p>
-<p>Dual Contouring produces meshes with better-placed vertices than Marching Cubes,
-especially for sharp features. It solves a QEF (Quadric Error Function) per cell
-to find optimal vertex positions.</p>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_contouring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ju'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.dual_contouring" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface with dual contouring.</p>
+<p>Every cell the surface crosses gets one vertex and every crossed grid
+edge one quad connecting the four cells around it. The vertex placement
+depends on the variant:</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;ju&quot;</span></code> (default) is dual contouring of Hermite data (Ju et al. 2002):
+each vertex minimizes the QEF of the tangent planes at the cell’s edge
+crossings. It needs normals; estimated from the grid values they are
+smeared at sharp features, exact SDF normals attached to the
+intersection reproduce them. One linear solve per cell.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;carrera&quot;</span></code> is dual contouring of signed distance data (Carrera et
+al. 2026). The vertices are optimized so that the mesh is tangent to
+the spheres around the grid samples near the surface, of radius equal to
+the absolute sample value,
+which recovers sharp features from the samples alone, without normals.
+The grid must hold a signed distance field. Iterative, and orders of
+magnitude slower than <code class="docutils literal notranslate"><span class="pre">&quot;ju&quot;</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>intersection</strong> – Optional Intersection from get_intersection(). Both
+variants use its points as the edge crossings; normals attached
+to it are used by “ju” directly and by “carrera” as the initial
+Hermite normals. Computed automatically when omitted.</p></li>
+<li><p><strong>method</strong> – “ju” (default) or “carrera”.</p></li>
+<li><p><strong>reg</strong> – (ju) Regularization weight of the QEF. Default 0.01.</p></li>
+<li><p><strong>svd_tol</strong> – (ju) Relative eigenvalue cutoff of the QEF solve.
+Default 1e-6.</p></li>
+<li><p><strong>clamp</strong> – (ju) Keep each vertex inside its cell. Default True.</p></li>
+<li><p><strong>outer_iters</strong> – (carrera) Global iterations. Default 100.</p></li>
+<li><p><strong>inner_iters</strong> – (carrera) Per-cell iterations per outer iteration.
+Default 100.</p></li>
+<li><p><strong>mu</strong> – (carrera) Regularization toward the previous iterate.
+Default 0.1.</p></li>
+<li><p><strong>hermite_weight</strong> – (carrera) Weight of the Hermite plane terms.
+Default 0.02.</p></li>
+<li><p><strong>update_weight</strong> – (carrera) Blend weight of the per-iteration Hermite
+and face point updates. Default 0.2.</p></li>
+<li><p><strong>hermite_update</strong> – (carrera) Refine the Hermite data from the mesh
+each iteration. Default True.</p></li>
+<li><p><strong>qef_assignment</strong> – (carrera) Assign the samples of the first iteration
+on the mesh of QEF vertices instead of the centroid mesh, as the
+reference code does. Default True.</p></li>
+<li><p><strong>band</strong> – (carrera) Only samples within this many cell diagonals of the
+surface are used. Default 3.0.</p></li>
+<li><p><strong>tol</strong> – (carrera) Inner-loop stopping step, in cell diagonals.
+Default 1e-5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32
+tensor and faces is an (M, 3) int32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.surface_nets">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">surface_nets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.surface_nets" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using the surface nets algorithm.</p>
+<p>Each cell crossed by the surface gets one vertex, placed at the
+centroid of the cell’s edge intersections. Compared to dual
+contouring this needs no normals and no linear solves, at the cost
+of less accurate vertex placement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
 <li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
 <li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
-If not provided, intersections are computed automatically.
-If provided but normals not set, normals are computed automatically.</p></li>
-<li><p><strong>reg</strong> – Regularization weight for the QEF solver. Default is 0.01.</p></li>
-<li><p><strong>svd_tol</strong> – SVD tolerance for the QEF solver. Default is 1e-6.</p></li>
+If not provided, intersections are computed automatically.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (vertices, faces) where vertices is an (N, 3) float32 tensor
+and faces is an (M, 3) int32 tensor of triangle indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.dual_marching_cubes">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">dual_marching_cubes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">isoext.isoext_ext.Grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'vega'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intersection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isoext.Intersection" title="isoext.isoext_ext.Intersection"><span class="pre">isoext.isoext_ext.Intersection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#isoext.dual_marching_cubes" title="Link to this definition">¶</a></dt>
+<dd><p>Extract an iso-surface using dual marching cubes.</p>
+<p>The dual of the marching cubes mesh: the chosen variant’s tables
+triangulate each cell, every connected patch of that triangulation
+becomes one vertex, and every crossed grid edge yields a quad
+connecting the four adjacent cells’ patch vertices. When the
+intersection carries normals, patch vertices are placed by the
+same QEF as dual contouring, which reproduces sharp features;
+without normals the centroid of the patch’s crossings is used.
+Cells crossed by several surface sheets get one vertex per sheet,
+which avoids the connectivity defects of dual contouring. The
+mesh ends half a cell short of the grid boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> – The input grid containing scalar values.</p></li>
+<li><p><strong>level</strong> – The iso-value. Default is 0.0.</p></li>
+<li><p><strong>method</strong> – The marching cubes variant used on the dual grid.
+Options are ‘vega’ (default), ‘lewiner’, ‘nagae’, or
+‘lorensen’.</p></li>
+<li><p><strong>intersection</strong> – Optional Intersection data from get_intersection().
+Attach normals to it (e.g. from the SDF gradient) to get
+sharp features. If not provided, intersections are computed
+automatically and vertices are placed at centroids.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -331,19 +468,19 @@ points using linear interpolation.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="isoext.make_grid">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">make_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aabb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cuda'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.make_grid" title="Link to this definition">¶</a></dt>
-<dd><p>Create a uniform grid from an axis-aligned bounding box.</p>
+<dt class="sig sig-object py" id="isoext.gaussian_smooth">
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">gaussian_smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.gaussian_smooth" title="Link to this definition">¶</a></dt>
+<dd><p>Smooth a 3D scalar field using a Gaussian filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>aabb</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Axis-aligned bounding box as [x_min, y_min, z_min, x_max, y_max, z_max]</p></li>
-<li><p><strong>res</strong> (<em>int</em><em> | </em><em>list</em><em>[</em><em>int</em><em>]</em>) – Resolution, either a single int or list of 3 ints for [x_res, y_res, z_res]</p></li>
-<li><p><strong>device</strong> (<em>str</em>) – Device to create the grid on (default: “cuda”)</p></li>
+<li><p><strong>field</strong> (<em>Tensor</em>) – Input scalar field with shape (X, Y, Z)</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – Standard deviation of the Gaussian kernel (default: 1.0)</p></li>
+<li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of the kernel. If None, uses int(6 * sigma) | 1 to ensure odd size.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Grid tensor with shape (x_res, y_res, z_res, 3)</p>
+<dd class="field-even"><p>Smoothed scalar field with the same shape as input</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>Tensor</em></p>
@@ -353,14 +490,14 @@ points using linear interpolation.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.write_obj">
-<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">write_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.write_obj" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.</span></span><span class="sig-name descname"><span class="pre">write_obj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.write_obj" title="Link to this definition">¶</a></dt>
 <dd><p>Write vertices and faces to an OBJ file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>obj_path</strong> (<em>str</em>) – Path to the output OBJ file</p></li>
-<li><p><strong>v</strong> (<em>Tensor</em>) – Tensor of vertices with shape (N, 3)</p></li>
-<li><p><strong>f</strong> (<em>Tensor</em>) – Tensor of face indices with shape (M, 3)</p></li>
+<li><p><strong>vertices</strong> (<em>Tensor</em>) – Tensor of vertices with shape (N, 3)</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>) – Tensor of face indices with shape (M, 3)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -370,8 +507,333 @@ points using linear interpolation.</p>
 </dd></dl>
 
 </section>
+<section id="sdf-toolbox">
+<h2>SDF Toolbox<a class="headerlink" href="#sdf-toolbox" title="Link to this heading">¶</a></h2>
+<p>Signed distance functions and helpers for building test fields; the
+<a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a> page shows them in use.</p>
+<dl class="py class" id="module-isoext.sdf">
+<dt class="sig sig-object py" id="isoext.sdf.SDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SDF</span></span><a class="headerlink" href="#isoext.sdf.SDF" title="Link to this definition">¶</a></dt>
+<dd><p>Abstract base class for Signed Distance Functions.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.SDFProtocol">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SDFProtocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.SDFProtocol" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol for SDF callable objects.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.SphereSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SphereSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.SphereSDF" title="Link to this definition">¶</a></dt>
+<dd><p>SDF for a sphere centered at the origin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>radius</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.TorusSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">TorusSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TorusSDF" title="Link to this definition">¶</a></dt>
+<dd><p>SDF for a torus in the xy-plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> (<em>float</em>) – Major radius (distance from center to tube center)</p></li>
+<li><p><strong>r</strong> (<em>float</em>) – Minor radius (tube radius)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.CuboidSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">CuboidSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.CuboidSDF" title="Link to this definition">¶</a></dt>
+<dd><p>SDF for an axis-aligned cuboid centered at the origin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Full lengths in x, y, z directions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.MandelbulbSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">MandelbulbSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.MandelbulbSDF" title="Link to this definition">¶</a></dt>
+<dd><p>Distance estimator for the Mandelbulb fractal.</p>
+<p>The values estimate the distance to the fractal surface; they are not an
+exact SDF. Fewer iterations give a smoother, blobbier shape. The bulb
+fits inside a sphere of radius about 1.2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>power</strong> (<em>float</em>) – Exponent of the iteration; 8 is the classic Mandelbulb.</p></li>
+<li><p><strong>iterations</strong> (<em>int</em>) – Number of fractal iterations.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.TriangleMeshSDF">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">TriangleMeshSDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'winding'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TriangleMeshSDF" title="Link to this definition">¶</a></dt>
+<dd><p>Signed distance to a triangle mesh.</p>
+<p>The mesh is held on the GPU behind a bounding volume hierarchy, so the
+field can be evaluated at many points at once: sampling a mesh into a
+grid to extract it again, or building a field around scanned geometry.
+The gradient is the exact gradient of a distance field, so
+get_sdf_normal and project_to_surface work as for the analytic SDFs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vertices</strong> (<em>Tensor</em>) – (V, 3) tensor of vertex positions on the CUDA device.</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em>) – (F, 3) tensor of vertex indices.</p></li>
+<li><p><strong>signed</strong> (<em>bool</em>) – Give points inside the mesh a negative distance. Pass False
+for the unsigned distance.</p></li>
+<li><p><strong>sign</strong> (<em>str</em>) – How the inside is decided. “winding” (default) uses the
+generalized winding number, which tolerates holes,
+self-intersections and disconnected pieces and does not depend
+on the mesh orientation. “parity” counts ray crossings, which
+is cheaper but needs a closed mesh.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.sdf.TriangleMeshSDF.winding_number">
+<span class="sig-name descname"><span class="pre">winding_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TriangleMeshSDF.winding_number" title="Link to this definition">¶</a></dt>
+<dd><p>Generalized winding number at the given points.</p>
+<p>1 inside a closed mesh and 0 outside; fractional near holes and for
+triangle soups. Negative for an inward-oriented mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor with shape (…)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isoext.sdf.TriangleMeshSDF.closest_points">
+<span class="sig-name descname"><span class="pre">closest_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TriangleMeshSDF.closest_points" title="Link to this definition">¶</a></dt>
+<dd><p>Project points onto the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the closest points on the mesh with
+shape (…, 3) and the index of the triangle holding each one
+with shape (…).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple (points, face_ids)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.UnionOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">UnionOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.UnionOp" title="Link to this definition">¶</a></dt>
+<dd><p>Union operation combining multiple SDFs (minimum distance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.IntersectionOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">IntersectionOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.IntersectionOp" title="Link to this definition">¶</a></dt>
+<dd><p>Intersection operation combining multiple SDFs (maximum distance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.NegationOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">NegationOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.NegationOp" title="Link to this definition">¶</a></dt>
+<dd><p>Negation operation (inverts SDF, creating inverse shape).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.SmoothUnionOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">SmoothUnionOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.SmoothUnionOp" title="Link to this definition">¶</a></dt>
+<dd><p>Smooth union operation combining multiple SDFs with blending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf_list</strong> (<em>list</em><em>[</em><a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a><em>]</em>) – List of SDFs to combine</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Blending parameter (smaller values = sharper transition)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.TranslationOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">TranslationOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.TranslationOp" title="Link to this definition">¶</a></dt>
+<dd><p>Translation operation (moves SDF by an offset).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a>)</p></li>
+<li><p><strong>offset</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="isoext.sdf.RotationOp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">RotationOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.RotationOp" title="Link to this definition">¶</a></dt>
+<dd><p>Rotation operation (rotates SDF around an axis).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDF" title="isoext.sdf.SDF"><em>SDF</em></a>) – SDF to rotate</p></li>
+<li><p><strong>axis</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Rotation axis as [x, y, z]</p></li>
+<li><p><strong>angle</strong> (<em>float</em>) – Rotation angle</p></li>
+<li><p><strong>use_degree</strong> (<em>bool</em>) – If True, angle is in degrees; if False, in radians</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.sdf.get_sdf_grad">
+<span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">get_sdf_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.get_sdf_grad" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the gradient of an SDF at given points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDFProtocol" title="isoext.sdf.SDFProtocol"><em>SDFProtocol</em></a>) – SDF function to evaluate</p></li>
+<li><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gradient tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.sdf.get_sdf_normal">
+<span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">get_sdf_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.get_sdf_normal" title="Link to this definition">¶</a></dt>
+<dd><p>Compute normalized gradient (surface normal) of an SDF at given points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDFProtocol" title="isoext.sdf.SDFProtocol"><em>SDFProtocol</em></a>) – SDF function to evaluate</p></li>
+<li><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized gradient tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.sdf.project_to_surface">
+<span class="sig-prename descclassname"><span class="pre">isoext.sdf.</span></span><span class="sig-name descname"><span class="pre">project_to_surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.sdf.project_to_surface" title="Link to this definition">¶</a></dt>
+<dd><p>Project points onto the zero level set of an SDF with Newton steps.</p>
+<p>Useful for refining the linearly interpolated intersection points from
+get_intersection before running dual contouring; more accurate points
+give sharper features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sdf</strong> (<a class="reference internal" href="#isoext.sdf.SDFProtocol" title="isoext.sdf.SDFProtocol"><em>SDFProtocol</em></a>) – SDF function to evaluate</p></li>
+<li><p><strong>p</strong> (<em>Tensor</em>) – Points tensor with shape (…, 3)</p></li>
+<li><p><strong>iters</strong> (<em>int</em>) – Number of Newton steps</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Projected points tensor with shape (…, 3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tensor</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="test-meshes">
+<h2>Test Meshes<a class="headerlink" href="#test-meshes" title="Link to this heading">¶</a></h2>
+<p>Well-known meshes for trying things out, downloaded on first use; the
+<a class="reference internal" href="sdf_guide.html"><span class="doc">SDF Utilities</span></a> shows one turned into a field.</p>
+<p id="module-isoext.assets">Well-known test meshes, downloaded on first use.</p>
+<p>The meshes are not shipped with the package. The Stanford models may be
+used and redistributed for research but not commercially, so they are
+fetched from the Stanford Computer Graphics Laboratory when first
+requested and cached locally; Spot is public domain.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.assets.load_mesh">
+<span class="sig-prename descclassname"><span class="pre">isoext.assets.</span></span><span class="sig-name descname"><span class="pre">load_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cuda'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.assets.load_mesh" title="Link to this definition">¶</a></dt>
+<dd><p>Load one of the test meshes as (vertices, faces) tensors.</p>
+<p>The mesh is downloaded and cached on first use, then centered at the
+origin, scaled so that its longest side has length <code class="docutils literal notranslate"><span class="pre">size</span></code> (so it fits
+the default grid domain [-1, 1] with a margin) and turned z-up.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – One of the keys of ASSETS: “bunny”, “armadillo”, “dragon”
+or “spot”. “armadillo” and “spot” are closed; “bunny” and
+“dragon” have holes at the bottom.</p></li>
+<li><p><strong>size</strong> (<em>float</em>) – Length of the longest side of the bounding box after scaling.</p></li>
+<li><p><strong>device</strong> – Device of the returned tensors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an (N, 3) float32 tensor and an (M, 3)
+int32 tensor of triangles.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple (vertices, faces)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.assets.cache_dir">
+<span class="sig-prename descclassname"><span class="pre">isoext.assets.</span></span><span class="sig-name descname"><span class="pre">cache_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isoext.assets.cache_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory holding the downloaded meshes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">$ISOEXT_CACHE</span></code> if set, else <code class="docutils literal notranslate"><span class="pre">$XDG_CACHE_HOME/isoext</span></code> or
+<code class="docutils literal notranslate"><span class="pre">~/.cache/isoext</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Path</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="viewer">
-<h2>Viewer<a class="headerlink" href="#viewer" title="Link to this heading">¶</a></h2>
+<span id="api-viewer"></span><h2>Viewer<a class="headerlink" href="#viewer" title="Link to this heading">¶</a></h2>
 <p>Interactive visualization built on <a class="reference external" href="https://viser.studio">viser</a>.</p>
 <p id="module-isoext.viewer">Interactive mesh viewing and scene export built on viser.</p>
 <p>Typical use:</p>
@@ -385,7 +847,7 @@ points using linear interpolation.</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.add_mesh">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.71,</span> <span class="pre">0.8,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_mesh" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.71,</span> <span class="pre">0.8,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_shading</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wireframe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'front'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_mesh" title="Link to this definition">¶</a></dt>
 <dd><p>Add a mesh from isoext output tensors to a viser scene.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -397,6 +859,9 @@ points using linear interpolation.</p>
 <li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
 <li><p><strong>flat_shading</strong> (<em>bool</em>) – Shade each triangle with a constant normal.</p></li>
 <li><p><strong>wireframe</strong> (<em>bool</em>) – Render the mesh as a wireframe.</p></li>
+<li><p><strong>side</strong> (<em>str</em>) – Which triangle sides to render: “front”, “back” or “double”.
+Use “double” for open surfaces, which disappear from behind
+with the default backface culling.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -406,8 +871,141 @@ points using linear interpolation.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_grid">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/grid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Draw a grid’s cell edges and its corner values as colored dots.</p>
+<p>Corners with a value below the level are drawn red (inside the
+surface), the rest blue. For sparse grids only the active cells are
+drawn. Meant for small demonstration grids, like the single-cell
+examples on the marching cubes variants page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>grid</strong> – A UniformGrid or SparseGrid whose values are set.</p></li>
+<li><p><strong>level</strong> (<em>float</em>) – The iso-value that separates inside from outside.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Scene tree name prefix for the lines and dots.</p></li>
+<li><p><strong>point_size</strong> (<em>float</em><em> | </em><em>None</em>) – Dot diameter in world units. Defaults to a fraction
+of the cell edge length.</p></li>
+<li><p><strong>line_width</strong> (<em>float</em>) – Width of the cell edges in pixels.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_points">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.93,</span> <span class="pre">0.79,</span> <span class="pre">0.24)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_points" title="Link to this definition">¶</a></dt>
+<dd><p>Draw raw points, for annotating a scene on top of the mesh and grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>points</strong> (<em>Tensor</em>) – (N, 3) tensor of positions.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>point_size</strong> (<em>float</em>) – Dot diameter in world units.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name of the point cloud. Defaults to a unique
+name, so repeated calls add to the scene instead of replacing
+the previous points.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_lines">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segments</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.55,</span> <span class="pre">0.55,</span> <span class="pre">0.55)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_lines" title="Link to this definition">¶</a></dt>
+<dd><p>Draw raw line segments, for annotating a scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>segments</strong> (<em>Tensor</em>) – (N, 2, 3) tensor: N segments with start and end points.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>line_width</strong> (<em>float</em>) – Width of the segments in pixels.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name of the segments. Defaults to a unique name,
+so repeated calls add to the scene instead of replacing the
+previous segments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_label">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_label" title="Link to this definition">¶</a></dt>
+<dd><p>Draw a text label, e.g. to caption the meshes of a composed scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – The label text.</p></li>
+<li><p><strong>position</strong> – The label position as a (3,) tensor, list or tuple.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name. Defaults to a unique name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_arrows">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_arrows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.45,</span> <span class="pre">0.45,</span> <span class="pre">0.45)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_arrows" title="Link to this definition">¶</a></dt>
+<dd><p>Draw arrows as line shafts with cone heads, e.g. for normals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>origins</strong> (<em>Tensor</em>) – (N, 3) tensor of arrow start points.</p></li>
+<li><p><strong>directions</strong> (<em>Tensor</em>) – (N, 3) tensor of arrow vectors; length sets the size.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>line_width</strong> (<em>float</em>) – Width of the shafts in pixels.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name prefix. Defaults to a unique name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_planes">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_planes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normals</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.6,</span> <span class="pre">0.7,</span> <span class="pre">0.9)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_planes" title="Link to this definition">¶</a></dt>
+<dd><p>Draw translucent square patches perpendicular to the given normals,
+e.g. tangent planes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>centers</strong> (<em>Tensor</em>) – (N, 3) tensor of patch centers.</p></li>
+<li><p><strong>normals</strong> (<em>Tensor</em>) – (N, 3) tensor of patch normals.</p></li>
+<li><p><strong>size</strong> (<em>float</em>) – Half of the patch side length, in world units.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>opacity</strong> (<em>float</em>) – Patch opacity in [0, 1].</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name. Defaults to a unique name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="isoext.viewer.add_spheres">
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">add_spheres</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radii</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.6,</span> <span class="pre">0.7,</span> <span class="pre">0.9)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.add_spheres" title="Link to this definition">¶</a></dt>
+<dd><p>Draw translucent spheres, e.g. the distance spheres of SDF samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> – A viser.ViserServer instance.</p></li>
+<li><p><strong>centers</strong> (<em>Tensor</em>) – (N, 3) tensor of sphere centers.</p></li>
+<li><p><strong>radii</strong> (<em>Tensor</em>) – (N,) tensor of radii.</p></li>
+<li><p><strong>color</strong> – RGB tuple with components in [0, 1], or a color name.</p></li>
+<li><p><strong>opacity</strong> (<em>float</em>) – Sphere opacity in [0, 1].</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Scene tree name. Defaults to a unique name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.show">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.show" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.show" title="Link to this definition">¶</a></dt>
 <dd><p>Open an interactive viewer serving the given mesh.</p>
 <p>The server keeps running until it is stopped or the process exits; the
 printed URL can be opened in any browser.</p>
@@ -417,6 +1015,10 @@ printed URL can be opened in any browser.</p>
 <li><p><strong>vertices</strong> (<em>Tensor</em>) – (N, 3) tensor of vertex positions.</p></li>
 <li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
 <li><p><strong>port</strong> (<em>int</em>) – Port to serve on (the next free port is used if taken).</p></li>
+<li><p><strong>grid</strong> – Optional grid to overlay with add_grid.</p></li>
+<li><p><strong>grid_level</strong> (<em>float</em>) – Iso-value for the grid overlay’s corner colors.</p></li>
+<li><p><strong>draw</strong> – Callable that receives the server to add extra elements,
+e.g. with add_points and add_lines.</p></li>
 <li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh.</p></li>
 </ul>
 </dd>
@@ -428,16 +1030,18 @@ printed URL can be opened in any browser.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.serialize_scene">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">serialize_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.serialize_scene" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">serialize_scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.serialize_scene" title="Link to this definition">¶</a></dt>
 <dd><p>Serialize a scene containing the given mesh to .viser bytes.</p>
 <p>The bytes can be written to a <code class="docutils literal notranslate"><span class="pre">.viser</span></code> file and played back offline by
 viser’s static client, e.g. embedded in a web page. See save_scene and
-embed for convenience wrappers.</p>
+embed for convenience wrappers. The mesh is optional: pass None to
+build a scene of only a grid overlay and drawn annotations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vertices</strong> (<em>Tensor</em>)</p></li>
-<li><p><strong>faces</strong> (<em>Tensor</em>)</p></li>
+<li><p><strong>vertices</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>grid_level</strong> (<em>float</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -482,7 +1086,7 @@ refreshed whenever the installed viser ships a different build.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="isoext.viewer.embed">
-<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_static'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">420</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.embed" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">isoext.viewer.</span></span><span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">faces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_static'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">420</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">mesh_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isoext.viewer.embed" title="Link to this definition">¶</a></dt>
 <dd><p>Display a mesh as a self-contained interactive scene in a notebook.</p>
 <p>Unlike show, which starts a live server, this writes static assets –
 the viser client to root/viser/ and the serialized scene to
@@ -492,11 +1096,17 @@ statically, for example on documentation pages.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vertices</strong> (<em>Tensor</em>) – (N, 3) tensor of vertex positions.</p></li>
-<li><p><strong>faces</strong> (<em>Tensor</em>) – (M, 3) tensor of triangle indices.</p></li>
+<li><p><strong>vertices</strong> (<em>Tensor</em><em> | </em><em>None</em>) – (N, 3) tensor of vertex positions, or None for a scene
+without a mesh.</p></li>
+<li><p><strong>faces</strong> (<em>Tensor</em><em> | </em><em>None</em>) – (M, 3) tensor of triangle indices.</p></li>
 <li><p><strong>root</strong> – Directory for the static assets, relative to the notebook.</p></li>
 <li><p><strong>height</strong> (<em>int</em>) – Height of the embedded viewer in pixels.</p></li>
-<li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh.</p></li>
+<li><p><strong>frame</strong> – Optional (N, 3) tensor of points that define the initial
+camera framing, for scenes composed with draw= whose extent
+the mesh alone does not describe.</p></li>
+<li><p><strong>**mesh_kwargs</strong> – Forwarded to add_mesh; pass grid= (and optionally
+grid_level=) to overlay the grid’s edges and corner signs, and
+draw= to add extra elements with add_points and add_lines.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -519,7 +1129,8 @@ Each cell has 8 corner points where scalar values are stored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shape</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – The number of cells in each dimension (x, y, z).</p></li>
+<li><p><strong>shape</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – The number of sample points in each dimension (x, y, z);
+the grid has one fewer cell than points along each axis.</p></li>
 <li><p><strong>aabb_min</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The minimum corner of the bounding box.</p></li>
 <li><p><strong>aabb_max</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The maximum corner of the bounding box.</p></li>
 <li><p><strong>default_value</strong> (<em>float</em>) – Initial scalar value for all points.</p></li>
@@ -558,7 +1169,8 @@ This is useful for large domains where only a small region contains the iso-surf
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>shape</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – The maximum number of cells in each dimension (x, y, z).</p></li>
+<li><p><strong>shape</strong> (<em>Sequence</em><em>[</em><em>int</em><em>]</em>) – The number of sample points in each dimension (x, y, z);
+cells may be added anywhere in the implied lattice.</p></li>
 <li><p><strong>aabb_min</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The minimum corner of the bounding box.</p></li>
 <li><p><strong>aabb_max</strong> (<em>Sequence</em><em>[</em><em>float</em><em>]</em>) – The maximum corner of the bounding box.</p></li>
 <li><p><strong>default_value</strong> (<em>float</em>) – Default scalar value for unset points.</p></li>
@@ -715,6 +1327,18 @@ You can modify the normals to control the surface reconstruction.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="isoext.Intersection.set_points">
+<span class="sig-name descname"><span class="pre">set_points</span></span><a class="headerlink" href="#isoext.Intersection.set_points" title="Link to this definition">¶</a></dt>
+<dd><p>Set custom intersection points, e.g. after refining them
+against the exact SDF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_points</strong> – (N, 3) float32 tensor of point positions.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -735,14 +1359,14 @@ You can modify the normals to control the surface reconstruction.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="more_sdf.html">
+          <a class="prev-page" href="viewer.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Using External SDF Libraries</div>
+                <div class="title">Viewer</div>
                 
               </div>
             </a>
@@ -779,14 +1403,52 @@ You can modify the normals to control the surface reconstruction.</p>
 <li><a class="reference internal" href="#">API Reference</a><ul>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
 <li><a class="reference internal" href="#isoext.marching_cubes"><code class="docutils literal notranslate"><span class="pre">marching_cubes()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.marching_tetrahedra"><code class="docutils literal notranslate"><span class="pre">marching_tetrahedra()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.dual_contouring"><code class="docutils literal notranslate"><span class="pre">dual_contouring()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.surface_nets"><code class="docutils literal notranslate"><span class="pre">surface_nets()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.dual_marching_cubes"><code class="docutils literal notranslate"><span class="pre">dual_marching_cubes()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.get_intersection"><code class="docutils literal notranslate"><span class="pre">get_intersection()</span></code></a></li>
-<li><a class="reference internal" href="#isoext.make_grid"><code class="docutils literal notranslate"><span class="pre">make_grid()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.gaussian_smooth"><code class="docutils literal notranslate"><span class="pre">gaussian_smooth()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.write_obj"><code class="docutils literal notranslate"><span class="pre">write_obj()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sdf-toolbox">SDF Toolbox</a><ul>
+<li><a class="reference internal" href="#isoext.sdf.SDF"><code class="docutils literal notranslate"><span class="pre">SDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.SDFProtocol"><code class="docutils literal notranslate"><span class="pre">SDFProtocol</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.SphereSDF"><code class="docutils literal notranslate"><span class="pre">SphereSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.TorusSDF"><code class="docutils literal notranslate"><span class="pre">TorusSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.CuboidSDF"><code class="docutils literal notranslate"><span class="pre">CuboidSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.MandelbulbSDF"><code class="docutils literal notranslate"><span class="pre">MandelbulbSDF</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.TriangleMeshSDF"><code class="docutils literal notranslate"><span class="pre">TriangleMeshSDF</span></code></a><ul>
+<li><a class="reference internal" href="#isoext.sdf.TriangleMeshSDF.winding_number"><code class="docutils literal notranslate"><span class="pre">TriangleMeshSDF.winding_number()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.TriangleMeshSDF.closest_points"><code class="docutils literal notranslate"><span class="pre">TriangleMeshSDF.closest_points()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#isoext.sdf.UnionOp"><code class="docutils literal notranslate"><span class="pre">UnionOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.IntersectionOp"><code class="docutils literal notranslate"><span class="pre">IntersectionOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.NegationOp"><code class="docutils literal notranslate"><span class="pre">NegationOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.SmoothUnionOp"><code class="docutils literal notranslate"><span class="pre">SmoothUnionOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.TranslationOp"><code class="docutils literal notranslate"><span class="pre">TranslationOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.RotationOp"><code class="docutils literal notranslate"><span class="pre">RotationOp</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.get_sdf_grad"><code class="docutils literal notranslate"><span class="pre">get_sdf_grad()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.get_sdf_normal"><code class="docutils literal notranslate"><span class="pre">get_sdf_normal()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.sdf.project_to_surface"><code class="docutils literal notranslate"><span class="pre">project_to_surface()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-meshes">Test Meshes</a><ul>
+<li><a class="reference internal" href="#isoext.assets.load_mesh"><code class="docutils literal notranslate"><span class="pre">load_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.assets.cache_dir"><code class="docutils literal notranslate"><span class="pre">cache_dir()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#viewer">Viewer</a><ul>
 <li><a class="reference internal" href="#isoext.viewer.add_mesh"><code class="docutils literal notranslate"><span class="pre">add_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_grid"><code class="docutils literal notranslate"><span class="pre">add_grid()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_points"><code class="docutils literal notranslate"><span class="pre">add_points()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_lines"><code class="docutils literal notranslate"><span class="pre">add_lines()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_label"><code class="docutils literal notranslate"><span class="pre">add_label()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_arrows"><code class="docutils literal notranslate"><span class="pre">add_arrows()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_planes"><code class="docutils literal notranslate"><span class="pre">add_planes()</span></code></a></li>
+<li><a class="reference internal" href="#isoext.viewer.add_spheres"><code class="docutils literal notranslate"><span class="pre">add_spheres()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.show"><code class="docutils literal notranslate"><span class="pre">show()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.serialize_scene"><code class="docutils literal notranslate"><span class="pre">serialize_scene()</span></code></a></li>
 <li><a class="reference internal" href="#isoext.viewer.save_scene"><code class="docutils literal notranslate"><span class="pre">save_scene()</span></code></a></li>
@@ -828,6 +1490,7 @@ You can modify the normals to control the surface reconstruction.</p>
 <li><a class="reference internal" href="#isoext.Intersection.get_points"><code class="docutils literal notranslate"><span class="pre">Intersection.get_points</span></code></a></li>
 <li><a class="reference internal" href="#isoext.Intersection.has_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.has_normals</span></code></a></li>
 <li><a class="reference internal" href="#isoext.Intersection.set_normals"><code class="docutils literal notranslate"><span class="pre">Intersection.set_normals</span></code></a></li>
+<li><a class="reference internal" href="#isoext.Intersection.set_points"><code class="docutils literal notranslate"><span class="pre">Intersection.set_points</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -2,12 +2,18 @@
 
 import gc
 
+import pytest
 import torch
+from conftest import populate_sparse_grid
 
 import isoext
-from isoext.sdf import SphereSDF, get_sdf_normal
-
-from conftest import populate_sparse_grid
+from isoext.sdf import (
+    CuboidSDF,
+    RotationOp,
+    SphereSDF,
+    get_sdf_normal,
+    project_to_surface,
+)
 
 
 def test_dual_contouring_simple(sphere_grid):
@@ -20,17 +26,114 @@ def test_dual_contouring_simple(sphere_grid):
     assert len(f) > 0
 
 
-def test_dual_contouring_vertex_accuracy(sphere_grid):
-    """Dual vertices from the QEF solve must lie on the sphere surface.
+@pytest.mark.parametrize("method", ["carrera", "ju"])
+def test_dual_contouring_vertex_accuracy(sphere_grid, method):
+    """Dual vertices of both variants must lie on the sphere surface.
 
-    Guards the batched SVD path: a silently failed solve would leave
-    vertices near cell corners instead (error on the order of a cell).
+    A silently failed solve would leave vertices near cell corners instead
+    (error on the order of a cell).
     """
-    v, f = isoext.dual_contouring(sphere_grid, level=0.0)
+    v, f = isoext.dual_contouring(sphere_grid, level=0.0, method=method)
 
     err = (v.norm(dim=-1) - 0.5).abs()
     cell_size = 2.0 / 31
     assert err.max().item() < cell_size / 4
+
+
+def test_dual_contouring_sdf_recovers_rotated_box_without_normals():
+    """The carrera variant must find the box's edges from the samples alone.
+
+    Compared against the same grid under "ju" with estimated normals, which
+    rounds the edges: the 99th percentile error must drop several times.
+    Thresholds are set from the authors' reference implementation on this
+    case (p99 about 0.5 percent of a cell, max about 7 percent).
+    """
+    sdf = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)
+    grid = isoext.UniformGrid([33, 33, 33])
+    grid.set_values(sdf(grid.get_points()))
+    cell_size = 2.0 / 32
+
+    v, f = isoext.dual_contouring(grid, method="carrera")
+    err = sdf(v).abs()
+    assert err.quantile(0.99).item() < 0.02 * cell_size
+    assert err.max().item() < 0.12 * cell_size
+
+    v_ju, _ = isoext.dual_contouring(grid)
+    err_ju = sdf(v_ju).abs()
+    assert err.quantile(0.99).item() < err_ju.quantile(0.99).item() / 5
+
+
+def test_dual_contouring_sdf_coarse_box():
+    """A box sampled on 5x5x5 cells: the paper's headline case.
+
+    Marching cubes and Hermite dual contouring cannot recover it; the
+    reference implementation reaches a max error of 8 percent of a cell.
+    """
+    sdf = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)
+    grid = isoext.UniformGrid([6, 6, 6])
+    grid.set_values(sdf(grid.get_points()))
+    cell_size = 2.0 / 5
+
+    v, f = isoext.dual_contouring(grid, method="carrera")
+    assert len(v) == 50
+    assert sdf(v).abs().max().item() < 0.1 * cell_size
+
+
+def test_dual_contouring_sdf_is_deterministic(sphere_grid):
+    """No random batching: two runs give the same vertices."""
+    v1, f1 = isoext.dual_contouring(sphere_grid, method="carrera", outer_iters=10)
+    v2, f2 = isoext.dual_contouring(sphere_grid, method="carrera", outer_iters=10)
+    assert torch.equal(v1, v2)
+    assert torch.equal(f1, f2)
+
+
+def test_dual_contouring_sdf_zero_iterations_is_surface_nets(sphere_grid):
+    """With no outer iterations the vertices are the centroids of the crossings."""
+    v, f = isoext.dual_contouring(sphere_grid, method="carrera", outer_iters=0)
+    v_sn, f_sn = isoext.surface_nets(sphere_grid)
+    assert torch.allclose(v, v_sn, atol=1e-6)
+    assert torch.equal(f, f_sn)
+
+
+def test_dual_contouring_sdf_with_sdf_normals_as_initial_hermite_data():
+    """Exact normals on the intersection seed the Hermite data."""
+    sdf = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)
+    grid = isoext.UniformGrid([33, 33, 33])
+    grid.set_values(sdf(grid.get_points()))
+    its = isoext.get_intersection(grid)
+    its.set_normals(get_sdf_normal(sdf, its.get_points()))
+
+    v, f = isoext.dual_contouring(grid, intersection=its, method="carrera")
+    cell_size = 2.0 / 32
+    assert sdf(v).abs().quantile(0.99).item() < 0.02 * cell_size
+
+
+def test_dual_contouring_sharp_features_with_sdf_normals():
+    """Refined points and SDF normals must place vertices on sharp features.
+
+    A rotated cube stresses vertex placement. Almost all vertices must sit
+    on the surface; cells whose crease lies in a neighboring cell carry a
+    bounded error, since one vertex per cell cannot span two face strips.
+    """
+    sdf = RotationOp(sdf=CuboidSDF(size=[1.0, 1.0, 1.0]), axis=[1, 1, 0], angle=30)
+    grid = isoext.UniformGrid([48, 48, 48], aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
+    grid.set_values(sdf(grid.get_points()))
+    cell_size = 2.0 / 47
+
+    its = isoext.get_intersection(grid)
+    points = project_to_surface(sdf, its.get_points())
+    its.set_points(points)
+    its.set_normals(get_sdf_normal(sdf, points))
+    v, f = isoext.dual_contouring(grid, intersection=its)
+
+    err = sdf(v).abs()
+    assert err.quantile(0.99).item() < 0.08 * cell_size
+    assert err.max().item() < 0.25 * cell_size
+
+    # Unclamped vertices may leave their cells to sit on the features.
+    v, f = isoext.dual_contouring(grid, intersection=its, clamp=False)
+    err = sdf(v).abs()
+    assert err.max().item() < 0.05 * cell_size
 
 
 def test_dual_contouring_with_intersection_auto_normals(sphere_grid):
@@ -92,11 +195,21 @@ def test_dual_contouring_empty_result():
 
 
 def test_dual_contouring_parameters(sphere_grid):
-    """Test dual contouring with different regularization parameters."""
+    """Each variant accepts its own options and rejects the other's."""
     v, f = isoext.dual_contouring(sphere_grid, level=0.0, reg=0.01)
-
     assert v.shape[1] == 3
     assert f.shape[1] == 3
+
+    v, f = isoext.dual_contouring(sphere_grid, level=0.0, method="carrera", outer_iters=5, inner_iters=5, band=2.0)
+    assert v.shape[1] == 3
+    assert f.shape[1] == 3
+
+    with pytest.raises(TypeError):
+        isoext.dual_contouring(sphere_grid, method="carrera", reg=0.01)
+    with pytest.raises(TypeError):
+        isoext.dual_contouring(sphere_grid, outer_iters=5)
+    with pytest.raises(ValueError):
+        isoext.dual_contouring(sphere_grid, method="schaefer")
 
 
 def test_dual_contouring_surface_crossing_domain_boundary():
@@ -283,7 +396,8 @@ def test_dual_contouring_sparse_grid_with_custom_normals(sphere):
     assert len(f) > 0
 
 
-def test_dual_contouring_sparse_grid_surface_crossing_domain_boundary():
+@pytest.mark.parametrize("method", ["carrera", "ju"])
+def test_dual_contouring_sparse_grid_surface_crossing_domain_boundary(method):
     """Test sparse-grid dual contouring when the surface extends past the AABB.
 
     Boundary edges are marked with -1 (no neighbor cell); the sparse-to-uniform
@@ -294,17 +408,19 @@ def test_dual_contouring_sparse_grid_surface_crossing_domain_boundary():
     grid = isoext.SparseGrid(shape, aabb_min=[-1, -1, -1], aabb_max=[1, 1, 1])
     populate_sparse_grid(grid, sphere, shape, level=0.0)
 
-    v, f = isoext.dual_contouring(grid, level=0.0)
+    v, f = isoext.dual_contouring(grid, level=0.0, method=method)
 
     assert v.shape[1] == 3
     assert f.shape[1] == 3
     assert len(v) > 0
     assert f.max().item() < len(v)
 
-    # Dual vertices are clipped to their cell AABB, so every vertex must lie
-    # inside the domain and within a cell diagonal of the sphere surface.
+    # Every vertex must lie within a cell diagonal of the sphere surface. The
+    # "ju" vertices are also clipped to their cell, so they stay inside the
+    # domain; "carrera" vertices may leave their cells.
     cell_size = 2.0 / 31
-    assert v.abs().max().item() <= 1.0 + 1e-5
+    if method == "ju":
+        assert v.abs().max().item() <= 1.0 + 1e-5
     err = (v.norm(dim=-1) - 1.2).abs()
     assert err.max().item() < 2 * cell_size
 

@@ -14,7 +14,7 @@
 namespace {
 
 // Accumulate the QEF of one cell from its intersection points and normals,
-// solve it, and clip the resulting dual vertex to the cell bounds.
+// solve it, and keep the resulting dual vertex inside the cell.
 struct place_dual_vertex_op {
     float3 *dual_v;
     const float3 *its_points;
@@ -24,15 +24,17 @@ struct place_dual_vertex_op {
     const GridView view;
     const float reg;
     const float tol;
+    const bool clamp;
 
     place_dual_vertex_op(float3 *dual_v, const float3 *its_points,
                          const float3 *its_normals,
                          const uint *its_cell_offsets,
                          const uint *its_cell_indices, const GridView &view,
-                         float reg, float tol)
+                         float reg, float tol, bool clamp)
         : dual_v(dual_v), its_points(its_points), its_normals(its_normals),
-          its_cell_offsets(its_cell_offsets), its_cell_indices(its_cell_indices),
-          view(view), reg(reg), tol(tol) {}
+          its_cell_offsets(its_cell_offsets),
+          its_cell_indices(its_cell_indices), view(view), reg(reg), tol(tol),
+          clamp(clamp) {}
 
     __host__ __device__ void operator()(uint idx) {
         // The QEF minimizes sum_i (n_i . (x - p_i))^2, accumulated as the
@@ -69,10 +71,16 @@ struct place_dual_vertex_op {
 
         float3 x = solve_sym_3x3(ATA, ATb, tol);
 
-        // Keep the vertex inside its cell.
-        uint cell = its_cell_indices[idx];
-        dual_v[idx] = clip(x, view.corner_position(cell, 0),
-                           view.corner_position(cell, 7));
+        // Clamping keeps the vertex inside its cell, which is safe but
+        // rounds features whose feature line runs through a neighboring
+        // cell. Without it the vertex stays wherever the QEF puts it, which
+        // follows sharp features better but can self-intersect.
+        if (clamp) {
+            uint cell = its_cell_indices[idx];
+            x = clip(x, view.corner_position(cell, 0),
+                     view.corner_position(cell, 7));
+        }
+        dual_v[idx] = x;
     }
 };
 
@@ -95,8 +103,8 @@ struct get_triangles_op {
     // vertex), or -1 if the cell has no intersections.
     __host__ __device__ int cell_to_dual_idx(int cell) const {
         const uint *end = its_cell_indices + num_cells;
-        const uint *it = thrust::lower_bound(thrust::seq, its_cell_indices,
-                                             end, uint(cell));
+        const uint *it =
+            thrust::lower_bound(thrust::seq, its_cell_indices, end, uint(cell));
         return (it != end && *it == uint(cell)) ? int(it - its_cell_indices)
                                                 : -1;
     }
@@ -155,42 +163,50 @@ struct get_triangles_op {
     }
 };
 
+// Place each cell's vertex at the centroid of its edge intersection
+// points (the surface nets rule). The centroid of points on the cell
+// boundary always lies inside the cell, so no clipping is needed.
+struct place_centroid_vertex_op {
+    float3 *dual_v;
+    const float3 *its_points;
+    const uint *its_cell_offsets;
+
+    place_centroid_vertex_op(float3 *dual_v, const float3 *its_points,
+                             const uint *its_cell_offsets)
+        : dual_v(dual_v), its_points(its_points),
+          its_cell_offsets(its_cell_offsets) {}
+
+    __host__ __device__ void operator()(uint idx) {
+        uint begin = its_cell_offsets[idx];
+        uint end = its_cell_offsets[idx + 1];
+        float3 sum = make_float3(0.0f, 0.0f, 0.0f);
+        for (uint i = begin; i < end; i++) {
+            sum = sum + its_points[i];
+        }
+        dual_v[idx] = sum / float(end - begin);
+    }
+};
+
 }   // anonymous namespace
 
+// Shared tail of the dual methods: build one quad around every intersected
+// edge from the per-cell vertices, split the quads into triangles, and weld
+// the result into an indexed mesh.
 std::pair<NDArray<float3>, NDArray<int>>
-dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
-                float svd_tol) {
-    // No cell intersects the surface: return an empty mesh instead of
-    // running the QEF solver on an empty batch.
-    if (its.cell_indices.size() == 0) {
-        return {NDArray<float3>({0}), NDArray<int>({0, 3})};
-    }
-
-    auto [dual_quads_dv, is_out_dv] =
+build_dual_mesh(Grid *grid, const Intersection &its,
+                const thrust::device_vector<float3> &dual_v) {
+    auto [dual_quads_dv, is_out_dv, dedup_edges_dv] =
         grid->get_dual_quads(its.edges, its.is_out);
-
-    // Place one dual vertex in every cell crossed by the surface.
-    uint num_active_cells = its.cell_indices.size();
-    thrust::device_vector<float3> dual_v(num_active_cells);
-    thrust::for_each(
-        thrust::counting_iterator<uint>(0),
-        thrust::counting_iterator<uint>(num_active_cells),
-        place_dual_vertex_op(dual_v.data().get(), its.points.data(),
-                             its.normals.data(), its.cell_offsets.data(),
-                             its.cell_indices.data(), grid->get_view(), reg,
-                             svd_tol));
 
     uint num_quads = dual_quads_dv.size();
     thrust::device_vector<float3> v_dv(num_quads * 6,
                                        make_float3(NAN, NAN, NAN));
-    thrust::for_each(thrust::counting_iterator<uint>(0),
-                     thrust::counting_iterator<uint>(num_quads),
-                     get_triangles_op(v_dv.data().get(),
-                                      dual_v.data().get(),
-                                      dual_quads_dv.data().get(),
-                                      is_out_dv.data().get(),
-                                      its.cell_indices.data(),
-                                      its.cell_indices.size()));
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_quads),
+        get_triangles_op(v_dv.data().get(), dual_v.data().get(),
+                         dual_quads_dv.data().get(), is_out_dv.data().get(),
+                         its.cell_indices.data(), its.cell_indices.size()));
 
     // Remove unused entries, which are marked as NAN.
     v_dv.erase(thrust::remove_if(v_dv.begin(), v_dv.end(), is_nan_pred()),
@@ -206,4 +222,55 @@ dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
         NDArray<int>::copy(f_dv.data().get(), {f_dv.size() / 3, 3});
 
     return {v, f};
+}
+
+thrust::device_vector<float3>
+place_dual_vertices(Grid *grid, const Intersection &its, float reg,
+                    float svd_tol, bool clamp) {
+    uint num_active_cells = its.cell_indices.size();
+    thrust::device_vector<float3> dual_v(num_active_cells);
+    thrust::for_each(
+        thrust::counting_iterator<uint>(0),
+        thrust::counting_iterator<uint>(num_active_cells),
+        place_dual_vertex_op(dual_v.data().get(), its.points.data(),
+                             its.normals.data(), its.cell_offsets.data(),
+                             its.cell_indices.data(), grid->get_view(), reg,
+                             svd_tol, clamp));
+    return dual_v;
+}
+
+thrust::device_vector<float3>
+place_centroid_vertices(const Intersection &its) {
+    uint num_active_cells = its.cell_indices.size();
+    thrust::device_vector<float3> dual_v(num_active_cells);
+    thrust::for_each(thrust::counting_iterator<uint>(0),
+                     thrust::counting_iterator<uint>(num_active_cells),
+                     place_centroid_vertex_op(dual_v.data().get(),
+                                              its.points.data(),
+                                              its.cell_offsets.data()));
+    return dual_v;
+}
+
+std::pair<NDArray<float3>, NDArray<int>>
+dual_contouring(Grid *grid, const Intersection &its, float level, float reg,
+                float svd_tol, bool clamp) {
+    // No cell intersects the surface: return an empty mesh instead of
+    // running the QEF solver on an empty batch.
+    if (its.cell_indices.size() == 0) {
+        return {NDArray<float3>({0}), NDArray<int>({0, 3})};
+    }
+
+    thrust::device_vector<float3> dual_v =
+        place_dual_vertices(grid, its, reg, svd_tol, clamp);
+    return build_dual_mesh(grid, its, dual_v);
+}
+
+std::pair<NDArray<float3>, NDArray<int>>
+surface_nets(Grid *grid, const Intersection &its, float level) {
+    if (its.cell_indices.size() == 0) {
+        return {NDArray<float3>({0}), NDArray<int>({0, 3})};
+    }
+
+    thrust::device_vector<float3> dual_v = place_centroid_vertices(its);
+    return build_dual_mesh(grid, its, dual_v);
 }

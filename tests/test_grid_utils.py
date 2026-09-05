@@ -6,35 +6,7 @@ import tempfile
 import torch
 
 import isoext
-from isoext.utils import make_grid, write_obj
-
-
-def test_make_grid_uniform():
-    """Test make_grid with uniform resolution."""
-    grid = make_grid([-1, -1, -1, 1, 1, 1], res=32, device="cuda")
-
-    assert grid.shape == (32, 32, 32, 3)
-    assert grid.device.type == "cuda"
-
-    # Check bounds
-    assert torch.allclose(grid[0, 0, 0], torch.tensor([-1.0, -1.0, -1.0], device="cuda"))
-    assert torch.allclose(grid[-1, -1, -1], torch.tensor([1.0, 1.0, 1.0], device="cuda"), atol=1e-5)
-
-
-def test_make_grid_non_uniform():
-    """Test make_grid with non-uniform resolution."""
-    grid = make_grid([-1, -1, -1, 1, 1, 1], res=[16, 32, 64], device="cuda")
-
-    assert grid.shape == (16, 32, 64, 3)
-    assert grid.device.type == "cuda"
-
-
-def test_make_grid_cpu():
-    """Test make_grid on CPU."""
-    grid = make_grid([-1, -1, -1, 1, 1, 1], res=16, device="cpu")
-
-    assert grid.shape == (16, 16, 16, 3)
-    assert grid.device.type == "cpu"
+from isoext.utils import write_obj
 
 
 def test_write_obj():

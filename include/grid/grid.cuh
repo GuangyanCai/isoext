@@ -25,6 +25,10 @@ struct GridView {
     const float *values;        // dense: per lattice point; sparse: per corner
     const uint *cell_indices;   // sparse only: active cell -> dense cell index
     bool sparse;
+    // Explicit cells: corner positions stored per (cell, corner) instead of
+    // derived from the lattice, with values laid out the same way. Used for
+    // the warped dual cells of dual marching cubes.
+    const float3 *positions = nullptr;
 
     // Index of a cell corner in the full point lattice. Corner i has local
     // coordinates (x, y, z) = (bit 2, bit 1, bit 0) of i (Morton order).
@@ -40,7 +44,8 @@ struct GridView {
     // sparse grid this indexes the per-corner value array; for a dense grid
     // it is the lattice point index.
     __host__ __device__ uint corner_point_id(uint cell, uint corner) const {
-        return sparse ? cell * 8 + corner : dense_point_index(cell, corner);
+        return (sparse || positions) ? cell * 8 + corner
+                                     : dense_point_index(cell, corner);
     }
 
     __host__ __device__ float corner_value(uint cell, uint corner) const {
@@ -48,8 +53,53 @@ struct GridView {
     }
 
     __host__ __device__ float3 corner_position(uint cell, uint corner) const {
+        if (positions) {
+            return positions[cell * 8 + corner];
+        }
         return get_vtx_pos_op(shape, aabb_min,
                               aabb_max)(dense_point_index(cell, corner));
+    }
+
+    // Trilinear interpolation of the cell's corner values at a point inside
+    // the cell. Lattice cells only (dense or sparse, not explicit).
+    __host__ __device__ float sample_in_cell(uint cell, float3 p) const {
+        float3 lo = corner_position(cell, 0);
+        float3 hi = corner_position(cell, 7);
+        float tx = (p.x - lo.x) / (hi.x - lo.x);
+        float ty = (p.y - lo.y) / (hi.y - lo.y);
+        float tz = (p.z - lo.z) / (hi.z - lo.z);
+        float v = 0.0f;
+        for (uint i = 0; i < 8; i++) {
+            float w = ((i >> 2) & 1 ? tx : 1.0f - tx) *
+                      ((i >> 1) & 1 ? ty : 1.0f - ty) *
+                      ((i & 1) ? tz : 1.0f - tz);
+            v += w * corner_value(cell, i);
+        }
+        return v;
+    }
+
+    // Gradient of the trilinear interpolant at a point of the cell, with
+    // the point clamped to the cell. Lattice cells only.
+    __host__ __device__ float3 gradient_in_cell(uint cell, float3 p) const {
+        float3 lo = corner_position(cell, 0);
+        float3 hi = corner_position(cell, 7);
+        float3 size = hi - lo;
+        float3 t = clip((p - lo) / size, make_float3(0.0f, 0.0f, 0.0f),
+                        make_float3(1.0f, 1.0f, 1.0f));
+        float3 g = make_float3(0.0f, 0.0f, 0.0f);
+        for (uint i = 0; i < 8; i++) {
+            float sx = (i >> 2) & 1 ? 1.0f : -1.0f;
+            float sy = (i >> 1) & 1 ? 1.0f : -1.0f;
+            float sz = (i & 1) ? 1.0f : -1.0f;
+            float wx = sx > 0 ? t.x : 1.0f - t.x;
+            float wy = sy > 0 ? t.y : 1.0f - t.y;
+            float wz = sz > 0 ? t.z : 1.0f - t.z;
+            float v = corner_value(cell, i);
+            g.x += sx * wy * wz * v;
+            g.y += wx * sy * wz * v;
+            g.z += wx * wy * sz * v;
+        }
+        return g / size;
     }
 
     // Load the positions and values of all 8 corners of a cell.
@@ -111,7 +161,11 @@ class Grid {
 
     virtual thrust::device_vector<uint> get_cell_indices() const = 0;
 
-    virtual std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+    // Quads of the dual mesh, one per unique crossed edge: the (up to 4)
+    // adjacent cells of each edge, the crossing direction, and the
+    // deduplicated edges themselves in dense lattice point ids.
+    virtual std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>,
+                       thrust::device_vector<uint2>>
     get_dual_quads(const NDArray<uint2> &edges,
                    const NDArray<bool> &is_out) const = 0;
 };

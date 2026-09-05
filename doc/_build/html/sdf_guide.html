@@ -202,11 +202,20 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">What Is Iso-Surface Extraction?</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extraction Methods</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="marching_cubes.html">Marching Cubes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marching_tetrahedra.html">Marching Tetrahedra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="surface_nets.html">Surface Nets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dual_contouring.html">Dual Contouring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dual_marching_cubes.html">Dual Marching Cubes</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">In Depth</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_comparisons.html">Method Comparisons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mc_variants.html">Marching Cubes Variants</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Working with Fields</span></p>
 <ul class="current">
@@ -215,10 +224,20 @@
 <li class="toctree-l1"><a class="reference internal" href="occupancy_grids.html">Working with Occupancy Grids</a></li>
 <li class="toctree-l1"><a class="reference internal" href="more_sdf.html">Using External SDF Libraries</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Visualization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="viewer.html">Viewer</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
 </ul>
 
 </div>
@@ -261,13 +280,16 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="sdf-utilities">
+          <section class="tex2jax_ignore mathjax_ignore" id="sdf-utilities">
 <h1>SDF Utilities<a class="headerlink" href="#sdf-utilities" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">isoext.sdf</span></code> provides <strong>optional</strong> utilities for working with signed distance functions. These are convenient for testing and demos, but you can always compute values with your own code.</p>
-<p><strong>Note:</strong> These utilities are not required — see <a class="reference internal" href="grids.html"><span class="std std-doc">Working with Grids</span></a> for examples using raw PyTorch.</p>
+<p><code class="docutils literal notranslate"><span class="pre">isoext.sdf</span></code> is a small toolbox of signed distance functions for
+testing and demos. Nothing in the library requires it: extraction
+only sees the values you put on the grid, however you compute them.
+<a class="reference internal" href="grids.html"><span class="doc">Working with Grids</span></a> shows examples with raw PyTorch.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">isoext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext.sdf</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isoext</span><span class="w"> </span><span class="kn">import</span> <span class="n">viewer</span>
 
@@ -276,6 +298,82 @@
 </div>
 </div>
 </div>
+<section id="meshes">
+<h2>Meshes<a class="headerlink" href="#meshes" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">TriangleMeshSDF</span></code> turns a triangle mesh into a signed distance function, so a
+mesh can be sampled into a grid, edited or combined like any other
+field, and extracted again.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TriangleMeshSDF</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">isoext.assets.load_mesh</span></code> downloads a few well-known test meshes on
+first use and caches them:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;armadillo&quot;</span></code> (<span class="bibtex-citation" id="id1">Krishnamurthy and Levoy [<a class="reference internal" href="#id16" title="Venkat Krishnamurthy and Marc Levoy. Fitting smooth surfaces to dense polygon meshes. In Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '96), 313–324. 1996. doi:10.1145/237170.237270.">1996</a>]</span>), <code class="docutils literal notranslate"><span class="pre">&quot;bunny&quot;</span></code>
+(<span class="bibtex-citation" id="id2">Turk and Levoy [<a class="reference internal" href="#id14" title="Greg Turk and Marc Levoy. Zippered polygon meshes from range images. In Proceedings of the 21st Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '94), 311–318. 1994. doi:10.1145/192161.192241.">1994</a>]</span>) and <code class="docutils literal notranslate"><span class="pre">&quot;dragon&quot;</span></code> (<span class="bibtex-citation" id="id3">Curless and Levoy [<a class="reference internal" href="#id15" title="Brian Curless and Marc Levoy. A volumetric method for building complex models from range images. In Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '96), 303–312. 1996. doi:10.1145/237170.237269.">1996</a>]</span>), courtesy
+of the Stanford Computer Graphics Laboratory, for research use</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;spot&quot;</span></code> from <span class="bibtex-citation" id="id4">Crane [<a class="reference internal" href="#id19" title="Keenan Crane. Keenan's 3D model repository. 2012. URL: https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/.">2012</a>]</span>, public domain</p></li>
+</ul>
+<p>The armadillo, sampled on a 256 cell grid and extracted again:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">load_mesh</span><span class="p">(</span><span class="s2">&quot;armadillo&quot;</span><span class="p">)</span>
+<span class="n">armadillo</span> <span class="o">=</span> <span class="n">TriangleMeshSDF</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="p">)</span>
+
+<span class="n">fine</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">])</span>
+<span class="n">fine</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">armadillo</span><span class="p">(</span><span class="n">fine</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">dual_marching_cubes</span><span class="p">(</span><span class="n">fine</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">faces</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> mesh triangles in, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> out&quot;</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightsteelblue&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>345,944 mesh triangles in, 204,664 out
+</pre></div>
+</div>
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/375161eab747352a.viser&initialCameraPosition=1.378,1.377,0.965&initialCameraLookAt=-0.000,-0.000,0.001&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+<p>The distance is the distance to the closest triangle, found through a
+bounding volume hierarchy on the GPU (<span class="bibtex-citation" id="id5">Ericson [<a class="reference internal" href="#id17" title="Christer Ericson. Real-Time Collision Detection. Morgan Kaufmann, 2005. ISBN 9781558607323.">2005</a>]</span>;
+<span class="bibtex-citation" id="id6">Jones <em>et al.</em> [<a class="reference internal" href="#id18" title="Mark W. Jones, J. Andreas Bærentzen, and Milos Sramek. 3D distance fields: a survey of techniques and applications. IEEE Transactions on Visualization and Computer Graphics, 12(4):581–599, 2006. doi:10.1109/TVCG.2006.56.">2006</a>]</span> survey the approaches). The sign is the generalized
+winding number (<span class="bibtex-citation" id="id7">Jacobson <em>et al.</em> [<a class="reference internal" href="#id30" title="Alec Jacobson, Ladislav Kavan, and Olga Sorkine-Hornung. Robust inside-outside segmentation using generalized winding numbers. ACM Transactions on Graphics, 32(4):33:1–33:12, 2013. doi:10.1145/2461912.2461916.">2013</a>]</span>), evaluated with the tree-based
+approximation of <span class="bibtex-citation" id="id8">Barill <em>et al.</em> [<a class="reference internal" href="#id31" title="Gavin Barill, Neil G. Dickson, Ryan Schmidt, David I. W. Levin, and Alec Jacobson. Fast winding numbers for soups and clouds. ACM Transactions on Graphics, 37(4):43:1–43:12, 2018. doi:10.1145/3197517.3201337.">2018</a>]</span>, so meshes with holes like the
+bunny and the dragon still get a sensible sign. <code class="docutils literal notranslate"><span class="pre">sign=&quot;parity&quot;</span></code> counts
+ray crossings instead (<span class="bibtex-citation" id="id9">Nooruddin and Turk [<a class="reference internal" href="#id26" title="Fakir S. Nooruddin and Greg Turk. Simplification and repair of polygonal models using volumetric techniques. IEEE Transactions on Visualization and Computer Graphics, 9(2):191–205, 2003. doi:10.1109/TVCG.2003.1196006.">2003</a>]</span>), which needs a closed
+mesh.</p>
+<p>The gradient is the direction away from the closest point, so
+<code class="docutils literal notranslate"><span class="pre">get_sdf_normal</span></code> and <code class="docutils literal notranslate"><span class="pre">project_to_surface</span></code> work on a mesh SDF, and
+<code class="docutils literal notranslate"><span class="pre">closest_points</span></code> returns the closest point on the mesh and its triangle
+directly:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]],</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">q</span><span class="p">,</span> <span class="n">face</span> <span class="o">=</span> <span class="n">armadillo</span><span class="o">.</span><span class="n">closest_points</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;distances:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">armadillo</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;closest points:&quot;</span><span class="p">,</span> <span class="p">[[</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">row</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">q</span><span class="o">.</span><span class="n">tolist</span><span class="p">()])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;faces:&quot;</span><span class="p">,</span> <span class="n">face</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>distances: [0.1756, 0.1375]
+closest points: [[-0.01, -0.0093, 0.725], [0.6087, 0.4526, 0.5696]]
+faces: [281187, 12731]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 <section id="primitives">
 <h2>Primitives<a class="headerlink" href="#primitives" title="Link to this heading">¶</a></h2>
 <section id="spheresdf">
@@ -285,7 +383,9 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sphere</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
+
+<span class="n">sphere</span> <span class="o">=</span> <span class="n">SphereSDF</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
 <span class="n">grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">sphere</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
 <span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 <span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -297,7 +397,7 @@
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/73da1675db599904.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/b6c15ceb58a53d61.viser&initialCameraPosition=1.383,1.383,0.968&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -324,7 +424,7 @@
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/dd32093f47db847d.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/3e3d1523f696f67d.viser&initialCameraPosition=1.310,1.310,0.917&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -351,7 +451,38 @@
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/16f2853e6bc0c7c7.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/a6bbd9a03562ffe7.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
+            frameborder="0"
+            allowfullscreen
+            style="border: 1px solid #8888; border-radius: 4px;"
+        ></iframe>
+        </div></div>
+</div>
+</section>
+<section id="mandelbulbsdf">
+<h3>MandelbulbSDF<a class="headerlink" href="#mandelbulbsdf" title="Link to this heading">¶</a></h3>
+<p>A distance estimator for the Mandelbulb fractal of
+<span class="bibtex-citation" id="id10">White and Nylander [<a class="reference internal" href="#id28" title="Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: https://www.skytopia.com/project/fractal/mandelbulb.html.">2009</a>]</span>. The values approximate
+the distance to the surface rather than being an exact SDF; fewer
+iterations give a smoother shape.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bulb</span> <span class="o">=</span> <span class="n">MandelbulbSDF</span><span class="p">(</span><span class="n">iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="c1"># The bulb needs slightly larger bounds than the shared grid above</span>
+<span class="n">bulb_grid</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">UniformGrid</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span> <span class="n">aabb_min</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2</span><span class="p">],</span> <span class="n">aabb_max</span><span class="o">=</span><span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">])</span>
+<span class="n">bulb_grid</span><span class="o">.</span><span class="n">set_values</span><span class="p">(</span><span class="n">bulb</span><span class="p">(</span><span class="n">bulb_grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()))</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">isoext</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">bulb_grid</span><span class="p">)</span>
+<span class="n">viewer</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;coral&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="100%"
+            height="420"
+            src="_static/viser/index.html?playbackPath=../scenes/28df64caf87d9c25.viser&initialCameraPosition=2.104,2.109,1.448&initialCameraLookAt=-0.005,-0.000,-0.028&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -404,7 +535,7 @@
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/f00cb923e2f106ed.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/80175ac219bea7f2.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
@@ -449,12 +580,59 @@
         <iframe
             width="100%"
             height="420"
-            src="_static/viser/index.html?playbackPath=../scenes/ffc9c5be9010a4df.viser"
+            src="_static/viser/index.html?playbackPath=../scenes/761e9a23bd3fac72.viser&initialCameraPosition=1.050,1.050,0.735&initialCameraLookAt=-0.000,0.000,0.000&initialCameraUp=0,0,1"
             frameborder="0"
             allowfullscreen
             style="border: 1px solid #8888; border-radius: 4px;"
         ></iframe>
         </div></div>
+</div>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div class="docutils container" id="id11">
+<div role="list" class="citation-list">
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Venkat Krishnamurthy and Marc Levoy. Fitting smooth surfaces to dense polygon meshes. In <em>Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '96)</em>, 313–324. 1996. <a class="reference external" href="https://doi.org/10.1145/237170.237270">doi:10.1145/237170.237270</a>.</p>
+</div>
+<div class="citation" id="id14" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Greg Turk and Marc Levoy. Zippered polygon meshes from range images. In <em>Proceedings of the 21st Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '94)</em>, 311–318. 1994. <a class="reference external" href="https://doi.org/10.1145/192161.192241">doi:10.1145/192161.192241</a>.</p>
+</div>
+<div class="citation" id="id15" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Brian Curless and Marc Levoy. A volumetric method for building complex models from range images. In <em>Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH '96)</em>, 303–312. 1996. <a class="reference external" href="https://doi.org/10.1145/237170.237269">doi:10.1145/237170.237269</a>.</p>
+</div>
+<div class="citation" id="id19" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
+<p>Keenan Crane. Keenan's 3D model repository. 2012. URL: <a class="reference external" href="https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/">https://www.cs.cmu.edu/~kmcrane/Projects/ModelRepository/</a>.</p>
+</div>
+<div class="citation" id="id17" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
+<p>Christer Ericson. <em>Real-Time Collision Detection</em>. Morgan Kaufmann, 2005. ISBN 9781558607323.</p>
+</div>
+<div class="citation" id="id18" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">6</a><span class="fn-bracket">]</span></span>
+<p>Mark W. Jones, J. Andreas Bærentzen, and Milos Sramek. 3D distance fields: a survey of techniques and applications. <em>IEEE Transactions on Visualization and Computer Graphics</em>, 12(4):581–599, 2006. <a class="reference external" href="https://doi.org/10.1109/TVCG.2006.56">doi:10.1109/TVCG.2006.56</a>.</p>
+</div>
+<div class="citation" id="id30" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">7</a><span class="fn-bracket">]</span></span>
+<p>Alec Jacobson, Ladislav Kavan, and Olga Sorkine-Hornung. Robust inside-outside segmentation using generalized winding numbers. <em>ACM Transactions on Graphics</em>, 32(4):33:1–33:12, 2013. <a class="reference external" href="https://doi.org/10.1145/2461912.2461916">doi:10.1145/2461912.2461916</a>.</p>
+</div>
+<div class="citation" id="id31" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">8</a><span class="fn-bracket">]</span></span>
+<p>Gavin Barill, Neil G. Dickson, Ryan Schmidt, David I. W. Levin, and Alec Jacobson. Fast winding numbers for soups and clouds. <em>ACM Transactions on Graphics</em>, 37(4):43:1–43:12, 2018. <a class="reference external" href="https://doi.org/10.1145/3197517.3201337">doi:10.1145/3197517.3201337</a>.</p>
+</div>
+<div class="citation" id="id26" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">9</a><span class="fn-bracket">]</span></span>
+<p>Fakir S. Nooruddin and Greg Turk. Simplification and repair of polygonal models using volumetric techniques. <em>IEEE Transactions on Visualization and Computer Graphics</em>, 9(2):191–205, 2003. <a class="reference external" href="https://doi.org/10.1109/TVCG.2003.1196006">doi:10.1109/TVCG.2003.1196006</a>.</p>
+</div>
+<div class="citation" id="id28" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">10</a><span class="fn-bracket">]</span></span>
+<p>Daniel White and Paul Nylander. The mandelbulb: the unravelling of the real 3D mandelbrot fractal. 2009. URL: <a class="reference external" href="https://www.skytopia.com/project/fractal/mandelbulb.html">https://www.skytopia.com/project/fractal/mandelbulb.html</a>.</p>
+</div>
+</div>
 </div>
 </section>
 </section>
@@ -515,14 +693,17 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">SDF Utilities</a><ul>
+<li><a class="reference internal" href="#meshes">Meshes</a></li>
 <li><a class="reference internal" href="#primitives">Primitives</a><ul>
 <li><a class="reference internal" href="#spheresdf">SphereSDF</a></li>
 <li><a class="reference internal" href="#torussdf">TorusSDF</a></li>
 <li><a class="reference internal" href="#cuboidsdf">CuboidSDF</a></li>
+<li><a class="reference internal" href="#mandelbulbsdf">MandelbulbSDF</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#csg-operations">CSG Operations</a></li>
 <li><a class="reference internal" href="#transformations">Transformations</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>

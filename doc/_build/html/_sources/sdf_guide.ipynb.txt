@@ -6,9 +6,10 @@
    "source": [
     "# SDF Utilities\n",
     "\n",
-    "`isoext.sdf` provides **optional** utilities for working with signed distance functions. These are convenient for testing and demos, but you can always compute values with your own code.\n",
-    "\n",
-    "**Note:** These utilities are not required — see [Working with Grids](grids.ipynb) for examples using raw PyTorch.\n"
+    "`isoext.sdf` is a small toolbox of signed distance functions for\n",
+    "testing and demos. Nothing in the library requires it: extraction\n",
+    "only sees the values you put on the grid, however you compute them.\n",
+    "{doc}`grids` shows examples with raw PyTorch.\n"
    ]
   },
   {
@@ -16,19 +17,147 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:36.218257Z",
-     "iopub.status.busy": "2026-07-05T04:06:36.218168Z",
-     "iopub.status.idle": "2026-07-05T04:06:36.970296Z",
-     "shell.execute_reply": "2026-07-05T04:06:36.969795Z"
+     "iopub.execute_input": "2026-09-03T07:32:00.652950Z",
+     "iopub.status.busy": "2026-09-03T07:32:00.652862Z",
+     "iopub.status.idle": "2026-09-03T07:32:01.540760Z",
+     "shell.execute_reply": "2026-09-03T07:32:01.540024Z"
     }
    },
    "outputs": [],
    "source": [
+    "import torch\n",
     "import isoext\n",
     "from isoext.sdf import *\n",
     "from isoext import viewer\n",
     "\n",
     "grid = isoext.UniformGrid([128, 128, 128])\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Meshes\n",
+    "\n",
+    "`TriangleMeshSDF` turns a triangle mesh into a signed distance function, so a\n",
+    "mesh can be sampled into a grid, edited or combined like any other\n",
+    "field, and extracted again.\n",
+    "\n",
+    "```python\n",
+    "TriangleMeshSDF(vertices, faces, signed=True)\n",
+    "```\n",
+    "\n",
+    "`isoext.assets.load_mesh` downloads a few well-known test meshes on\n",
+    "first use and caches them:\n",
+    "\n",
+    "- `\"armadillo\"` ({cite:t}`krishnamurthy1996`), `\"bunny\"`\n",
+    "  ({cite:t}`turk1994`) and `\"dragon\"` ({cite:t}`curless1996`), courtesy\n",
+    "  of the Stanford Computer Graphics Laboratory, for research use\n",
+    "- `\"spot\"` from {cite:t}`crane2012`, public domain\n",
+    "\n",
+    "The armadillo, sampled on a 256 cell grid and extracted again:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T07:32:01.542929Z",
+     "iopub.status.busy": "2026-09-03T07:32:01.542797Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.353283Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.352861Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "345,944 mesh triangles in, 204,664 out\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/375161eab747352a.viser&initialCameraPosition=1.378,1.377,0.965&initialCameraLookAt=-0.000,-0.000,0.001&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7e8c20161790>"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "vertices, faces = isoext.assets.load_mesh(\"armadillo\")\n",
+    "armadillo = TriangleMeshSDF(vertices, faces)\n",
+    "\n",
+    "fine = isoext.UniformGrid([256, 256, 256])\n",
+    "fine.set_values(armadillo(fine.get_points()))\n",
+    "v, f = isoext.dual_marching_cubes(fine)\n",
+    "print(f\"{len(faces):,} mesh triangles in, {len(f):,} out\")\n",
+    "viewer.embed(v, f, color=\"lightsteelblue\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The distance is the distance to the closest triangle, found through a\n",
+    "bounding volume hierarchy on the GPU ({cite:t}`ericson2005`;\n",
+    "{cite:t}`jones2006` survey the approaches). The sign is the generalized\n",
+    "winding number ({cite:t}`jacobson2013`), evaluated with the tree-based\n",
+    "approximation of {cite:t}`barill2018`, so meshes with holes like the\n",
+    "bunny and the dragon still get a sensible sign. `sign=\"parity\"` counts\n",
+    "ray crossings instead ({cite:t}`nooruddin2003`), which needs a closed\n",
+    "mesh.\n",
+    "\n",
+    "The gradient is the direction away from the closest point, so\n",
+    "`get_sdf_normal` and `project_to_surface` work on a mesh SDF, and\n",
+    "`closest_points` returns the closest point on the mesh and its triangle\n",
+    "directly:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T07:32:02.715865Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.715695Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.719769Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.719566Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "distances: [0.1756, 0.1375]\n",
+      "closest points: [[-0.01, -0.0093, 0.725], [0.6087, 0.4526, 0.5696]]\n",
+      "faces: [281187, 12731]\n"
+     ]
+    }
+   ],
+   "source": [
+    "p = torch.tensor([[0.0, 0.0, 0.9], [0.5, 0.5, 0.5]], device=\"cuda\")\n",
+    "q, face = armadillo.closest_points(p)\n",
+    "print(\"distances:\", [round(d, 4) for d in armadillo(p).tolist()])\n",
+    "print(\"closest points:\", [[round(x, 4) for x in row] for row in q.tolist()])\n",
+    "print(\"faces:\", face.tolist())"
    ]
   },
   {
@@ -45,13 +174,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": 5,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:36.971867Z",
-     "iopub.status.busy": "2026-07-05T04:06:36.971741Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.126576Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.125962Z"
+     "iopub.execute_input": "2026-09-03T07:32:02.721165Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.721084Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.753192Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.752918Z"
     }
    },
    "outputs": [
@@ -62,7 +191,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/73da1675db599904.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/b6c15ceb58a53d61.viser&initialCameraPosition=1.383,1.383,0.968&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -70,19 +199,21 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x773b30956f30>"
+       "<IPython.lib.display.IFrame at 0x7e8be8440b30>"
       ]
      },
-     "execution_count": 2,
+     "execution_count": 5,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
+    "grid = isoext.UniformGrid([128, 128, 128])\n",
+    "\n",
     "sphere = SphereSDF(radius=0.7)\n",
     "grid.set_values(sphere(grid.get_points()))\n",
     "v, f = isoext.marching_cubes(grid)\n",
-    "viewer.embed(v, f)\n"
+    "viewer.embed(v, f)"
    ]
   },
   {
@@ -97,13 +228,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 6,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.141423Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.141273Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.214995Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.214611Z"
+     "iopub.execute_input": "2026-09-03T07:32:02.754252Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.754177Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.772324Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.772127Z"
     }
    },
    "outputs": [
@@ -114,7 +245,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/dd32093f47db847d.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/3e3d1523f696f67d.viser&initialCameraPosition=1.310,1.310,0.917&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -122,10 +253,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738f65173b0>"
+       "<IPython.lib.display.IFrame at 0x7e8be815a1e0>"
       ]
      },
-     "execution_count": 3,
+     "execution_count": 6,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -134,7 +265,7 @@
     "torus = TorusSDF(R=0.6, r=0.2)\n",
     "grid.set_values(torus(grid.get_points()))\n",
     "v, f = isoext.marching_cubes(grid)\n",
-    "viewer.embed(v, f, color=\"gold\")\n"
+    "viewer.embed(v, f, color=\"gold\")"
    ]
   },
   {
@@ -149,13 +280,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 7,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.216335Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.216207Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.261344Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.261025Z"
+     "iopub.execute_input": "2026-09-03T07:32:02.774165Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.774089Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.799731Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.799303Z"
     }
    },
    "outputs": [
@@ -166,7 +297,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/16f2853e6bc0c7c7.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/a6bbd9a03562ffe7.viser&initialCameraPosition=0.988,0.988,0.692&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -174,10 +305,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738f6555820>"
+       "<IPython.lib.display.IFrame at 0x7e8bf618dc40>"
       ]
      },
-     "execution_count": 4,
+     "execution_count": 7,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -186,7 +317,64 @@
     "cube = CuboidSDF(size=[1.0, 1.0, 1.0])\n",
     "grid.set_values(cube(grid.get_points()))\n",
     "v, f = isoext.marching_cubes(grid)\n",
-    "viewer.embed(v, f, color=\"salmon\")\n"
+    "viewer.embed(v, f, color=\"salmon\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### MandelbulbSDF\n",
+    "\n",
+    "A distance estimator for the Mandelbulb fractal of\n",
+    "{cite:t}`white2009`. The values approximate\n",
+    "the distance to the surface rather than being an exact SDF; fewer\n",
+    "iterations give a smoother shape.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-09-03T07:32:02.801496Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.801403Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.947092Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.946812Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"100%\"\n",
+       "            height=\"420\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/28df64caf87d9c25.viser&initialCameraPosition=2.104,2.109,1.448&initialCameraLookAt=-0.005,-0.000,-0.028&initialCameraUp=0,0,1\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.IFrame at 0x7e8fb83d7200>"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "bulb = MandelbulbSDF(iterations=6)\n",
+    "\n",
+    "# The bulb needs slightly larger bounds than the shared grid above\n",
+    "bulb_grid = isoext.UniformGrid([128, 128, 128], aabb_min=[-1.2, -1.2, -1.2], aabb_max=[1.2, 1.2, 1.2])\n",
+    "bulb_grid.set_values(bulb(bulb_grid.get_points()))\n",
+    "v, f = isoext.marching_cubes(bulb_grid)\n",
+    "viewer.embed(v, f, color=\"coral\")"
    ]
   },
   {
@@ -207,13 +395,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 9,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.262659Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.262583Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.298129Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.297795Z"
+     "iopub.execute_input": "2026-09-03T07:32:02.948389Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.948302Z",
+     "iopub.status.idle": "2026-09-03T07:32:02.985505Z",
+     "shell.execute_reply": "2026-09-03T07:32:02.985302Z"
     }
    },
    "outputs": [
@@ -224,7 +412,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/f00cb923e2f106ed.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/80175ac219bea7f2.viser&initialCameraPosition=1.370,1.370,0.959&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -232,10 +420,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738f65547a0>"
+       "<IPython.lib.display.IFrame at 0x7e8be82de540>"
       ]
      },
-     "execution_count": 5,
+     "execution_count": 9,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -248,7 +436,7 @@
     "\n",
     "grid.set_values(drilled(grid.get_points()))\n",
     "v, f = isoext.marching_cubes(grid)\n",
-    "viewer.embed(v, f, color=\"orchid\")\n"
+    "viewer.embed(v, f, color=\"orchid\")"
    ]
   },
   {
@@ -265,13 +453,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 10,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:06:37.299528Z",
-     "iopub.status.busy": "2026-07-05T04:06:37.299451Z",
-     "iopub.status.idle": "2026-07-05T04:06:37.389830Z",
-     "shell.execute_reply": "2026-07-05T04:06:37.389484Z"
+     "iopub.execute_input": "2026-09-03T07:32:02.987122Z",
+     "iopub.status.busy": "2026-09-03T07:32:02.987039Z",
+     "iopub.status.idle": "2026-09-03T07:32:03.077216Z",
+     "shell.execute_reply": "2026-09-03T07:32:03.076713Z"
     }
    },
    "outputs": [
@@ -282,7 +470,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/ffc9c5be9010a4df.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/761e9a23bd3fac72.viser&initialCameraPosition=1.050,1.050,0.735&initialCameraLookAt=-0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -290,10 +478,10 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7738d375be00>"
+       "<IPython.lib.display.IFrame at 0x7e8bf618f920>"
       ]
      },
-     "execution_count": 6,
+     "execution_count": 10,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -306,7 +494,18 @@
     "\n",
     "grid.set_values(blended(grid.get_points()))\n",
     "v, f = isoext.marching_cubes(grid)\n",
-    "viewer.embed(v, f, color=\"tomato\")\n"
+    "viewer.embed(v, f, color=\"tomato\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## References\n",
+    "\n",
+    "```{bibliography}\n",
+    ":filter: docname in docnames\n",
+    "```\n"
    ]
   }
  ],

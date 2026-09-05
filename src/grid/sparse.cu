@@ -156,8 +156,9 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
     uint num_cells = new_cell_indices.size();
 
     // View the candidate cells and their corner values as a sparse grid.
-    GridView view = {shape, aabb_min, aabb_max, new_values.data(),
-                     new_cell_indices.data(), true};
+    GridView view = {
+        shape, aabb_min, aabb_max, new_values.data(), new_cell_indices.data(),
+        true};
 
     // Get the case index of each cell.
     thrust::device_vector<uint8_t> cases_dv(num_cells);
@@ -179,7 +180,8 @@ SparseGrid::filter_cell_indices(const NDArray<uint> &new_cell_indices,
     return filtered_cell_indices;
 }
 
-std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>>
+std::tuple<thrust::device_vector<int4>, thrust::device_vector<bool>,
+           thrust::device_vector<uint2>>
 SparseGrid::get_dual_quads(const NDArray<uint2> &edges,
                            const NDArray<bool> &is_out) const {
     // Copy edges and is_out
@@ -246,5 +248,5 @@ SparseGrid::get_dual_quads(const NDArray<uint2> &edges,
             en.w = to_active(en.w);
         });
 
-    return {edge_neighbors_dv, is_out_dv};
+    return {edge_neighbors_dv, is_out_dv, edges_dv};
 }

@@ -1,21 +1,24 @@
 [build-system]
-requires = ["scikit-build-core >=0.4.3", "nanobind >=2.2.0"]
+requires = ["scikit-build-core >=0.4.3", "nanobind >=3.0.1,<4", "nanobind-backend >=1.0,<2"]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "isoext"
-version = "0.7.0"
-description = "A collection of algorithms for iso-surface extraction on GPU. Supports pytorch."
+version = "1.0.0"
+description = "GPU-accelerated iso-surface extraction for PyTorch"
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "Guangyan Cai", email = "gcai3@uci.edu" }]
+authors = [{ name = "Guangyan Cai", email = "gc.nick@pm.me" }]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Environment :: GPU :: NVIDIA CUDA",
     "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]
 
-dependencies = ["viser"]
+# nanobind-backend holds the Python-version-specific half of the bindings
+# (nanobind split mode); the extension itself is one stable-ABI wheel per
+# platform for Python 3.10 and newer.
+dependencies = ["viser", "nanobind-backend >=1.0,<2"]
 
 [project.urls]
 Homepage = "https://github.com/GuangyanCai/isoext"
@@ -29,27 +32,80 @@ minimum-version = "0.4"
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}"
 
-# Build stable ABI wheels for CPython 3.12+
+# The documentation, its built HTML and the viewer scenes are large and not
+# needed to build or use the package.
+[tool.scikit-build.sdist]
+exclude = ["doc/", "benchmarks/", "luts/", ".github/"]
+
+# Stable ABI wheels with a Python 3.10 floor (nanobind split mode)
 [tool.scikit-build.wheel]
-py-api = "cp312"
+py-api = "cp310"
 
 
 [tool.cibuildwheel]
+# One stable-ABI wheel per platform covers every Python version from 3.10.
+build = "cp310-*"
 # Necessary to see build output from the actual compilation
 build-verbosity = 1
+# Wheels are built per CUDA version (see .github/workflows/wheels.yml): the
+# toolkit is installed into the manylinux container and the embedded GPU
+# architectures are chosen per toolkit, both through these variables.
+environment-pass = ["ISOEXT_CUDA", "ISOEXT_CUDA_ARCHS"]
 
 # Run pytest to ensure that the package was correctly built. pytest-xdist runs
 # tests in worker processes so a CUDA crash is reported as a test failure
-# instead of aborting the whole session.
+# instead of aborting the whole session. CI runners have no GPU and skip it.
 test-command = "pytest -n 2 {project}/tests"
 test-requires = ["pytest", "pytest-xdist"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+# Ninja with MSVC from the runner's Visual Studio; nvcc's host compiler
+# check lags behind new Visual Studio releases, hence the override.
+environment = { SKBUILD_BUILD_DIR = "C:/isoext-build", CMAKE_GENERATOR = "Ninja", CUDAFLAGS = "-allow-unsupported-compiler", CMAKE_ARGS = "-DCMAKE_CUDA_ARCHITECTURES=$ISOEXT_CUDA_ARCHS" }
+
+[tool.cibuildwheel.linux]
+# CUDA exists for glibc x86_64 only: no musllinux, no i686.
+archs = ["x86_64"]
+skip = "*musllinux*"
+manylinux-x86_64-image = "manylinux_2_28"
+before-all = "bash {project}/scripts/manylinux_cuda.sh $ISOEXT_CUDA"
+environment = { SKBUILD_BUILD_DIR = "/tmp/isoext-build", PATH = "/usr/local/cuda/bin:$PATH", CUDACXX = "/usr/local/cuda/bin/nvcc", CC = "/opt/rh/gcc-toolset-13/root/usr/bin/gcc", CXX = "/opt/rh/gcc-toolset-13/root/usr/bin/g++", CUDAHOSTCXX = "/opt/rh/gcc-toolset-13/root/usr/bin/g++", CMAKE_ARGS = "-DCMAKE_CUDA_ARCHITECTURES=$ISOEXT_CUDA_ARCHS" }
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+fix = true
+# Doc notebooks are hand-formatted for reading flow; keep the formatter
+# out of them.
+extend-exclude = ["doc"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+    "W",  # pycodestyle warnings
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
 
+[tool.pixi.dependencies]
+# Stable CPython; without a pin the solver reaches for free-threaded 3.14
+# builds, which torch and the extension do not target yet.
+python = "3.12.*"
+
 [tool.pixi.pypi-dependencies]
-nanobind = "*"
+nanobind = ">=3.0.1,<4"
 scikit-build-core = { version = "*", extras = ["pyproject"] }
 
 [tool.pixi.tasks]
@@ -60,10 +116,15 @@ ruff = "*"
 numpy = "*"
 pytest = "*"
 pytest-xdist = "*"
+scikit-image = "*"
+clang-format = "*"
 
 [tool.pixi.feature.dev.tasks]
 test = { cmd = "pytest tests/ -n 2", cwd = ".", depends-on = ["compile"] }
 bench = { cmd = "python benchmarks/benchmark.py", cwd = ".", depends-on = ["compile"] }
+# The generated LUT headers are excluded: reformatting them would churn
+# against their generators.
+format = { cmd = "find include src -name '*.cu' -o -name '*.cuh' | grep -vE '(lewiner|vega)_luts' | xargs clang-format -i && ruff format .", cwd = "." }
 
 [tool.pixi.feature.cu128.pypi-dependencies]
 torch = { index = "https://download.pytorch.org/whl/cu128" }
@@ -71,6 +132,7 @@ torch = { index = "https://download.pytorch.org/whl/cu128" }
 [tool.pixi.feature.doc.pypi-dependencies]
 sphinx = "*"
 sphinx-autobuild = "*"
+sphinxcontrib-bibtex = "*"
 furo = "*"
 myst-nb = "*"
 ipywidgets = "*"
@@ -82,9 +144,11 @@ doc-build = { cmd = "sphinx-build -b html . _build/html", cwd = "doc", depends-o
 doc-serve = { cmd = "sphinx-autobuild . _build/html --host 0.0.0.0 --watch ../src", cwd = "doc", depends-on = ["compile"] }
 doc-clean = { cmd = "rm -rf _build", cwd = "doc", depends-on = ["compile"] }
 doc-rebuild = { cmd = "rm -rf _build && sphinx-build -b html . _build/html", cwd = "doc", depends-on = ["compile"] }
+doc-linkcheck = { cmd = "sphinx-build -b linkcheck . _build/linkcheck", cwd = "doc", depends-on = ["compile"] }
 doc-lab = { cmd = "jupyter lab", cwd = "doc", depends-on = ["compile"] }
 
 [tool.pixi.environments]
-dev = { features = ["dev"] }
-cu128 = { features = ["dev", "cu128"] }
+# The CUDA flavor is picked here, so the commands stay the same when it
+# changes: plain `pixi run <task>` for development, `-e doc` for docs.
+default = { features = ["dev", "cu128"] }
 doc = { features = ["doc", "cu128"] }

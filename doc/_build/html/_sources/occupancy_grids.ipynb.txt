@@ -6,12 +6,11 @@
    "source": [
     "# Working with Occupancy Grids\n",
     "\n",
-    "While isoext is designed for signed distance fields (SDFs), you can also extract surfaces from **binary occupancy grids**—voxel grids where each cell is either occupied (1) or empty (0).\n",
-    "\n",
-    "This is useful when:\n",
-    "- You have voxelized data from 3D scanning or segmentation\n",
-    "- Your data comes from a boolean CSG operation\n",
-    "- You want to convert a mesh to voxels and back\n"
+    "isoext is built for scalar fields, but it also works on binary\n",
+    "occupancy grids: voxel data where each sample is occupied (1) or\n",
+    "empty (0), as produced by 3D scans, segmentation masks, or boolean\n",
+    "voxel operations. Extraction works the same way; what changes is the\n",
+    "choice of level and the need for smoothing.\n"
    ]
   },
   {
@@ -19,10 +18,10 @@
    "execution_count": 1,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:08:30.766629Z",
-     "iopub.status.busy": "2026-07-05T04:08:30.766551Z",
-     "iopub.status.idle": "2026-07-05T04:08:31.397195Z",
-     "shell.execute_reply": "2026-07-05T04:08:31.396762Z"
+     "iopub.execute_input": "2026-07-06T19:41:38.830301Z",
+     "iopub.status.busy": "2026-07-06T19:41:38.830215Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.559631Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.558918Z"
     }
    },
    "outputs": [],
@@ -30,7 +29,7 @@
     "import torch\n",
     "import isoext\n",
     "from isoext.sdf import SphereSDF\n",
-    "from isoext import viewer\n"
+    "from isoext import viewer"
    ]
   },
   {
@@ -47,10 +46,10 @@
    "execution_count": 2,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:08:31.398455Z",
-     "iopub.status.busy": "2026-07-05T04:08:31.398340Z",
-     "iopub.status.idle": "2026-07-05T04:08:31.589806Z",
-     "shell.execute_reply": "2026-07-05T04:08:31.589409Z"
+     "iopub.execute_input": "2026-07-06T19:41:39.561132Z",
+     "iopub.status.busy": "2026-07-06T19:41:39.561001Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.775147Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.774729Z"
     }
    },
    "outputs": [
@@ -70,16 +69,19 @@
     "# Convert to binary occupancy: 0 = outside, 1 = inside\n",
     "occupancy = (sdf_values < 0.0).float()\n",
     "\n",
-    "print(f\"Occupancy values: {occupancy.unique().tolist()}\")\n"
+    "print(f\"Occupancy values: {occupancy.unique().tolist()}\")"
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Direct Extraction (Jagged Result)\n",
+    "## Direct Extraction\n",
     "\n",
-    "You can run marching cubes directly on the binary grid using `level=0.5` (the boundary between 0 and 1). However, the result will be **jagged** because there's no gradient information—every surface point lands exactly on a voxel face:\n"
+    "Marching cubes runs directly on the binary grid with `level=0.5`,\n",
+    "halfway between empty and occupied. The result is jagged: with only\n",
+    "two values there is nothing to interpolate, so every vertex lands\n",
+    "exactly halfway across a voxel face.\n"
    ]
   },
   {
@@ -87,10 +89,10 @@
    "execution_count": 3,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:08:31.605989Z",
-     "iopub.status.busy": "2026-07-05T04:08:31.605882Z",
-     "iopub.status.idle": "2026-07-05T04:08:31.692518Z",
-     "shell.execute_reply": "2026-07-05T04:08:31.692159Z"
+     "iopub.execute_input": "2026-07-06T19:41:39.791957Z",
+     "iopub.status.busy": "2026-07-06T19:41:39.791846Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.847007Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.846564Z"
     }
    },
    "outputs": [
@@ -108,7 +110,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/2e6f8a7a7566515e.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/ead150578e6ce454.viser&initialCameraPosition=1.380,1.380,0.966&initialCameraLookAt=0.000,0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -116,7 +118,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7756f1b779e0>"
+       "<IPython.lib.display.IFrame at 0x72d94cf534a0>"
       ]
      },
      "execution_count": 3,
@@ -129,7 +131,7 @@
     "v_jagged, f_jagged = isoext.marching_cubes(grid, level=0.5)\n",
     "\n",
     "print(f\"Jagged mesh: {v_jagged.shape[0]} vertices, {f_jagged.shape[0]} faces\")\n",
-    "viewer.embed(v_jagged, f_jagged, flat_shading=True)\n"
+    "viewer.embed(v_jagged, f_jagged, flat_shading=True)"
    ]
   },
   {
@@ -138,7 +140,10 @@
    "source": [
     "## Smoothed Extraction\n",
     "\n",
-    "To get a smoother result, apply **Gaussian smoothing** before extraction. This blurs the sharp 0/1 transitions into gradual gradients, allowing marching cubes to interpolate vertex positions:\n"
+    "Gaussian smoothing before extraction turns the hard 0/1 steps into\n",
+    "gradients the interpolation can work with. The mesh comes out\n",
+    "smooth, at the cost of rounding any genuinely sharp corners in the\n",
+    "data.\n"
    ]
   },
   {
@@ -146,10 +151,10 @@
    "execution_count": 4,
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-07-05T04:08:31.693808Z",
-     "iopub.status.busy": "2026-07-05T04:08:31.693684Z",
-     "iopub.status.idle": "2026-07-05T04:08:31.901417Z",
-     "shell.execute_reply": "2026-07-05T04:08:31.901067Z"
+     "iopub.execute_input": "2026-07-06T19:41:39.848445Z",
+     "iopub.status.busy": "2026-07-06T19:41:39.848358Z",
+     "iopub.status.idle": "2026-07-06T19:41:39.969411Z",
+     "shell.execute_reply": "2026-07-06T19:41:39.968624Z"
     }
    },
    "outputs": [
@@ -167,7 +172,7 @@
        "        <iframe\n",
        "            width=\"100%\"\n",
        "            height=\"420\"\n",
-       "            src=\"_static/viser/index.html?playbackPath=../scenes/cd6b06ad7f559c0a.viser\"\n",
+       "            src=\"_static/viser/index.html?playbackPath=../scenes/6657d7f18e790d46.viser&initialCameraPosition=1.312,1.312,0.918&initialCameraLookAt=0.000,-0.000,0.000&initialCameraUp=0,0,1\"\n",
        "            frameborder=\"0\"\n",
        "            allowfullscreen\n",
        "            style=\"border: 1px solid #8888; border-radius: 4px;\"\n",
@@ -175,7 +180,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x7756f1ca23c0>"
+       "<IPython.lib.display.IFrame at 0x72dab54e2660>"
       ]
      },
      "execution_count": 4,
@@ -190,7 +195,7 @@
     "v_smooth, f_smooth = isoext.marching_cubes(grid, level=0.5)\n",
     "\n",
     "print(f\"Smooth mesh: {v_smooth.shape[0]} vertices, {f_smooth.shape[0]} faces\")\n",
-    "viewer.embed(v_smooth, f_smooth)\n"
+    "viewer.embed(v_smooth, f_smooth)"
    ]
   }
  ],

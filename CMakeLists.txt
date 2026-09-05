@@ -61,18 +61,11 @@ nanobind_add_module(
     # Name of the extension
     isoext_ext
 
-    # Target the stable ABI for Python 3.12+, which reduces
-    # the number of binary wheels that must be built. This
-    # does nothing on older Python versions
+    # Split mode: the extension targets the stable ABI (Python 3.10 floor)
+    # and contains no nanobind library code; the Python-version-specific
+    # part is resolved at import time from the nanobind_backend package.
     STABLE_ABI
-
-    # Build libnanobind statically and merge it into the
-    # extension (which itself remains a shared library)
-    #
-    # If your project builds multiple extensions, you can
-    # replace this flag by NB_SHARED to conserve space by
-    # reusing a shared libnanobind across libraries
-    NB_STATIC
+    BACKEND_MODULE nanobind_backend
 
     # Source code goes here
     ${HEADER_LIST}
@@ -80,7 +73,7 @@ nanobind_add_module(
 )
 
 target_compile_options(isoext_ext PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Wno-deprecated-gpu-targets>)
-target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/")
+target_include_directories(isoext_ext PUBLIC "${isoext_SOURCE_DIR}/include/" "${isoext_SOURCE_DIR}/ext/cuBQL/")
 
 set(ISOEXT_PYTHON_PACKAGE_DIR
     ${isoext_SOURCE_DIR}/src/isoext
