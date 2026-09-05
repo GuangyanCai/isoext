@@ -1,11 +1,10 @@
 """Tests for the surface nets algorithm."""
 
 import torch
+from conftest import populate_sparse_grid
 
 import isoext
 from isoext.sdf import SphereSDF
-
-from conftest import populate_sparse_grid
 
 
 def test_surface_nets_simple(sphere_grid):

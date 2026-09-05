@@ -4,6 +4,7 @@ import gc
 
 import pytest
 import torch
+from conftest import populate_sparse_grid
 
 import isoext
 from isoext.sdf import (
@@ -13,8 +14,6 @@ from isoext.sdf import (
     get_sdf_normal,
     project_to_surface,
 )
-
-from conftest import populate_sparse_grid
 
 
 def test_dual_contouring_simple(sphere_grid):

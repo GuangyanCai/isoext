@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="References" href="references.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="Changelog" href="changelog.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>Development - isoext documentation</title>
@@ -233,6 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul class="current">
@@ -297,6 +298,12 @@ pixi<span class="w"> </span>run<span class="w"> </span>compile
 <p><code class="docutils literal notranslate"><span class="pre">compile</span></code> builds the CUDA extension and installs it editably into the
 pixi environment. Rebuilds after source changes are incremental and
 triggered automatically on import.</p>
+<p>The bindings use nanobind 3 in split mode: the extension targets the
+stable ABI with a Python 3.10 floor and holds none of nanobind’s own
+library code, which lives in the <code class="docutils literal notranslate"><span class="pre">nanobind-backend</span></code> package that pip
+installs alongside isoext. One wheel per platform therefore covers
+every supported Python version, and building from source needs
+nanobind 3.0.1 or newer.</p>
 <p>One pitfall: some distributions ship an old <code class="docutils literal notranslate"><span class="pre">nvcc</span></code> (Ubuntu’s
 <code class="docutils literal notranslate"><span class="pre">nvidia-cuda-toolkit</span></code> package installs CUDA 12.0 as <code class="docutils literal notranslate"><span class="pre">/usr/bin/nvcc</span></code>),
 and CMake will pick it up before a newer toolkit installed elsewhere.
@@ -454,14 +461,14 @@ significant digits, which absorbs run-to-run jitter.</p>
         
         <div class="related-pages">
           
-          <a class="prev-page" href="references.html">
+          <a class="prev-page" href="changelog.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">References</div>
+                <div class="title">Changelog</div>
                 
               </div>
             </a>

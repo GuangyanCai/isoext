@@ -9,7 +9,7 @@
         <title>Changelog - isoext documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=660e4aa1" />
     
@@ -282,31 +282,10 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h1>
-<p>Notable changes to isoext, newest first. Earlier 0.x releases are not
-listed.</p>
+<p>Notable changes to isoext, newest first.</p>
 <section id="id1">
 <h2>1.0.0<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <p>First major release.</p>
-<ul class="simple">
-<li><p>Extraction methods on one grid interface: marching cubes with the
-<code class="docutils literal notranslate"><span class="pre">vega</span></code> (default), <code class="docutils literal notranslate"><span class="pre">lewiner</span></code>, <code class="docutils literal notranslate"><span class="pre">nagae</span></code> and <code class="docutils literal notranslate"><span class="pre">lorensen</span></code> tables, marching
-tetrahedra, surface nets, dual contouring with the <code class="docutils literal notranslate"><span class="pre">ju</span></code> (default) and
-<code class="docutils literal notranslate"><span class="pre">carrera</span></code> variants, and dual marching cubes.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dual_contouring(method=&quot;carrera&quot;)</span></code> implements Carrera et al. 2026,
-which recovers sharp features from the signed distance samples alone,
-without normals.</p></li>
-<li><p>Dense <code class="docutils literal notranslate"><span class="pre">UniformGrid</span></code> and surface-only <code class="docutils literal notranslate"><span class="pre">SparseGrid</span></code>, both consumed by
-every method.</p></li>
-<li><p>SDF toolbox: primitives, CSG and transform operators, gradient and
-projection helpers, and <code class="docutils literal notranslate"><span class="pre">TriangleMeshSDF</span></code>, the signed distance to a
-triangle mesh on a GPU bounding volume hierarchy with a fast winding
-number sign.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">isoext.assets</span></code> downloads and caches the Stanford bunny, armadillo and
-dragon and Keenan Crane’s Spot for experiments.</p></li>
-<li><p>Interactive viewer built on viser, with scene export for static pages.</p></li>
-<li><p>Documentation with executed, interactive examples, a method comparison
-page and a performance table; <code class="docutils literal notranslate"><span class="pre">__version__</span></code>; <code class="docutils literal notranslate"><span class="pre">make_grid</span></code> removed.</p></li>
-</ul>
 </section>
 </section>
 

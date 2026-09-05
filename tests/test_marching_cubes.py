@@ -1,11 +1,9 @@
 """Tests for marching cubes algorithm with different methods."""
 
 import torch
+from conftest import populate_sparse_grid
 
 import isoext
-from isoext.sdf import SphereSDF
-
-from conftest import populate_sparse_grid
 
 
 def test_marching_cubes_nagae(sphere_grid):

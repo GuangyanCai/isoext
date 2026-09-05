@@ -4,7 +4,7 @@ import pytest
 import torch
 
 import isoext
-from isoext.sdf import CuboidSDF, TriangleMeshSDF, RotationOp, SphereSDF, get_sdf_normal, project_to_surface
+from isoext.sdf import CuboidSDF, RotationOp, SphereSDF, TriangleMeshSDF, get_sdf_normal, project_to_surface
 
 
 def extract(sdf, n=64):

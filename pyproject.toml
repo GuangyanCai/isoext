@@ -32,6 +32,11 @@ minimum-version = "0.4"
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}"
 
+# The documentation, its built HTML and the viewer scenes are large and not
+# needed to build or use the package.
+[tool.scikit-build.sdist]
+exclude = ["doc/", "benchmarks/", "luts/", ".github/"]
+
 # Stable ABI wheels with a Python 3.10 floor (nanobind split mode)
 [tool.scikit-build.wheel]
 py-api = "cp310"

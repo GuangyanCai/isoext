@@ -3,12 +3,11 @@
 import itertools
 
 import torch
+from conftest import populate_sparse_grid
 
 import isoext
 from isoext.sdf import SphereSDF
 from isoext.utils import gaussian_smooth
-
-from conftest import populate_sparse_grid
 
 
 def signed_volume(v, f):

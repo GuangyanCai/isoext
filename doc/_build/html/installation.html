@@ -233,6 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -305,7 +306,48 @@ each nvcc release accepts host compilers only up to a certain version.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>isoext
 </pre></div>
 </div>
-<p>This will compile the CUDA extension during installation.</p>
+<p>This compiles the CUDA extension during installation, for exactly your
+GPU and toolkit.</p>
+</section>
+<section id="prebuilt-wheels">
+<h2>Prebuilt Wheels<a class="headerlink" href="#prebuilt-wheels" title="Link to this heading">¶</a></h2>
+<p>Wheels for Linux x86_64 and Windows x64 are attached to each
+<a class="reference external" href="https://github.com/GuangyanCai/isoext/releases">GitHub release</a>, built
+per CUDA version like PyTorch’s own wheels. Pick the tag of your PyTorch
+build (<code class="docutils literal notranslate"><span class="pre">torch.version.cuda</span></code>, so <code class="docutils literal notranslate"><span class="pre">cu126</span></code> for 12.6) and add its index:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>isoext<span class="w"> </span>--extra-index-url<span class="w"> </span>https://guangyancai.github.io/isoext/whl/cu126
+</pre></div>
+</div>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tag</p></th>
+<th class="head"><p>Toolkit</p></th>
+<th class="head"><p>GPUs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cu126</span></code></p></td>
+<td><p>CUDA 12.6</p></td>
+<td><p>Maxwell (sm_50) to Hopper (sm_90)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cu128</span></code></p></td>
+<td><p>CUDA 12.8</p></td>
+<td><p>Maxwell (sm_50) to Blackwell (sm_120)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cu130</span></code></p></td>
+<td><p>CUDA 13.0</p></td>
+<td><p>Turing (sm_75) to Blackwell (sm_120)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The wheels need no toolkit or compiler, only a driver that supports the
+chosen CUDA version, the same requirement as the matching PyTorch build.
+They contain machine code for every listed GPU, so nothing is compiled at
+import time either. Without the extra index, pip builds from source as
+above, which is also the fallback if a wheel gives you trouble:
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-binary</span> <span class="pre">isoext</span> <span class="pre">isoext</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>On Windows, you may encounter errors due to path length limits (260 characters).
@@ -428,6 +470,7 @@ The result is cached on disk, so this happens once per machine.</p>
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#install-from-pypi">Install from PyPI</a></li>
+<li><a class="reference internal" href="#prebuilt-wheels">Prebuilt Wheels</a></li>
 <li><a class="reference internal" href="#install-from-source">Install from Source</a></li>
 <li><a class="reference internal" href="#verify-installation">Verify Installation</a></li>
 <li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>

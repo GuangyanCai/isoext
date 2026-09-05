@@ -31,7 +31,9 @@ def main():
         index.parent.mkdir(parents=True, exist_ok=True)
         links = "\n".join(f'<a href="{url}">{html.escape(name)}</a><br>' for name, url in sorted(files))
         index.write_text(f"<!DOCTYPE html>\n<html><body>\n{links}\n</body></html>\n")
-        (out / "whl" / tag / "index.html").write_text('<!DOCTYPE html>\n<html><body>\n<a href="isoext/">isoext</a>\n</body></html>\n')
+        (out / "whl" / tag / "index.html").write_text(
+            '<!DOCTYPE html>\n<html><body>\n<a href="isoext/">isoext</a>\n</body></html>\n'
+        )
         print(f"{tag}: {len(files)} wheels")
 
 

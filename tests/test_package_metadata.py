@@ -2,6 +2,7 @@
 
 from importlib.metadata import metadata
 
+import pytest
 from packaging.specifiers import SpecifierSet
 
 
@@ -22,3 +23,12 @@ def test_requires_python_matches_source_syntax():
     # suite runs on 3.13.
     assert spec.contains("3.13")
     assert spec.contains("3.14")
+
+
+def test_viewer_is_reachable_as_attribute():
+    """isoext.viewer is available right after `import isoext`."""
+    import isoext
+
+    assert callable(isoext.viewer.embed)
+    with pytest.raises(AttributeError):
+        getattr(isoext, "no_such_module")

@@ -20,6 +20,13 @@ pixi run compile
 pixi environment. Rebuilds after source changes are incremental and
 triggered automatically on import.
 
+The bindings use nanobind 3 in split mode: the extension targets the
+stable ABI with a Python 3.10 floor and holds none of nanobind's own
+library code, which lives in the `nanobind-backend` package that pip
+installs alongside isoext. One wheel per platform therefore covers
+every supported Python version, and building from source needs
+nanobind 3.0.1 or newer.
+
 One pitfall: some distributions ship an old `nvcc` (Ubuntu's
 `nvidia-cuda-toolkit` package installs CUDA 12.0 as `/usr/bin/nvcc`),
 and CMake will pick it up before a newer toolkit installed elsewhere.
